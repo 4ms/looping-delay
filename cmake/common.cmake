@@ -72,11 +72,12 @@ set(BOOTLOADER_COMMON_SOURCES
     # ${root}/src/bootloader/leds.cc ${root}/src/bootloader/animation.cc
     # ${root}/src/bootloader/bl_utils.cc
     # ${root}/src/bootloader/stm_audio_bootloader/fsk/packet_decoder.cc
-    # ${root}/src/libc_stub.c ${root}/src/libcpp_stub.cc
-    # ${root}/src/shareddrv/flash.cc ${root}/lib/mdrivlib/drivers/pin.cc
-    # ${root}/lib/mdrivlib/drivers/timekeeper.cc
-    # ${root}/lib/mdrivlib/drivers/tim.cc
-)
+    ${root}/src/libc_stub.c
+    ${root}/src/libcpp_stub.cc
+    # ${root}/src/shareddrv/flash.cc
+    ${root}/lib/mdrivlib/drivers/pin.cc
+    ${root}/lib/mdrivlib/drivers/timekeeper.cc
+    ${root}/lib/mdrivlib/drivers/tim.cc)
 
 set(BOOTLOADER_COMMON_INCLUDES
     ${root}/lib/CMSIS/Include
@@ -150,7 +151,7 @@ function(set_target_sources_includes project_driver_dir mdrivlib_target_dir
   # Add target-specific project files and paths:
   set(TARGET_SOURCES
       ${TARGET_SOURCES}
-      # ${project_driver_dir}/cmsis_system.c
+      ${mdrivlib_target_dir}/boot/cmsis_system.c
       ${mdrivlib_target_dir}/boot/startup.s
       # ${project_driver_dir}/adc.cc ${project_driver_dir}/system.cc
       ${mdrivlib_target_dir}/drivers/interrupt_handler.cc
@@ -167,15 +168,14 @@ function(set_target_sources_includes project_driver_dir mdrivlib_target_dir
 
   set(TARGET_BOOTLOADER_SOURCES
       ${TARGET_BOOTLOADER_SOURCES}
-      # ${project_driver_dir}/cmsis_system.c
+      ${mdrivlib_target_dir}/boot/cmsis_system.c
       ${mdrivlib_target_dir}/boot/startup.s
       # ${project_driver_dir}/system.cc
-      # ${mdrivlib_target_dir}/drivers/interrupt_handler.cc
+      ${mdrivlib_target_dir}/drivers/interrupt_handler.cc
       PARENT_SCOPE)
 
-  string(REGEX MATCH "^stm32([fghlmuw]p?[0-9bl])_?(m0plus|m4|m7)?" family_name
-               ${family_name})
-  # set(short_family_name ${CMAKE_MATCH_1})
+  # string(REGEX MATCH "^stm32([fghlmuw]p?[0-9bl])_?(m0plus|m4|m7)?" family_name
+  # ${family_name}) set(short_family_name ${CMAKE_MATCH_1})
 
   set_hal_sources(HAL_SOURCES ${family_name})
   set(HAL_SOURCES
