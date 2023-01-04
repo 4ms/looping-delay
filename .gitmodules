@@ -1,0 +1,9 @@
+[submodule "lib/mdrivlib"]
+	path = lib/mdrivlib
+	url = git@github.com:4ms/mdrivlib.git
+[submodule "lib/libhwtests"]
+	path = lib/libhwtests
+	url = git@github.com:4ms/libhwtests
+[submodule "lib/cpputil"]
+	path = lib/cpputil
+	url = git@github.com:4ms/cpputil
