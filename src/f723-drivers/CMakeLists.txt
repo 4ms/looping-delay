@@ -7,11 +7,11 @@ project(f723 C CXX ASM)
 message("Configuring f723")
 include(../../cmake/common.cmake)
 
-set(target 7423)
+set(target 723)
 set(FAMILY_NAME stm32f7)
 set(PROJECT_DRIVER_DIR ../../src/f723-drivers)
 set(MDRIVLIB_TARGET_DIR ../../lib/mdrivlib/target/stm32f7xx)
-set(TARGET_LINK_SCRIPT ${CMAKE_SOURCE_DIR}/linker/STM32F423VHHx_FLASH.ld)
+set(TARGET_LINK_SCRIPT ${CMAKE_SOURCE_DIR}/linker/STM32F723IETx_FLASH.ld)
 set(ARCH_FLAGS -mcpu=cortex-m7 -mfpu=fpv4-sp-d16)
 set(ARCH_DEFINES STM32F723xx STM32F7 ARM_MATH_CM7)
 
@@ -22,7 +22,7 @@ set(TARGET_BOOTLOADER_SOURCES
     # ../../stm32/HAL/stm32f4/Src/stm32f4xx_hal_dma.c
 )
 set(TARGET_BOOTLOADER_LINK_SCRIPT
-    ${CMAKE_SOURCE_DIR}/linker/STM32F423VHHx_FLASH_BOOTLOADER.ld)
+    ${CMAKE_SOURCE_DIR}/linker/STM32F723IETx_FLASH_BOOTLOADER.ld)
 
 set(WAV_ENCODE_PYTHON_CMD
     # Note: flash sector size is 128kB, but we arbitrarily limit app size with

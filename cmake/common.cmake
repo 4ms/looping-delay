@@ -150,7 +150,8 @@ function(set_target_sources_includes project_driver_dir mdrivlib_target_dir
   # Add target-specific project files and paths:
   set(TARGET_SOURCES
       ${TARGET_SOURCES}
-      # ${project_driver_dir}/cmsis_system.c ${project_driver_dir}/startup.s
+      # ${project_driver_dir}/cmsis_system.c
+      ${mdrivlib_target_dir}/boot/startup.s
       # ${project_driver_dir}/adc.cc ${project_driver_dir}/system.cc
       ${mdrivlib_target_dir}/drivers/interrupt_handler.cc
       PARENT_SCOPE)
@@ -166,7 +167,8 @@ function(set_target_sources_includes project_driver_dir mdrivlib_target_dir
 
   set(TARGET_BOOTLOADER_SOURCES
       ${TARGET_BOOTLOADER_SOURCES}
-      # ${project_driver_dir}/cmsis_system.c ${project_driver_dir}/startup.s
+      # ${project_driver_dir}/cmsis_system.c
+      ${mdrivlib_target_dir}/boot/startup.s
       # ${project_driver_dir}/system.cc
       # ${mdrivlib_target_dir}/drivers/interrupt_handler.cc
       PARENT_SCOPE)
