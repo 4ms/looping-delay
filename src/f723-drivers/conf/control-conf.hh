@@ -60,21 +60,29 @@ struct BoardAdcConf : mdrivlib::DefaultAdcPeriphConf {
 	};
 };
 
-enum Pots : uint32_t { TimePot, FeedbackPot, MixPot, DelayFeedPot };
-enum CVs : uint32_t { TimeCV, FeedbackCV, MixCV, DelayFeedCV };
+static constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_480Cycles;
 
-constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_480Cycles;
-constexpr auto AdcConfs = std::to_array({
-	AdcChannelConf{{GPIO::C, PinNum::_3}, AdcChanNum::_13, TimePot, AdcSampTime},
-	AdcChannelConf{{GPIO::A, PinNum::_1}, AdcChanNum::_1, FeedbackPot, AdcSampTime},
-	AdcChannelConf{{GPIO::A, PinNum::_0}, AdcChanNum::_0, MixPot, AdcSampTime},
-	AdcChannelConf{{GPIO::C, PinNum::_4}, AdcChanNum::_14, DelayFeedPot, AdcSampTime},
-	AdcChannelConf{{GPIO::C, PinNum::_0}, AdcChanNum::_10, TimeCV, AdcSampTime},
-	AdcChannelConf{{GPIO::A, PinNum::_5}, AdcChanNum::_5, FeedbackCV, AdcSampTime},
-	AdcChannelConf{{GPIO::A, PinNum::_4}, AdcChanNum::_4, MixCV, AdcSampTime},
-	AdcChannelConf{{GPIO::C, PinNum::_1}, AdcChanNum::_11, DelayFeedCV, AdcSampTime},
-});
+enum AdcElement : uint32_t {
+	TimePot,
+	FeedbackPot,
+	MixPot,
+	DelayFeedPot,
+	TimeCV,
+	FeedbackCV,
+	MixCV,
+	DelayFeedCV,
+	NumAdcs
+};
 
-static constexpr uint32_t NumAdcs = AdcConfs.size();
+constexpr std::array<AdcChannelConf, NumAdcs> AdcConfs = {{
+	{{GPIO::C, PinNum::_3}, AdcChanNum::_13, TimePot, AdcSampTime},
+	{{GPIO::A, PinNum::_1}, AdcChanNum::_1, FeedbackPot, AdcSampTime},
+	{{GPIO::A, PinNum::_0}, AdcChanNum::_0, MixPot, AdcSampTime},
+	{{GPIO::C, PinNum::_4}, AdcChanNum::_14, DelayFeedPot, AdcSampTime},
+	{{GPIO::C, PinNum::_0}, AdcChanNum::_10, TimeCV, AdcSampTime},
+	{{GPIO::A, PinNum::_5}, AdcChanNum::_5, FeedbackCV, AdcSampTime},
+	{{GPIO::A, PinNum::_4}, AdcChanNum::_4, MixCV, AdcSampTime},
+	{{GPIO::C, PinNum::_1}, AdcChanNum::_11, DelayFeedCV, AdcSampTime},
+}};
 
 } // namespace LoopingDelay

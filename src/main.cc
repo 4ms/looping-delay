@@ -5,6 +5,7 @@ void main() {
 	using namespace LoopingDelay;
 	Controls controls;
 
-	while (true)
+	while (true) {
 		;
+	}
 }
