@@ -62,6 +62,7 @@ struct BoardAdcConf : mdrivlib::DefaultAdcPeriphConf {
 
 enum Pots : uint32_t { TimePot, FeedbackPot, MixPot, DelayFeedPot };
 enum CVs : uint32_t { TimeCV, FeedbackCV, MixCV, DelayFeedCV };
+
 constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_480Cycles;
 constexpr auto AdcConfs = std::to_array({
 	AdcChannelConf{{GPIO::C, PinNum::_3}, AdcChanNum::_13, TimePot, AdcSampTime},
@@ -73,5 +74,7 @@ constexpr auto AdcConfs = std::to_array({
 	AdcChannelConf{{GPIO::A, PinNum::_4}, AdcChanNum::_4, MixCV, AdcSampTime},
 	AdcChannelConf{{GPIO::C, PinNum::_1}, AdcChanNum::_11, DelayFeedCV, AdcSampTime},
 });
+
+static constexpr uint32_t NumAdcs = AdcConfs.size();
 
 } // namespace LoopingDelay
