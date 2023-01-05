@@ -6,7 +6,7 @@
 // #include "drivers/stm32xx.h"
 // #include "drivers/timekeeper.hh"
 
-namespace MetaModule
+namespace LoopingDelay
 {
 
 using mdrivlib::AdcChannelConf;
@@ -74,4 +74,4 @@ constexpr auto AdcConfs = std::to_array({
 	AdcChannelConf{{GPIO::C, PinNum::_1}, AdcChanNum::_11, DelayFeedCV, AdcSampTime},
 });
 
-} // namespace MetaModule
+} // namespace LoopingDelay
