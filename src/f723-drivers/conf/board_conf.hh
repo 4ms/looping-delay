@@ -20,6 +20,7 @@ using mdrivlib::GPIO;
 using mdrivlib::PinDef;
 using mdrivlib::PinNum;
 using enum mdrivlib::PinPolarity;
+using enum mdrivlib::PinMode;
 
 // const mdrivlib::TimekeeperConfig control_read_tim_conf = {
 // 	.TIMx = TIM6,
@@ -31,10 +32,14 @@ using enum mdrivlib::PinPolarity;
 using PingButton = mdrivlib::DebouncedSwitch<PinDef{GPIO::C, PinNum::_7}, Inverted>;
 using HoldButton = mdrivlib::DebouncedSwitch<PinDef{GPIO::C, PinNum::_11}, Inverted>;
 using RevButton = mdrivlib::DebouncedSwitch<PinDef{GPIO::A, PinNum::_15}, Inverted>;
+
 using TimeSwitch = mdrivlib::Switch3Pos<PinDef{GPIO::C, PinNum::_8}, PinDef{GPIO::C, PinNum::_9}>;
+
 using PingJack = mdrivlib::DebouncedPin<PinDef{GPIO::I, PinNum::_1}, Normal>;
 using HoldJack = mdrivlib::DebouncedPin<PinDef{GPIO::I, PinNum::_5}, Normal>;
 using RevJack = mdrivlib::DebouncedPin<PinDef{GPIO::B, PinNum::_8}, Normal>;
+
+using PingLED = mdrivlib::FPin<GPIO::A, PinNum::_2, Output, Inverted>;
 
 struct BoardPinConf {
 	static constexpr PinDef ping_led{GPIO::A, PinNum::_2};
