@@ -40,17 +40,12 @@ using HoldJack = mdrivlib::DebouncedPin<PinDef{GPIO::I, PinNum::_5}, Normal>;
 using RevJack = mdrivlib::DebouncedPin<PinDef{GPIO::B, PinNum::_8}, Normal>;
 
 using PingLED = mdrivlib::FPin<GPIO::A, PinNum::_2, Output, Inverted>;
+using HoldLED = mdrivlib::FPin<GPIO::I, PinNum::_0, Output, Inverted>;
+using RevLED = mdrivlib::FPin<GPIO::D, PinNum::_2, Output, Inverted>;
+using ClkLED = mdrivlib::FPin<GPIO::A, PinNum::_8, Output, Inverted>;
 
-struct BoardPinConf {
-	static constexpr PinDef ping_led{GPIO::A, PinNum::_2};
-	static constexpr PinDef hold_led{GPIO::I, PinNum::_0};
-	static constexpr PinDef reverse_led{GPIO::D, PinNum::_2};
-
-	static constexpr PinDef clk_led{GPIO::A, PinNum::_8};
-
-	static constexpr PinDef clk_out_jack{GPIO::I, PinNum::_7};
-	static constexpr PinDef loop_clk_out_jack{GPIO::H, PinNum::_5};
-};
+using ClkOut = mdrivlib::FPin<GPIO::I, PinNum::_7, Output, Normal>;
+using LoopClkOut = mdrivlib::FPin<GPIO::H, PinNum::_5, Output, Normal>;
 
 struct AdcConf : mdrivlib::DefaultAdcPeriphConf {
 	static constexpr auto resolution = mdrivlib::AdcResolution::Bits12;
