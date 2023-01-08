@@ -11,9 +11,6 @@ namespace LoppingDelay
 {
 
 struct AudioStream {
-	mdrivlib::I2CPeriph codec_i2c;
-	mdrivlib::CodecWM8731 codec;
-
 	// TODO: Verify this region is non-cacheable:
 	static inline AudioStreamConf::AudioInBlock audio_in_dma_block;
 	static inline AudioStreamConf::AudioOutBlock audio_out_dma_block;
@@ -22,9 +19,10 @@ public:
 	using AudioProcessFunction =
 		Function<void(const AudioStreamConf::AudioInBuffer &, AudioStreamConf::AudioOutBuffer &)>;
 
-	AudioStream()
+	AudioStream(AudioProcessFunction &&process_func)
 		: codec_i2c{codec_i2c_conf}
-		, codec{codec_i2c, sai_conf} {
+		, codec{codec_i2c, sai_conf}
+		, _process_func{std::move(process_func)} {
 
 		// Setup clocks needed for codec
 		// Must const_cast because STM32-HAL is not const-correct
@@ -49,7 +47,10 @@ public:
 	}
 
 private:
-	AudioProcessFunction _process_func;
+	mdrivlib::I2CPeriph codec_i2c;
+	mdrivlib::CodecWM8731 codec;
+
+	AudioProcessFunction &_process_func;
 	float audio_load_smoothed = 0.f;
 	static constexpr float kSmoothCoef = 0.01; // 100 process blocks = 6400 samples: tau=0.133s
 	static constexpr float kinvSmoothCoef = 1.f - kSmoothCoef;
