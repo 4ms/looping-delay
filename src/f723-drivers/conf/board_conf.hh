@@ -22,12 +22,12 @@ using mdrivlib::PinNum;
 using enum mdrivlib::PinPolarity;
 using enum mdrivlib::PinMode;
 
-// const mdrivlib::TimekeeperConfig control_read_tim_conf = {
-// 	.TIMx = TIM6,
-// 	.period_ns = 40000,
-// 	.priority1 = 2,
-// 	.priority2 = 3,
-// };
+const mdrivlib::TimekeeperConfig control_read_tim_conf = {
+	.TIMx = TIM6,
+	.period_ns = 40000,
+	.priority1 = 2,
+	.priority2 = 3,
+};
 
 using PingButton = mdrivlib::DebouncedSwitch<PinDef{GPIO::C, PinNum::_7}, Inverted>;
 using HoldButton = mdrivlib::DebouncedSwitch<PinDef{GPIO::C, PinNum::_11}, Inverted>;
