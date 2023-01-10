@@ -9,7 +9,7 @@
 // #include "drivers/stm32xx.h"
 // #include "drivers/timekeeper.hh"
 
-namespace LoopingDelay
+namespace LDKit
 {
 
 namespace Board
@@ -78,4 +78,4 @@ constexpr std::array<AdcChannelConf, NumAdcs> AdcChans = {{
 }};
 
 } // namespace Board
-} // namespace LoopingDelay
+} // namespace LDKit

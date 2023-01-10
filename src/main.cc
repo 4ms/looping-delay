@@ -2,7 +2,7 @@
 #include "controls.hh"
 
 void main() {
-	using namespace LoopingDelay;
+	using namespace LDKit;
 
 	Controls controls;
 

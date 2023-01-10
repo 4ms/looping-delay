@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace LoopingDelay
+namespace LDKit
 {
 
 enum AdcElement : uint32_t {
@@ -22,4 +22,4 @@ enum TrigInJackElement : uint32_t {
 	PingJack,
 };
 
-} // namespace LoopingDelay
+} // namespace LDKit

@@ -1,9 +1,10 @@
+#pragma once
 #include "conf/board_conf.hh"
 #include "drivers/adc_builtin.hh"
 #include "drivers/debounced_switch.hh"
 #include "elements.hh"
 
-namespace LoopingDelay
+namespace LDKit
 {
 
 class Controls {
@@ -67,4 +68,4 @@ public:
 		// etc..
 	}
 };
-} // namespace LoopingDelay
+} // namespace LDKit
