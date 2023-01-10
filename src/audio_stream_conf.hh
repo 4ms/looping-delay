@@ -12,14 +12,13 @@ struct AudioStreamConf {
 	static constexpr int SampleBits = 24;
 	static constexpr int NumInChans = 2;
 	static constexpr int NumOutChans = 2;
-	static constexpr int NumDMAHalfTransfers = 2;
+	static constexpr int HalvesInAWhole = 2;
 
 	using AudioInFrame = AudioFrame<SampleT, SampleBits, NumInChans>;
-	using AudioInBuffer = std::array<AudioInFrame, BlockSize>;
-	using AudioInBlock = std::array<AudioInBuffer, NumDMAHalfTransfers>;
+	using AudioInBlock = std::array<AudioInFrame, BlockSize>;
+	using AudioInBuffer = std::array<AudioInBlock, HalvesInAWhole>;
 
 	using AudioOutFrame = AudioFrame<SampleT, SampleBits, NumOutChans>;
-	using AudioOutBuffer = std::array<AudioOutFrame, BlockSize>;
-	using AudioOutBlock = std::array<AudioOutBuffer, NumDMAHalfTransfers>;
+	using AudioOutBlock = std::array<AudioOutFrame, BlockSize>;
+	using AudioOutBuffer = std::array<AudioOutBlock, HalvesInAWhole>;
 };
-
