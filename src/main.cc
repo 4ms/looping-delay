@@ -5,6 +5,7 @@ void main() {
 	using namespace LDKit;
 
 	Controls controls;
+	DelayBuffer audio_buffer = get_delay_buffer();
 
 	while (true) {
 		;

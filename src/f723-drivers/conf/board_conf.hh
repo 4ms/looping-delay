@@ -1,13 +1,13 @@
 #pragma once
-#include "debounced_switch.hh"
 #include "drivers/adc_builtin_conf.hh"
+#include "drivers/debounced_switch.hh"
 #include "drivers/dma_config_struct.hh"
 #include "drivers/pin.hh"
 #include "drivers/switch_3pos.hh"
 #include "elements.hh"
 #include <array>
 // #include "drivers/stm32xx.h"
-// #include "drivers/timekeeper.hh"
+#include "drivers/timekeeper.hh"
 
 namespace LDKit
 {
@@ -76,6 +76,8 @@ constexpr std::array<AdcChannelConf, NumAdcs> AdcChans = {{
 	{{GPIO::A, PinNum::_4}, AdcChanNum::_4, MixCV, AdcSampTime},
 	{{GPIO::C, PinNum::_1}, AdcChanNum::_11, DelayFeedCV, AdcSampTime},
 }};
+
+static uint32_t ExternalMemoryStartAddr = 0xD0000000;
 
 } // namespace Board
 } // namespace LDKit
