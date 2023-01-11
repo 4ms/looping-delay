@@ -13,6 +13,15 @@ class LoopingDelay {
 	Params &params;
 	DelayBuffer &buf;
 
+	uint32_t read_head;
+	uint32_t write_head;
+	uint32_t fade_read_head;
+	uint32_t fade_read_head_end;
+	uint32_t fade_queued_divmult_time_end;
+
+	uint32_t loop_start;
+	uint32_t loop_end;
+
 public:
 	LoopingDelay(Params &params, DelayBuffer &delay_buffer)
 		: params{params}
@@ -23,11 +32,17 @@ public:
 	}
 
 	void update(const AudioStreamConf::AudioInBlock inblock, AudioStreamConf::AudioOutBlock outblock) {
-		float delay_feed = params.level;
+		check_heads_in_bounds();
 
 		for (auto [out, in] : zip(outblock, inblock)) {
-			out.chan[0] = in.chan[0] * delay_feed;
+			out.chan[0] = in.chan[0] * params.delay_feed;
 			out.chan[1] = in.chan[1];
+		}
+	}
+
+	void check_heads_in_bounds() {
+		if (params.modes.inf == InfState::Off && fade_read_head < params.crossfade_rate) {
+			auto t = calculate_read_addr(params.divmult_time);
 		}
 	}
 };
