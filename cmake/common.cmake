@@ -6,6 +6,9 @@ set(COMMON_SOURCES
     ${root}/lib/mdrivlib/drivers/pin.cc
     ${root}/lib/mdrivlib/drivers/tim.cc
     ${root}/lib/mdrivlib/drivers/timekeeper.cc
+    ${root}/lib/mdrivlib/drivers/i2c.cc
+    ${root}/lib/mdrivlib/drivers/codec_WM8731.cc
+    ${root}/lib/mdrivlib/target/stm32f7xx/drivers/sai_tdm.cc
     ${root}/lib/libhwtests/src/AdcChecker.cc
     ${root}/lib/libhwtests/src/AdcRangeChecker.cc
     ${root}/lib/libhwtests/src/ButtonChecker.cc
@@ -41,10 +44,13 @@ function(set_hal_sources sources family_name)
       ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_flash.c
       ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_flash_ex.c
       ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_gpio.c
+      ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_i2c.c
+      ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_i2c_ex.c
       ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_pwr.c
       ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_pwr_ex.c
       ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_rcc.c
       ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_rcc_ex.c
+      ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_sai.c
       ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_tim.c
       ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_ll_tim.c
       PARENT_SCOPE)
