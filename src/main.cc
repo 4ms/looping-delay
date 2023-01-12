@@ -16,7 +16,7 @@ void main() {
 
 	Controls controls;
 	Params params{controls};
-	DelayBuffer audio_buffer = get_delay_buffer();
+	DelayBuffer &audio_buffer = get_delay_buffer();
 	LoopingDelay looping_delay{params, audio_buffer};
 	AudioStream audio{[&looping_delay](const auto in, auto out) { looping_delay.update(in, out); }};
 
@@ -32,3 +32,5 @@ void main() {
 	while (true) {
 	}
 }
+
+void recover_from_task_fault() { NVIC_SystemReset(); }
