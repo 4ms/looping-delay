@@ -41,8 +41,8 @@ public:
 	}
 
 	void check_heads_in_bounds() {
-		if (params.modes.inf == InfState::Off && fade_read_head < params.crossfade_rate) {
-			auto t = calculate_read_addr(params.divmult_time);
+		if (params.modes.inf == InfState::Off && fade_read_head < params.settings.crossfade_rate) {
+			// auto t = calculate_read_addr(params.divmult_time);
 		}
 	}
 };

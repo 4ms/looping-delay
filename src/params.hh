@@ -83,7 +83,7 @@ struct Params {
 		delay_feed = std::clamp(df / 4095.f, 0.f, 4095.f);
 	}
 
-	float set_fade_increment(uint32_t samples) { return (1.f / ((samples / (codec_BUFF_LEN >> 3)) + 1.f)); }
+	// float set_fade_increment(uint32_t samples) { return (1.f / ((samples / (codec_BUFF_LEN >> 3)) + 1.f)); }
 };
 
 } // namespace LDKit
