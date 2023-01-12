@@ -9,6 +9,7 @@ set(COMMON_SOURCES
     ${root}/lib/mdrivlib/drivers/i2c.cc
     ${root}/lib/mdrivlib/drivers/codec_WM8731.cc
     ${root}/lib/mdrivlib/drivers/hal_handlers.cc
+    ${root}/lib/mdrivlib/drivers/sdram.cc
     ${root}/lib/mdrivlib/target/stm32f7xx/drivers/interrupt_handler.cc
     ${root}/lib/mdrivlib/target/stm32f7xx/drivers/sai_tdm.cc
     ${root}/lib/libhwtests/src/AdcChecker.cc
