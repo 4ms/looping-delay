@@ -64,7 +64,7 @@ struct AdcConf : mdrivlib::DefaultAdcPeriphConf {
 	};
 };
 
-static constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_480Cycles;
+constexpr inline auto AdcSampTime = mdrivlib::AdcSamplingTime::_480Cycles;
 
 constexpr std::array<AdcChannelConf, NumAdcs> AdcChans = {{
 	{{GPIO::C, PinNum::_3}, AdcChanNum::_13, TimePot, AdcSampTime},
@@ -77,7 +77,8 @@ constexpr std::array<AdcChannelConf, NumAdcs> AdcChans = {{
 	{{GPIO::C, PinNum::_1}, AdcChanNum::_11, DelayFeedCV, AdcSampTime},
 }};
 
-static uint32_t ExternalMemoryStartAddr = 0xD0000000;
+constexpr inline uint32_t ExternalMemoryStartAddr = 0xD0000000;
+constexpr inline uint32_t ExternalMemorySizeBytes = 0x00800000;
 
 } // namespace Board
 } // namespace LDKit

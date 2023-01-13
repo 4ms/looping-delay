@@ -1,15 +1,12 @@
 #pragma once
-#include "drivers/sdram_48LC16M16_6A_conf.hh"
-#include "drivers/sdram_AS4C16M16SA_6CN_conf.hh"
-#include "drivers/sdram_AS4C16M16SA_7CN_conf.hh"
-#include "drivers/sdram_W9825G6KH_75_conf.hh"
+#include "drivers/sdram_IS42S16400J-7BL.hh"
 #include "drivers/sdram_config_struct.hh"
 
 using mdrivlib::GPIO;
 using mdrivlib::PinAF;
 using mdrivlib::PinNum;
 
-constexpr mdrivlib::SDRAMPinNames SDRAM_pin_names = {
+constexpr inline mdrivlib::SDRAMPinNames SDRAM_pin_names = {
 	.A0{GPIO::F, PinNum::_0, PinAF::AltFunc12},
 	.A1{GPIO::F, PinNum::_1, PinAF::AltFunc12},
 	.A2{GPIO::F, PinNum::_2, PinAF::AltFunc12},
@@ -51,36 +48,14 @@ constexpr mdrivlib::SDRAMPinNames SDRAM_pin_names = {
 	.SDNWE{GPIO::A, PinNum::_7, PinAF::AltFunc12},
 };
 
-constexpr uint32_t FMC_Clock = 216; // Todo: read/calc this from RCC... query System?
+constexpr inline uint32_t FMC_Clock = 216; // Todo: read/calc this from RCC... query System?
 
-constexpr mdrivlib::SDRAMConfig SDRAM_AS4C_T7_conf = {
+constexpr inline mdrivlib::SDRAMConfig SDRAM_conf = {
 	.pin_list = {SDRAM_pin_names},
-	.timing = SDRAM_timing_AS4C16M16SA_7CN,
-	.arch = SDRAM_arch_AS4C16M16SA_7CN,
-	.connected_bank = 2,
-	.fmc_kernel_clock_MHz = FMC_Clock,
+	.timing = SDRAM_timing_IS42S16400J_7BL,
+	.arch = SDRAM_arch_IS42S16400J_7BL,
+	.size_bytes = 8 * 1024 * 1024,
 };
 
-constexpr mdrivlib::SDRAMConfig SDRAM_AS4C_T6_conf = {
-	.pin_list = {SDRAM_pin_names},
-	.timing = SDRAM_timing_AS4C16M16SA_6CN,
-	.arch = SDRAM_arch_AS4C16M16SA_6CN,
-	.connected_bank = 2,
-	.fmc_kernel_clock_MHz = FMC_Clock,
-};
-
-constexpr mdrivlib::SDRAMConfig SDRAM_48LC16M16_6A_conf = {
-	.pin_list = {SDRAM_pin_names},
-	.timing = SDRAM_timing_48LC16M16_6A,
-	.arch = SDRAM_arch_48LC16M16_6A,
-	.connected_bank = 2,
-	.fmc_kernel_clock_MHz = FMC_Clock,
-};
-
-constexpr mdrivlib::SDRAMConfig SDRAM_W9825_conf = {
-	.pin_list = {SDRAM_pin_names},
-	.timing = SDRAM_timing_W9825G6KH_75,
-	.arch = SDRAM_arch_W9825G6KH_75,
-	.connected_bank = 2,
-	.fmc_kernel_clock_MHz = FMC_Clock,
-};
+constexpr inline mdrivlib::SDRAMBank SdramBank = mdrivlib::SDRAMBank::Bank2;
+constexpr inline uint32_t SdramKernelClock = 216'000'000;

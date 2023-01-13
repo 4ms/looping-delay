@@ -21,9 +21,12 @@ void main() {
 	AudioStream audio{[&looping_delay](const auto in, auto out) { looping_delay.update(in, out); }};
 
 	// TODO: Make Params thread-safe:
-	// low-priority task calls params.update() which stores values in a local Params struct
-	// another (quick) task with priority equal to AudioStream task, which copies local struct to params
-	// Alternatively, use double-buffering and LoopingDelay is constructed with a Params*
+	// Use double-buffering (two Params structs), and LoopingDelay is constructed with a Params*
+	// And right before looping_delay.update(), call params.load_updated_values()
+	//
+
+	// Or, parm
+
 	mdrivlib::Timekeeper params_update_task{Board::control_read_tim_conf, [&]() { params.update(); }};
 
 	params_update_task.start();
