@@ -1,0 +1,2 @@
+all:
+	cmake --build build
