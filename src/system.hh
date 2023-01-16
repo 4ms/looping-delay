@@ -13,6 +13,11 @@ struct System {
 		mdrivlib::System::SetVectorTable(AppStartAddr);
 		mdrivlib::SystemClocks::init_clocks(osc_conf, clk_conf, rcc_periph_conf);
 		mdrivlib::SDRAMPeriph sdram{SDRAM_conf, SdramBank, SdramKernelClock};
+		// SCB_CleanInvalidateDCache();
+		// SCB_DisableDCache();
+		SCB_InvalidateICache();
+		SCB_EnableICache();
+		// SCB_DisableDCache();
 	}
 };
 
