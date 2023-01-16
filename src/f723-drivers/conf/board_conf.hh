@@ -24,7 +24,7 @@ using enum mdrivlib::PinMode;
 
 const mdrivlib::TimekeeperConfig control_read_tim_conf = {
 	.TIMx = TIM6,
-	.period_ns = 40000,
+	.period_ns = 1'000'000'000 / 6000, // 6kHz
 	.priority1 = 2,
 	.priority2 = 3,
 };

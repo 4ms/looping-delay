@@ -55,6 +55,7 @@ function(set_hal_sources sources family_name)
       ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_rcc_ex.c
       ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_sai.c
       ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_tim.c
+	  ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_usart.c
       ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_ll_tim.c
       ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_ll_fmc.c
       PARENT_SCOPE)
@@ -115,6 +116,7 @@ set(COMMON_COMPILE_OPTIONS
     -Werror=return-type
     $<$<COMPILE_LANGUAGE:CXX>:
     -std=c++23
+	-ffold-simple-inlines
     -fno-rtti
     -fno-threadsafe-statics
     -fno-exceptions

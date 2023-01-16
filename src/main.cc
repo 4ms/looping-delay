@@ -1,6 +1,7 @@
 #include "audio_stream.hh"
 #include "conf/board_conf.hh"
 #include "controls.hh"
+#include "debug.hh"
 #include "delay_buffer.hh"
 #include "drivers/timekeeper.hh"
 #include "looping_delay.hh"
@@ -25,9 +26,14 @@ void main() {
 	// And right before looping_delay.update(), call params.load_updated_values()
 	//
 
-	// Or, parm
+	Debug::Pin2{};
+	Debug::Pin3{};
 
-	mdrivlib::Timekeeper params_update_task{Board::control_read_tim_conf, [&]() { params.update(); }};
+	mdrivlib::Timekeeper params_update_task{Board::control_read_tim_conf, [&]() {
+												Debug::Pin2::high();
+												params.update();
+												Debug::Pin2::low();
+											}};
 
 	params_update_task.start();
 	audio.start();

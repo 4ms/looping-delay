@@ -1,6 +1,7 @@
 #pragma once
 #include "audio_stream_conf.hh"
 #include "controls.hh"
+#include "debug.hh"
 #include "delay_buffer.hh"
 #include "params.hh"
 #include "util/math.hh"
@@ -26,18 +27,20 @@ public:
 	LoopingDelay(Params &params, DelayBuffer &delay_buffer)
 		: params{params}
 		, buf{delay_buffer} {
-		for (auto &s : buf)
-			s = 0;
+		// for (auto &s : buf)
+		// 	s = 0;
 		//
 	}
 
 	void update(const AudioStreamConf::AudioInBlock inblock, AudioStreamConf::AudioOutBlock outblock) {
 		check_heads_in_bounds();
 
+		Debug::Pin3::high();
 		for (auto [out, in] : zip(outblock, inblock)) {
 			out.chan[0] = in.chan[0] * params.delay_feed;
 			out.chan[1] = in.chan[1];
 		}
+		Debug::Pin3::low();
 	}
 
 	void check_heads_in_bounds() {
