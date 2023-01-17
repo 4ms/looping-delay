@@ -13,8 +13,8 @@ namespace LDKit
 
 struct AudioStream {
 	// TODO: Verify this region is non-cacheable:
-	static inline AudioStreamConf::AudioInBuffer audio_in_dma_buffer;
-	static inline AudioStreamConf::AudioOutBuffer audio_out_dma_buffer;
+	alignas(256) static inline AudioStreamConf::AudioInBuffer audio_in_dma_buffer;
+	alignas(256) static inline AudioStreamConf::AudioOutBuffer audio_out_dma_buffer;
 
 public:
 	using AudioProcessFunction =
