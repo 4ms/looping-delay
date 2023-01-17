@@ -32,12 +32,12 @@ public:
 		//
 	}
 
-	void update(const AudioStreamConf::AudioInBlock inblock, AudioStreamConf::AudioOutBlock outblock) {
-		check_heads_in_bounds();
+	void update(const AudioStreamConf::AudioInBlock &inblock, AudioStreamConf::AudioOutBlock &outblock) {
+		// check_heads_in_bounds();
 
 		Debug::Pin3::high();
 		for (auto [out, in] : zip(outblock, inblock)) {
-			out.chan[0] = in.chan[0] * params.delay_feed;
+			out.chan[0] = in.chan[0]; // * params.delay_feed;
 			out.chan[1] = in.chan[1];
 		}
 		Debug::Pin3::low();
