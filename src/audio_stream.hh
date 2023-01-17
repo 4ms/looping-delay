@@ -37,7 +37,8 @@ public:
 
 	template<uint32_t buffer_half>
 	void _process() {
-		_process_func(audio_in_dma_buffer[buffer_half], audio_out_dma_buffer[buffer_half]);
+		// FIXME: this only works when:
+		_process_func(audio_in_dma_buffer[1 - buffer_half], audio_out_dma_buffer[buffer_half]);
 	}
 
 private:
