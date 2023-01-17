@@ -102,6 +102,7 @@ set(BOOTLOADER_COMMON_INCLUDES
 set(COMMON_DEFINES USE_HAL_DRIVER USE_FULL_LL_DRIVER)
 
 set(COMMON_COMPILE_OPTIONS
+	-Ofast
     -g3
     -fdata-sections
     -ffunction-sections
