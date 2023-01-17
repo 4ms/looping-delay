@@ -47,7 +47,7 @@ struct Settings {
 	bool quantize_mode_changes = true;
 	uint32_t led_brightness = 4;
 
-	float crossfade_rate = 0.01f;
+	float crossfade_rate = 0.01f; // SLOW_FADE_INCREMENT
 };
 
 inline constexpr float DivKnobValue[17] = {
@@ -84,6 +84,8 @@ struct Params {
 	}
 
 	// float set_fade_increment(uint32_t samples) { return (1.f / ((samples / (codec_BUFF_LEN >> 3)) + 1.f)); }
+
+	void reset_loopled_tmr() {}
 };
 
 } // namespace LDKit

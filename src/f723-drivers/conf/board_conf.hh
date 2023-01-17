@@ -80,5 +80,8 @@ constexpr std::array<AdcChannelConf, NumAdcs> AdcChans = {{
 constexpr inline uint32_t ExternalMemoryStartAddr = 0xD0000000;
 constexpr inline uint32_t ExternalMemorySizeBytes = 0x00800000;
 
+using RAMSampleT = int16_t;
+constexpr inline uint32_t RAMSampleSize = sizeof(RAMSampleT);
+
 } // namespace Board
 } // namespace LDKit
