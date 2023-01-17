@@ -16,7 +16,9 @@ enum AdcElement : uint32_t {
 	MixCV,
 };
 
-constexpr static uint32_t NumAdcs = 8;
+constexpr static uint32_t NumPots = 4;
+constexpr static uint32_t NumCVs = 4;
+constexpr static uint32_t NumAdcs = NumPots + NumCVs;
 
 enum TrigInJackElement : uint32_t {
 	PingJack,

@@ -28,6 +28,8 @@ void main() {
 	// And right before looping_delay.update(), call params.load_updated_values()
 	//
 
+	Debug::Pin0{};
+	Debug::Pin1{};
 	Debug::Pin2{};
 	Debug::Pin3{};
 
