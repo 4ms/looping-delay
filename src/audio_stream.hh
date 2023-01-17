@@ -25,14 +25,11 @@ public:
 		, codec{codec_i2c, sai_conf}
 		, _process_func{std::move(process_func)} {
 
-		// Setup clocks needed for codec
-		// Must const_cast because STM32-HAL is not const-correct
-		HAL_RCCEx_PeriphCLKConfig(const_cast<RCC_PeriphCLKInitTypeDef *>(&sai_rcc_clk_conf));
-
 		codec.init();
 		codec.set_rx_buffer_start(audio_in_dma_buffer[0]);
 		codec.set_tx_buffer_start(audio_out_dma_buffer[0]);
 
+		//{TC, HT}
 		codec.set_callbacks([this] { _process<1>(); }, [this] { _process<0>(); });
 	}
 

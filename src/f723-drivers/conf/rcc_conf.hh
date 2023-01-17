@@ -26,9 +26,7 @@ const RCC_ClkInitTypeDef clk_conf{
 	.APB2CLKDivider = RCC_HCLK_DIV2,
 };
 
-const RCC_PeriphCLKInitTypeDef rcc_periph_conf = {};
-
-const RCC_PeriphCLKInitTypeDef sai_rcc_clk_conf = {
+const RCC_PeriphCLKInitTypeDef rcc_periph_conf = {
 	.PeriphClockSelection = RCC_PERIPHCLK_SAI1 | RCC_PERIPHCLK_UART4,
 	.PLLSAI =
 		{
