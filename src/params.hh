@@ -79,7 +79,7 @@ struct Params {
 	void update() {
 		controls.update();
 		// // LPF?
-		float df = controls.read_adc(DelayFeedCV) + controls.read_adc(DelayFeedPot);
+		float df = (controls.read_adc(DelayFeedCV) - 2048) + controls.read_adc(DelayFeedPot);
 		delay_feed = std::clamp(df / 4095.f, 0.f, 4095.f);
 	}
 
