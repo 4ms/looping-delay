@@ -35,6 +35,7 @@ void main() {
 												Debug::Pin2::low();
 											}};
 
+	controls.start();
 	params_update_task.start();
 	audio.start();
 

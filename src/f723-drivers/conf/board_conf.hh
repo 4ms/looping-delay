@@ -69,12 +69,12 @@ constexpr inline auto AdcSampTime = mdrivlib::AdcSamplingTime::_480Cycles;
 constexpr std::array<AdcChannelConf, NumAdcs> AdcChans = {{
 	{{GPIO::C, PinNum::_3}, AdcChanNum::_13, TimePot, AdcSampTime},
 	{{GPIO::A, PinNum::_1}, AdcChanNum::_1, FeedbackPot, AdcSampTime},
-	{{GPIO::A, PinNum::_0}, AdcChanNum::_0, MixPot, AdcSampTime},
 	{{GPIO::C, PinNum::_4}, AdcChanNum::_14, DelayFeedPot, AdcSampTime},
+	{{GPIO::A, PinNum::_0}, AdcChanNum::_0, MixPot, AdcSampTime},
 	{{GPIO::C, PinNum::_0}, AdcChanNum::_10, TimeCV, AdcSampTime},
 	{{GPIO::A, PinNum::_5}, AdcChanNum::_5, FeedbackCV, AdcSampTime},
-	{{GPIO::A, PinNum::_4}, AdcChanNum::_4, MixCV, AdcSampTime},
 	{{GPIO::C, PinNum::_1}, AdcChanNum::_11, DelayFeedCV, AdcSampTime},
+	{{GPIO::A, PinNum::_4}, AdcChanNum::_4, MixCV, AdcSampTime},
 }};
 
 constexpr inline uint32_t ExternalMemoryStartAddr = 0xD0000000;

@@ -11,8 +11,8 @@ class Controls {
 	using enum mdrivlib::PinPolarity;
 
 	// ADCs (Pots and CV):
-	mdrivlib::AdcDmaPeriph<Board::AdcConf> adcs{adc_buffer, Board::AdcChans};
 	std::array<uint16_t, NumAdcs> adc_buffer;
+	mdrivlib::AdcDmaPeriph<Board::AdcConf> adcs{adc_buffer, Board::AdcChans};
 
 public:
 	// Buttons/Switches:

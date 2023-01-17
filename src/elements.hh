@@ -8,12 +8,12 @@ namespace LDKit
 enum AdcElement : uint32_t {
 	TimePot,
 	FeedbackPot,
-	MixPot,
 	DelayFeedPot,
+	MixPot,
 	TimeCV,
 	FeedbackCV,
-	MixCV,
 	DelayFeedCV,
+	MixCV,
 };
 
 constexpr static uint32_t NumAdcs = 8;
