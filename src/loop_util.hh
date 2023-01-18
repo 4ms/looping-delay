@@ -19,17 +19,15 @@ struct Util {
 		return ((mid >= end) && (mid <= beg)) == reverse;
 	}
 
-	constexpr static uint32_t offset_samples(uint32_t base_addr, uint32_t offset, uint8_t subtract) {
+	constexpr static uint32_t offset_samples(uint32_t base_addr, int32_t offset, bool subtract = false) {
 		uint32_t t_addr;
 
 		// convert samples to addresses
 		offset *= Board::RAMSampleSize;
 
-		if (subtract == 0) {
-			t_addr = base_addr + offset;
-		} else {
-			t_addr = base_addr - offset;
-		}
+		if (subtract)
+			offset = -offset;
+		t_addr = base_addr + offset;
 
 		while (t_addr >= (Board::ExternalMemoryStartAddr + Board::ExternalMemorySizeBytes))
 			t_addr = t_addr - Board::ExternalMemorySizeBytes;
@@ -62,9 +60,10 @@ static_assert(Util::in_between(3, 3, 3, 0), "zero length, not reverse, mid equal
 static_assert(!Util::in_between(2, 3, 3, 1), "zero length, reverse, mid not equal");
 static_assert(!Util::in_between(2, 3, 3, 0), "zero length, not reverse, mid not equal");
 
-static_assert(Util::offset_samples(0xD0000000, 8, 0) == 0xD0000010, "add");
+static_assert(Util::offset_samples(0xD0000000, 8) == 0xD0000010, "add");
+static_assert(Util::offset_samples(0xD0000000, -8) == 0xD07FFFF0, "subtract across loop boundary");
 static_assert(Util::offset_samples(0xD0000000, 8, 1) == 0xD07FFFF0, "subtract across loop boundary");
-static_assert(Util::offset_samples(0xD07FFFF8, 8, 0) == 0xD0000008, "add across loop boundary");
-static_assert(Util::offset_samples(0xD07FFFF8, 8, 1) == 0xD07FFFE8, "subtract");
-static_assert(Util::offset_samples(0xD0000002, 0x30000000, 0) == 0xD0000002, "integer overflow");
+static_assert(Util::offset_samples(0xD07FFFF8, 8) == 0xD0000008, "add across loop boundary");
+static_assert(Util::offset_samples(0xD07FFFF8, -8) == 0xD07FFFE8, "subtract");
+static_assert(Util::offset_samples(0xD0000002, 0x30000000) == 0xD0000002, "integer overflow");
 } // namespace LDKit

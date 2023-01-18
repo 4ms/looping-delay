@@ -58,16 +58,21 @@ inline constexpr float DivKnobValue[17] = {
 struct Params {
 	Controls &controls;
 
-	float time; // TIME: fractional value for time multiplication, integer value for time division
-	float divmult_time;
+	float time;		  // TIME: fractional value for time multiplication, integer value for time division
 	float delay_feed; // DELAY FEED: amount of main input mixed into delay loop
 	float feedback;	  // FEEDBACK: amount of regeneration
 	float mix_dry;	  // MIX: mix of delayed and clean on the main output
 	float mix_wet;
 	float tracking_comp; // TRACKING_COMP: -2.0 .. 2.0 compensation for 1V/oct tracking
 
+	float divmult_time; // samples between read and write heads
+	uint32_t locked_ping_time;
+	uint32_t ping_time;
+
 	ChannelMode modes;
 	Settings settings;
+
+	bool pot_moved_while_rev_pressed[NumPots]{};
 
 	float fast_fade_samples;
 	float slow_fade_samples;
