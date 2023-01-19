@@ -97,11 +97,7 @@ public:
 			phase = __USAT(phase, 12);
 			int32_t rd = ((float)mem_rd * epp_lut[phase]) + ((float)mem_rd_dest * epp_lut[4095 - phase]);
 
-			if (params.settings.soft_clip)
-				rd = compress(rd);
-
-			if constexpr (Board::MemorySampleSize == 2)
-				rd = __SSAT(rd, 16);
+			rd = clip(rd);
 
 			// Attenuate the delayed signal with REGEN
 			int32_t regen = (float)rd * params.feedback;
@@ -199,8 +195,9 @@ public:
 	//// util:
 
 	int32_t clip(int32_t val) {
+		static constexpr size_t max = std::numeric_limits<Board::RAMSampleT>::max();
 		if (params.settings.soft_clip)
-			val = compress(val);
+			val = compress<max, 0.75f>(val);
 		else if (Board::MemorySampleSize == 2)
 			val = __SSAT(val, 16);
 		return val;
