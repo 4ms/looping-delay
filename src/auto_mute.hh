@@ -11,7 +11,7 @@ public:
 	AutoMute() = default;
 
 	int32_t update(int32_t cur) {
-		lpf = (lpf * (1.f - LPFCoef)) + (((cur > 0) ? cur : -cur) * LPFCoef);
+		lpf = (lpf * (1.f - LPFCoef)) + (std::abs(cur) * LPFCoef);
 
 		if (lpf < MinLevel && state != Muted)
 			state = FadingDown;
