@@ -37,7 +37,7 @@ public:
 
 	template<uint32_t buffer_half>
 	void _process() {
-		// FIXME: this only works when:
+		// NOTE: this only works when:
 		// 	TC processes in[0] -> out[1] (dma just finished sending out[1], seems like it just finished filling in[0]?)
 		// 	HT processes in[1] -> out[0] (dma just finished sending out[0], seems like it just finished filling in[1]?)
 		_process_func(audio_in_dma_buffer[1 - buffer_half], audio_out_dma_buffer[buffer_half]);
@@ -51,3 +51,9 @@ private:
 };
 
 } // namespace LDKit
+
+// TODO: would be nice to give SAI LoopingDelay::update directly
+// IRQ -> ISRs[n]
+// -> if saiflag { callback(0); } else { callback(1); }
+// -> AudioStream::_process_func(buf[0/1])
+// -> LoopingDelay::update(bufs)

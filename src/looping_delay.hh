@@ -258,10 +258,4 @@ public:
 	}
 };
 
-// TODO: would be nice to give SAI LoopingDelay::update directly
-// IRQ -> ISRs[n]
-// -> if saiflag { callback(0); } else { callback(1); }
-// -> AudioStream::_process_func(buf[0/1])
-// -> LoopingDelay::update(bufs)
-
 } // namespace LDKit
