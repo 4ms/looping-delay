@@ -1,4 +1,5 @@
 #pragma once
+#include "audio_stream_conf.hh"
 #include "controls.hh"
 #include <cstdint>
 
@@ -47,7 +48,12 @@ struct Settings {
 	bool quantize_mode_changes = true;
 	uint32_t led_brightness = 4;
 
-	float crossfade_rate = 0.01f; // SLOW_FADE_INCREMENT
+	uint32_t crossfade_samples = 192;							   // SLOW_FADE_SAMPLES
+	float crossfade_rate = calc_fade_increment(crossfade_samples); // SLOW_FADE_INCREMENT
+
+	static constexpr float calc_fade_increment(uint32_t samples) {
+		return (1.f / (((float)samples / (float)AudioStreamConf::BlockSize) + 1.f));
+	}
 };
 
 inline constexpr float DivKnobValue[17] = {
@@ -73,22 +79,36 @@ struct Params {
 	Settings settings;
 
 	bool pot_moved_while_rev_pressed[NumPots]{};
-
-	float fast_fade_samples;
-	float slow_fade_samples;
-	float fast_fade_increment;
+	uint32_t mute_on_boot_ctr = 96000;
 
 	Params(Controls &controls)
 		: controls{controls} {}
 
 	void update() {
 		controls.update();
-		// // LPF?
+
 		float df = (controls.read_adc(DelayFeedCV) - 2048) + controls.read_adc(DelayFeedPot);
 		delay_feed = std::clamp(df / 4095.f, 0.f, 4095.f);
-	}
 
-	// float set_fade_increment(uint32_t samples) { return (1.f / ((samples / (codec_BUFF_LEN >> 3)) + 1.f)); }
+		float tm = (controls.read_adc(TimeCV) - 2048) + controls.read_adc(TimePot);
+		time = std::clamp(tm / 4095.f, 0.f, 4095.f);
+
+		float fb = (controls.read_adc(FeedbackCV) - 2048) + controls.read_adc(FeedbackPot);
+		feedback = std::clamp(fb / 4095.f, 0.f, 4095.f);
+
+		float mx = (controls.read_adc(MixCV) - 2048) + controls.read_adc(MixPot);
+		// TODO; use epp lut
+		mix_dry = std::clamp(mx / 4095.f, 0.f, 4095.f);
+		mix_wet = 1.f - mix_dry;
+
+		// TODO
+		tracking_comp = 1.f;
+
+		for (auto &pot : pot_moved_while_rev_pressed) {
+			// TODO
+			pot = false;
+		}
+	}
 
 	void reset_loopled_tmr() {}
 };

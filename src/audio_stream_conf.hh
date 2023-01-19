@@ -21,4 +21,7 @@ struct AudioStreamConf {
 	using AudioOutFrame = AudioFrame<SampleT, SampleBits, NumOutChans>;
 	using AudioOutBlock = std::array<AudioOutFrame, BlockSize>;
 	using AudioOutBuffer = std::array<AudioOutBlock, HalvesInAWhole>;
+
+	static constexpr inline auto AudioBufferSizeBytes = sizeof(AudioInBuffer);
+	static constexpr inline auto AudioBlockSizeBytes = sizeof(AudioInBlock);
 };

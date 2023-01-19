@@ -1,3 +1,4 @@
+#pragma once
 #include "audio_stream_conf.hh"
 #include "conf/board_conf.hh"
 #include <cstdint>
@@ -23,22 +24,21 @@ struct Util {
 		uint32_t t_addr;
 
 		// convert samples to addresses
-		offset *= Board::RAMSampleSize;
+		offset *= Board::MemorySampleSize;
 
 		if (subtract)
 			offset = -offset;
 		t_addr = base_addr + offset;
 
-		while (t_addr >= (Board::ExternalMemoryStartAddr + Board::ExternalMemorySizeBytes))
-			t_addr = t_addr - Board::ExternalMemorySizeBytes;
-		while (t_addr < Board::ExternalMemoryStartAddr)
-			t_addr = t_addr + Board::ExternalMemorySizeBytes;
+		while (t_addr >= Board::MemoryEndAddr)
+			t_addr = t_addr - Board::MemorySizeBytes;
+		while (t_addr < Board::MemoryStartAddr)
+			t_addr = t_addr + Board::MemorySizeBytes;
 
-		std::clamp(
-			t_addr, Board::ExternalMemoryStartAddr, Board::ExternalMemoryStartAddr + Board::ExternalMemorySizeBytes);
+		// std::clamp(t_addr, Board::MemoryStartAddr, Board::MemoryEndAddr);
 
 		// addresses must be aligned
-		constexpr uint32_t mask = (UINT32_MAX - Board::RAMSampleSize) + 1; // 0xFFFFFFFE;
+		constexpr uint32_t mask = (UINT32_MAX - Board::MemorySampleSize) + 1; // 0xFFFFFFFE;
 		t_addr = t_addr & mask;
 
 		return t_addr;
