@@ -34,7 +34,7 @@ class LoopingDelay {
 
 	AutoMute<0.0002f, 10, 0.02f, 0.02f> main_automute;
 	AutoMute<0.0002f, 10, 0.02f, 0.02f> aux_automute;
-	LpfIir<1.f / 4800.f> dcblock;
+	DCBlock<1.f / 4800.f> dcblock;
 
 public:
 	LoopingDelay(Params &params, DelayBuffer &delay_buffer)
@@ -131,7 +131,7 @@ public:
 
 			// High-pass filter before writing to memory
 			if (params.settings.runaway_dc_block)
-				wr -= dcblock.update(wr);
+				wr = dcblock.update(wr);
 			mem_wr = clip(wr);
 		}
 
