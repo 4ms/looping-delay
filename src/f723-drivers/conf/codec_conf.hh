@@ -34,8 +34,8 @@ const SaiConfig sai_conf = {
 			.stream = DMA2_Stream1,
 			.channel = DMA_CHANNEL_0,
 			.IRQn = DMA2_Stream1_IRQn,
-			.pri = 1,
-			.subpri = 1,
+			.pri = 2,
+			.subpri = 2,
 		},
 	.dma_init_rx =
 		{
@@ -43,8 +43,8 @@ const SaiConfig sai_conf = {
 			.stream = DMA2_Stream4,
 			.channel = DMA_CHANNEL_1,
 			.IRQn = DMA2_Stream4_IRQn,
-			.pri = 1,
-			.subpri = 1,
+			.pri = 2,
+			.subpri = 2,
 		},
 
 	.datasize = AudioStreamConf::SampleBits == 24 ? SAI_DATASIZE_24 :

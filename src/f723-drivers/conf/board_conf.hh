@@ -22,7 +22,7 @@ using mdrivlib::PinNum;
 using enum mdrivlib::PinPolarity;
 using enum mdrivlib::PinMode;
 
-const mdrivlib::TimekeeperConfig control_read_tim_conf = {
+const mdrivlib::TimekeeperConfig param_update_task_conf = {
 	.TIMx = TIM6,
 	.period_ns = 1'000'000'000 / 6000, // 6kHz
 	.priority1 = 2,
@@ -84,6 +84,9 @@ constexpr inline uint32_t MemoryEndAddr = MemoryStartAddr + MemorySizeBytes;
 using RAMSampleT = int16_t;
 constexpr inline uint32_t MemorySampleSize = sizeof(RAMSampleT);
 constexpr inline uint32_t MemorySamplesNum = MemorySizeBytes / MemorySampleSize;
+
+constexpr inline int16_t MinPotChange = 10;
+constexpr inline int16_t MinCVChange = 10;
 
 } // namespace Board
 } // namespace LDKit
