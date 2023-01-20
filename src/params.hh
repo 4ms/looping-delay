@@ -2,6 +2,7 @@
 #include "audio_stream_conf.hh"
 #include "clock_mult_util.hh"
 #include "controls.hh"
+#include "log_taper_lut.hh"
 #include "util/countzip.hh"
 #include <cstdint>
 
@@ -78,7 +79,10 @@ struct Params {
 	ChannelMode modes;
 	Settings settings;
 	OperationMode op_mode = OperationMode::Normal;
+
+	// flags for LoopingDelay:
 	uint32_t mute_on_boot_ctr = 12000;
+	bool flag_time_changed = true;
 
 	Params(Controls &controls)
 		: controls{controls} {}
@@ -87,40 +91,18 @@ struct Params {
 		controls.update();
 
 		update_pot_states();
+		update_cv_states();
+
 		update_adjust_loop_end_mode();
 		update_time_quant_mode();
 
-		update_cv_states();
+		calc_delay_feed();
+		calc_feedback();
+		calc_time();
+		calc_mix();
 
-		if (modes.inf == InfState::On) {
-			delay_feed = 0.f;
-			feedback = 1.f;
+		if (modes.inf == InfState::On)
 			update_scroll_loop_amount();
-		} else {
-			float df = cv_state[DelayFeedCV].cur_val + pot_state[DelayFeedPot].cur_val;
-			delay_feed = std::clamp(df / 4095.f, 0.f, 1.f);
-
-			float fb = cv_state[FeedbackCV].cur_val + pot_state[FeedbackPot].cur_val;
-			feedback = std::clamp(fb / 4095.f, 0.f, 1.f);
-		}
-
-		int16_t time_cv = MathTools::plateau<60>(2048 - cv_state[TimeCV].cur_val);
-
-		int16_t time_pot = pot_state[TimePot].cur_val;
-		float time_pot_mult =
-			modes.time_pot_quantized ? ClockMultUtil::calc_quantized(time_pot) : ClockMultUtil::calc_unquant(time_pot);
-
-		float time_cv_mult = modes.time_cv_quantized ? ClockMultUtil::calc_quantized(time_cv) :
-							 (time_cv < 0)			 ? ClockMultUtil::calc_unquant(time_cv) :
-													   ClockMultUtil::calc_voct(time_cv, tracking_comp);
-
-		auto time_switch = controls.read_time_switch();
-		float time_mult = adjust_time_by_switch(time_pot_mult * time_cv_mult, time_switch);
-
-		float mx = (controls.read_adc(MixCV) - 2048) + pot_state[MixPot].cur_val;
-		// TODO; use epp lut
-		mix_dry = std::clamp(mx / 4095.f, 0.f, 4095.f);
-		mix_wet = 1.f - mix_dry;
 
 		// TODO
 		tracking_comp = 1.f;
@@ -143,6 +125,14 @@ struct Params {
 
 		if (mute_on_boot_ctr)
 			mute_on_boot_ctr--;
+	}
+
+	void process_mode_flags() {
+		// if (flag_time_changed || flag_ping_changed) {
+		// 	flag_time_changed = false;
+		// 	flag_ping_changed = false;
+		// 	set_divmult_time();
+		// }
 	}
 
 	void reset_loopled_tmr() {}
@@ -236,6 +226,82 @@ private:
 		}
 	}
 
+	void calc_delay_feed() {
+		if (modes.inf == InfState::On) {
+			delay_feed = 0.f;
+			return;
+		}
+
+		int16_t df = pot_state[DelayFeedPot].cur_val;
+		if (!settings.levelcv_mix)
+			df = __USAT(df + cv_state[DelayFeedCV].cur_val, 12);
+
+		if (settings.log_delay_feed)
+			delay_feed = log_taper[df];
+		else
+			delay_feed = df > 4065 ? 1.f : (float)MathTools::plateau<30, 0>(df) / 4035.f;
+
+		float fb = cv_state[FeedbackCV].cur_val + pot_state[FeedbackPot].cur_val;
+		feedback = std::clamp(fb / 4095.f, 0.f, 1.f);
+	}
+
+	void calc_feedback() {
+		if (modes.inf == InfState::On) {
+			feedback = 1.f;
+			return;
+		}
+
+		float fb_pot = pot_state[FeedbackPot].cur_val;
+		float fb;
+		if (fb_pot < 3500.f)
+			fb = fb_pot / 3500.f;
+		else if (fb_pot < 4000.f)
+			fb = 1.f;
+		else
+			fb = (fb_pot - 3050.f) / 950.f; //(4095-3050)/950 = 110% ... (4000-3050)/950 = 100%
+
+		float fb_cv = cv_state[FeedbackCV].cur_val;
+		// FIXME: DLD firmware has bug that prevents the fb += 1.f branch
+		if (fb_cv > 4080.f)
+			fb += 1.f;
+		else if (fb_cv > 30.f)
+			fb += fb_cv / 4095.f;
+
+		if (fb > 1.1f)
+			fb = 1.1f;
+		else if (fb > 0.997f && fb < 1.003f)
+			fb = 1.0f;
+
+		feedback = fb;
+	}
+
+	void calc_time() {
+		int16_t time_pot = pot_state[TimePot].cur_val;
+		int16_t time_cv = MathTools::plateau<60>(2048 - cv_state[TimeCV].cur_val);
+
+		float time_pot_mult =
+			modes.time_pot_quantized ? ClockMultUtil::calc_quantized(time_pot) : ClockMultUtil::calc_unquant(time_pot);
+
+		float time_cv_mult = modes.time_cv_quantized ? ClockMultUtil::calc_quantized(time_cv) :
+							 (time_cv < 0)			 ? ClockMultUtil::calc_unquant(time_cv) :
+													   ClockMultUtil::calc_voct(time_cv, tracking_comp);
+
+		auto time_switch = controls.read_time_switch();
+		float time_mult = adjust_time_by_switch(time_pot_mult * time_cv_mult, time_switch);
+
+		if (time != time_mult) {
+			time = time_mult;
+			flag_time_changed = true;
+		}
+	}
+
+	void calc_mix() {
+		float mx = (controls.read_adc(MixCV) - 2048) + pot_state[MixPot].cur_val;
+		// TODO; use epp lut
+		mix_dry = std::clamp(mx / 4095.f, 0.f, 4095.f);
+		mix_wet = 1.f - mix_dry;
+	}
+
 	static constexpr float adjust_time_by_switch(float timeval, Controls::SwitchPos switch_pos) {
 		uint16_t switch_val = static_cast<uint16_t>(switch_pos);
 		if (switch_val == 0b10)
@@ -266,8 +332,6 @@ private:
 
 	bool ignore_inf_release = false;
 	bool ignore_rev_release = false;
-	// int32_t window_pot_delta = 0;
-	// int32_t window_cv_delta = 0;
 };
 
 constexpr auto ParamsSize = sizeof(Params); // 164B

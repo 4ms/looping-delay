@@ -60,6 +60,13 @@ public:
 			// TODO: scroll loop
 		}
 
+		if (params.flag_time_changed) {
+			set_divmult_time();
+			// FIXME: figure out how to clear flag without writing params
+			// this will have no effect when double-buffering params
+			params.flag_time_changed = false;
+		}
+
 		std::array<int32_t, AudioStreamConf::BlockSize> rd_buff; // on DLD this is 2x.. bug?
 		std::array<int32_t, AudioStreamConf::BlockSize> rd_buff_dest;
 		std::array<int32_t, AudioStreamConf::BlockSize> wr_buff;
