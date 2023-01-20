@@ -2,6 +2,7 @@
 #include "audio_stream_conf.hh"
 #include "clock_mult_util.hh"
 #include "controls.hh"
+#include "epp_lut.hh"
 #include "log_taper_lut.hh"
 #include "util/countzip.hh"
 #include <cstdint>
@@ -128,6 +129,31 @@ struct Params {
 	}
 
 	void process_mode_flags() {
+		// if (!disable_mode_changes) {
+		// 	if (flag_inf_change[channel]) {
+		// 		change_inf_mode(channel);
+		// 		// mode[channel][CONTINUOUS_REVERSE] = 0;
+		// 	}
+
+		// 	if (flag_rev_change[channel]) {
+		// 		// mode[channel][CONTINUOUS_REVERSE] = 0;
+
+		// 		if (!doing_reverse_fade[channel]) {
+		// 			flag_rev_change[channel] = 0;
+
+		// 			mode[channel][REV] = 1 - mode[channel][REV];
+
+		// 			if (mode[channel][INF] == INF_ON || mode[channel][INF] == INF_TRANSITIONING_OFF ||
+		// 				mode[channel][INF] == INF_TRANSITIONING_ON)
+		// 				reverse_loop(channel);
+
+		// 			else
+		// 				swap_read_write(channel);
+		// 		}
+		// 	}
+		// }
+
+		// handled in looping delay:
 		// if (flag_time_changed || flag_ping_changed) {
 		// 	flag_time_changed = false;
 		// 	flag_ping_changed = false;
@@ -240,9 +266,6 @@ private:
 			delay_feed = log_taper[df];
 		else
 			delay_feed = df > 4065 ? 1.f : (float)MathTools::plateau<30, 0>(df) / 4035.f;
-
-		float fb = cv_state[FeedbackCV].cur_val + pot_state[FeedbackPot].cur_val;
-		feedback = std::clamp(fb / 4095.f, 0.f, 1.f);
 	}
 
 	void calc_feedback() {
@@ -296,10 +319,14 @@ private:
 	}
 
 	void calc_mix() {
-		float mx = (controls.read_adc(MixCV) - 2048) + pot_state[MixPot].cur_val;
-		// TODO; use epp lut
-		mix_dry = std::clamp(mx / 4095.f, 0.f, 4095.f);
-		mix_wet = 1.f - mix_dry;
+		uint16_t mx;
+		if (settings.levelcv_mix)
+			mx = __USAT(cv_state[MixCV].cur_val + pot_state[MixPot].cur_val, 12);
+		else
+			mx = pot_state[MixPot].cur_val;
+
+		mix_dry = epp_lut[mx];
+		mix_wet = epp_lut[4095 - mx];
 	}
 
 	static constexpr float adjust_time_by_switch(float timeval, Controls::SwitchPos switch_pos) {
