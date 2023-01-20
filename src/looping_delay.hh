@@ -54,6 +54,12 @@ public:
 		constexpr uint32_t blksz = sz2;
 
 		Debug::Pin3::high();
+
+		if (params.modes.scroll_loop_amount) {
+			params.modes.scroll_loop_amount = 0;
+			// TODO: scroll loop
+		}
+
 		std::array<int32_t, AudioStreamConf::BlockSize> rd_buff; // on DLD this is 2x.. bug?
 		std::array<int32_t, AudioStreamConf::BlockSize> rd_buff_dest;
 		std::array<int32_t, AudioStreamConf::BlockSize> wr_buff;
@@ -79,7 +85,6 @@ public:
 			auto auxin = in.chan[1];
 
 			if (params.mute_on_boot_ctr) {
-				params.mute_on_boot_ctr--;
 				mainin = 0;
 				auxin = 0;
 			}
@@ -107,7 +112,7 @@ public:
 
 			int32_t wr;
 			int32_t auxout;
-			if (params.modes.send_return_before_loop) {
+			if (params.settings.send_return_before_loop) {
 				// Assign the auxin signal to the write head
 				wr = auxin;
 				// Add the loop contents to the input signal, and assign to the auxout signal
@@ -227,7 +232,7 @@ public:
 		} else {
 			params.divmult_time = t_divmult_time;
 
-			if (params.pot_moved_while_rev_pressed[TimePot])
+			if (params.modes.adjust_loop_end)
 				loop_end = Util::offset_samples(loop_start, t_divmult_time, params.modes.reverse);
 			else
 				loop_start = Util::offset_samples(loop_end, t_divmult_time, 1 - params.modes.reverse);

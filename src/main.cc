@@ -15,6 +15,11 @@ LDKit::System _init;
 void main() {
 	using namespace LDKit;
 
+	Debug::Pin0{};
+	Debug::Pin1{};
+	Debug::Pin2{};
+	Debug::Pin3{};
+
 	Controls controls;
 	Params params{controls};
 	DelayBuffer &audio_buffer = get_delay_buffer();
@@ -28,12 +33,7 @@ void main() {
 	// And right before looping_delay.update(), call params.load_updated_values()
 	//
 
-	Debug::Pin0{};
-	Debug::Pin1{};
-	Debug::Pin2{};
-	Debug::Pin3{};
-
-	mdrivlib::Timekeeper params_update_task{Board::control_read_tim_conf, [&]() {
+	mdrivlib::Timekeeper params_update_task{Board::param_update_task_conf, [&]() {
 												Debug::Pin2::high();
 												params.update();
 												Debug::Pin2::low();
