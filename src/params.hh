@@ -3,6 +3,7 @@
 #include "clock_mult_util.hh"
 #include "controls.hh"
 #include "epp_lut.hh"
+#include "flags.hh"
 #include "log_taper_lut.hh"
 #include "util/countzip.hh"
 #include <cstdint>
@@ -52,8 +53,10 @@ struct Settings {
 	uint32_t led_brightness = 4;
 	bool levelcv_mix = false;
 
-	uint32_t crossfade_samples = 192;							   // SLOW_FADE_SAMPLES
-	float crossfade_rate = calc_fade_increment(crossfade_samples); // SLOW_FADE_INCREMENT
+	uint32_t crossfade_samples = 192;									 // SLOW_FADE_SAMPLES
+	float crossfade_rate = calc_fade_increment(crossfade_samples);		 // SLOW_FADE_INCREMENT
+	uint32_t write_crossfade_samples = 192;								 // FAST_FADE_SAMPLES
+	float write_crossfade_rate = calc_fade_increment(crossfade_samples); // FAST_FADE_INCREMENT
 
 	static constexpr float calc_fade_increment(uint32_t samples) {
 		return (1.f / (((float)samples / (float)AudioStreamConf::BlockSize) + 1.f));
@@ -66,6 +69,7 @@ enum class OperationMode { Normal, SysSettings, Calibrate };
 // Params are set by controls (knobs, jacks, buttons, etc)
 struct Params {
 	Controls &controls;
+	Flags &flags;
 
 	float time = 0.f;		 // TIME: fractional value for time multiplication, integer value for time division
 	float delay_feed = 0.7f; // DELAY FEED: amount of main input mixed into delay loop
@@ -81,12 +85,9 @@ struct Params {
 	Settings settings;
 	OperationMode op_mode = OperationMode::Normal;
 
-	// flags for LoopingDelay:
-	uint32_t mute_on_boot_ctr = 12000;
-	bool flag_time_changed = true;
-
-	Params(Controls &controls)
-		: controls{controls} {}
+	Params(Controls &controls, Flags &flags)
+		: controls{controls}
+		, flags{flags} {}
 
 	void update() {
 		controls.update();
@@ -124,15 +125,16 @@ struct Params {
 
 		// update_leds();
 
-		if (mute_on_boot_ctr)
-			mute_on_boot_ctr--;
+		update_button_modes();
+
+		if (flags.mute_on_boot_ctr)
+			flags.mute_on_boot_ctr--;
 	}
 
 	void process_mode_flags() {
 		// if (!disable_mode_changes) {
 		// 	if (flag_inf_change[channel]) {
 		// 		change_inf_mode(channel);
-		// 		// mode[channel][CONTINUOUS_REVERSE] = 0;
 		// 	}
 
 		// 	if (flag_rev_change[channel]) {
@@ -189,19 +191,34 @@ private:
 				}
 			}
 
-			if (controls.reverse_button.is_just_released()) {
-				if (!ignore_rev_release) {
-					// TODO: handle REV released
-				}
-				pot.moved_while_rev_down = false;
-			}
-
 			if (!controls.hold_button.is_pressed()) {
 				if (!ignore_inf_release) {
 					// TODO: handle INF released
 				}
 				pot.moved_while_inf_down = false;
 			}
+		}
+	}
+
+	void update_button_modes() {
+		if (controls.hold_button.is_just_released()) {
+			if (!ignore_inf_release) {
+				flags.set_inf_changed();
+			}
+
+			ignore_rev_release = false;
+			for (auto &pot : pot_state)
+				pot.moved_while_inf_down = false;
+		}
+
+		if (controls.reverse_button.is_just_released()) {
+			if (!ignore_rev_release) {
+				flags.set_rev_changed();
+			}
+
+			ignore_rev_release = false;
+			for (auto &pot : pot_state)
+				pot.moved_while_rev_down = false;
 		}
 	}
 
@@ -314,7 +331,7 @@ private:
 
 		if (time != time_mult) {
 			time = time_mult;
-			flag_time_changed = true;
+			flags.set_time_changed();
 		}
 	}
 
@@ -328,6 +345,9 @@ private:
 		mix_dry = epp_lut[mx];
 		mix_wet = epp_lut[4095 - mx];
 	}
+
+	// void update_button_modes() {
+	// }
 
 	static constexpr float adjust_time_by_switch(float timeval, Controls::SwitchPos switch_pos) {
 		uint16_t switch_val = static_cast<uint16_t>(switch_pos);

@@ -21,9 +21,10 @@ void main() {
 	Debug::Pin3{};
 
 	Controls controls;
-	Params params{controls};
+	Flags flags;
+	Params params{controls, flags};
 	DelayBuffer &audio_buffer = get_delay_buffer();
-	LoopingDelay looping_delay{params, audio_buffer};
+	LoopingDelay looping_delay{params, flags, audio_buffer};
 	AudioStream audio{[&looping_delay](const AudioStreamConf::AudioInBlock &in, AudioStreamConf::AudioOutBlock &out) {
 		looping_delay.update(in, out);
 	}};
