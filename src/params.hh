@@ -6,6 +6,7 @@
 #include "flags.hh"
 #include "log_taper_lut.hh"
 #include "util/countzip.hh"
+#include "util/math.hh"
 #include <cstdint>
 
 namespace LDKit
@@ -317,7 +318,7 @@ private:
 
 	void calc_time() {
 		int16_t time_pot = pot_state[TimePot].cur_val;
-		int16_t time_cv = MathTools::plateau<60>(2048 - cv_state[TimeCV].cur_val);
+		int16_t time_cv = MathTools::plateau<60, 0>(2048 - cv_state[TimeCV].cur_val);
 
 		float time_pot_mult =
 			modes.time_pot_quantized ? ClockMultUtil::calc_quantized(time_pot) : ClockMultUtil::calc_unquant(time_pot);
