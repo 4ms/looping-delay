@@ -5,11 +5,14 @@
 namespace LDKit
 {
 
-enum AdcElement : uint32_t {
+enum PotAdcElement : uint32_t {
 	TimePot,
 	FeedbackPot,
 	DelayFeedPot,
 	MixPot,
+};
+
+enum CVAdcElement : uint32_t {
 	TimeCV,
 	FeedbackCV,
 	DelayFeedCV,

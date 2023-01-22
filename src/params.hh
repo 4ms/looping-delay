@@ -169,7 +169,7 @@ struct Params {
 private:
 	void update_pot_states() {
 		for (auto [i, pot] : enumerate(pot_state)) {
-			pot.cur_val = (int16_t)controls.read_adc(static_cast<AdcElement>(i++));
+			pot.cur_val = (int16_t)controls.read_pot(static_cast<PotAdcElement>(i++));
 
 			int16_t diff = std::abs(pot.cur_val - pot.prev_val);
 			if (diff > Board::MinPotChange)
@@ -225,7 +225,7 @@ private:
 
 	void update_cv_states() {
 		for (auto [i, cv] : enumerate(cv_state)) {
-			cv.cur_val = (int16_t)controls.read_adc(static_cast<AdcElement>(NumPots + i++));
+			cv.cur_val = (int16_t)controls.read_cv(static_cast<CVAdcElement>(NumPots + i++));
 			if (op_mode == OperationMode::Calibrate) {
 				// TODO: use raw values, without calibration offset
 			}

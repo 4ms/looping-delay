@@ -47,7 +47,14 @@ using ClkLED = mdrivlib::FPin<GPIO::A, PinNum::_8, Output, Inverted>;
 using ClkOut = mdrivlib::FPin<GPIO::I, PinNum::_7, Output, Normal>;
 using LoopClkOut = mdrivlib::FPin<GPIO::H, PinNum::_5, Output, Normal>;
 
-struct AdcConf : mdrivlib::DefaultAdcPeriphConf {
+struct AdcCommonIsrConf : mdrivlib::DefaultAdcCommonIsrConf {
+	static constexpr auto adc1_enabled = true;
+	static constexpr auto adc2_enabled = true;
+	static constexpr auto pri = 0;
+	static constexpr auto subpri = 0;
+};
+
+struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 	static constexpr auto resolution = mdrivlib::AdcResolution::Bits12;
 	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_1;
 	static constexpr auto oversample = false;
@@ -64,13 +71,33 @@ struct AdcConf : mdrivlib::DefaultAdcPeriphConf {
 	};
 };
 
+struct CVAdcConf : mdrivlib::DefaultAdcPeriphConf {
+	static constexpr auto resolution = mdrivlib::AdcResolution::Bits12;
+	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_2;
+	static constexpr auto oversample = false;
+	static constexpr auto clock_div = mdrivlib::AdcClockSourceDiv::APBClk_Div4;
+
+	static constexpr bool enable_end_of_sequence_isr = true;
+	static constexpr bool enable_end_of_conversion_isr = false;
+
+	struct DmaConf : mdrivlib::DefaultAdcPeriphConf::DmaConf {
+		static constexpr auto DMAx = 2;
+		static constexpr auto StreamNum = 2;
+		static constexpr auto RequestNum = DMA_CHANNEL_1;
+		static constexpr auto dma_priority = Low;
+	};
+};
+
 constexpr inline auto AdcSampTime = mdrivlib::AdcSamplingTime::_480Cycles;
 
-constexpr std::array<AdcChannelConf, NumAdcs> AdcChans = {{
+constexpr std::array<AdcChannelConf, NumPots> PotAdcChans = {{
 	{{GPIO::C, PinNum::_3}, AdcChanNum::_13, TimePot, AdcSampTime},
 	{{GPIO::A, PinNum::_1}, AdcChanNum::_1, FeedbackPot, AdcSampTime},
 	{{GPIO::C, PinNum::_4}, AdcChanNum::_14, DelayFeedPot, AdcSampTime},
 	{{GPIO::A, PinNum::_0}, AdcChanNum::_0, MixPot, AdcSampTime},
+}};
+
+constexpr std::array<AdcChannelConf, NumCVs> CVAdcChans = {{
 	{{GPIO::C, PinNum::_0}, AdcChanNum::_10, TimeCV, AdcSampTime},
 	{{GPIO::A, PinNum::_5}, AdcChanNum::_5, FeedbackCV, AdcSampTime},
 	{{GPIO::C, PinNum::_1}, AdcChanNum::_11, DelayFeedCV, AdcSampTime},

@@ -15,11 +15,15 @@ class Controls {
 	template<typename ConfT>
 	using AdcDmaPeriph = mdrivlib::AdcDmaPeriph<ConfT>;
 
-	// ADCs (Pots and CV):
-	std::array<uint16_t, NumAdcs> adc_buffer;
-	AdcDmaPeriph<Board::AdcConf> adcs{adc_buffer, Board::AdcChans};
+	mdrivlib::AdcCommonIsr<Board::AdcCommonIsrConf> adc_common;
 
-	// AnalogIn<AdcDmaPeriph<Board::AdcConf>, NumAdcs, Oversampler<16, uint16_t>> adcs{adc_buffer, Board::AdcChans};
+	// ADCs (Pots and CV):
+	std::array<uint16_t, NumCVs> cv_adc_buffer;
+	AdcDmaPeriph<Board::CVAdcConf> cv_adcs{cv_adc_buffer, Board::CVAdcChans};
+
+	std::array<uint16_t, NumPots> pot_adc_buffer;
+	AdcDmaPeriph<Board::PotAdcConf> pot_adcs{pot_adc_buffer, Board::PotAdcChans};
+
 	std::array<Oversampler<16, uint16_t>, NumPots> pots;
 	std::array<Oversampler<8, uint16_t>, NumCVs> cvs;
 
@@ -46,28 +50,29 @@ public:
 
 	enum class SwitchPos { Invalid = 0b00, Up = 0b01, Down = 0b10, Center = 0b11 };
 
-	uint16_t read_adc(AdcElement adcnum) {
-		if (adcnum < NumPots)
-			return pots[adcnum].val();
-		else
-			return cvs[adcnum - NumPots].val();
-	}
+	uint16_t read_pot(PotAdcElement adcnum) { return pots[adcnum].val(); }
+	uint16_t read_cv(CVAdcElement adcnum) { return cvs[adcnum].val(); }
+
 	SwitchPos read_time_switch() { return static_cast<SwitchPos>(time_switch.read()); }
 
 	void start() {
-		adcs.register_callback(
-			[this] {
-				Debug::Pin1::high();
-				for (unsigned i = 0; auto &pot : pots)
-					pot.add_val(adc_buffer[i++]);
+		pot_adcs.register_callback(adc_common, [this] {
+			Debug::Pin1::high();
+			for (unsigned i = 0; auto &pot : pots)
+				pot.add_val(pot_adc_buffer[i++]);
+			Debug::Pin1::low();
+		});
+		cv_adcs.register_callback(adc_common, [this] {
+			Debug::Pin0::high();
+			for (unsigned i = 0; auto &cv : cvs)
+				cv.add_val(cv_adc_buffer[i++]);
+			Debug::Pin0::low();
+		});
 
-				for (unsigned i = NumPots; auto &cv : cvs)
-					cv.add_val(adc_buffer[i++]);
-				Debug::Pin1::low();
-			},
-			0,
-			0);
-		adcs.start();
+		pot_adcs.start();
+		cv_adcs.start();
+
+		// adc_common.start_common_isr();
 	}
 
 	void update() {
