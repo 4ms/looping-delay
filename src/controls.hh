@@ -15,8 +15,6 @@ class Controls {
 	template<typename ConfT>
 	using AdcDmaPeriph = mdrivlib::AdcDmaPeriph<ConfT>;
 
-	mdrivlib::AdcCommonIsr<Board::AdcCommonIsrConf> adc_common;
-
 	// ADCs (Pots and CV):
 	std::array<uint16_t, NumCVs> cv_adc_buffer;
 	AdcDmaPeriph<Board::CVAdcConf> cv_adcs{cv_adc_buffer, Board::CVAdcChans};
@@ -56,23 +54,24 @@ public:
 	SwitchPos read_time_switch() { return static_cast<SwitchPos>(time_switch.read()); }
 
 	void start() {
-		pot_adcs.register_callback(adc_common, [this] {
+		mdrivlib::InterruptManager::register_and_start_isr(DMA2_Stream0_IRQn, 0, 0, [this] {
+			DMA2->LIFCR = DMA_LIFCR_CTCIF0;
+			DMA2->LIFCR = DMA_LIFCR_CHTIF0;
 			Debug::Pin1::high();
 			for (unsigned i = 0; auto &pot : pots)
 				pot.add_val(pot_adc_buffer[i++]);
 			Debug::Pin1::low();
 		});
-		cv_adcs.register_callback(adc_common, [this] {
+		mdrivlib::InterruptManager::register_and_start_isr(DMA2_Stream2_IRQn, 0, 0, [this] {
+			DMA2->LIFCR = DMA_LIFCR_CTCIF2;
+			DMA2->LIFCR = DMA_LIFCR_CHTIF2;
 			Debug::Pin0::high();
 			for (unsigned i = 0; auto &cv : cvs)
 				cv.add_val(cv_adc_buffer[i++]);
 			Debug::Pin0::low();
 		});
-
 		pot_adcs.start();
 		cv_adcs.start();
-
-		// adc_common.start_common_isr();
 	}
 
 	void update() {
