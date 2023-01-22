@@ -22,8 +22,7 @@ set(COMMON_SOURCES
     ${root}/lib/libhwtests/src/LEDTester.cc
     ${root}/src/libc_stub.c
     ${root}/src/libcpp_stub.cc
-    ${root}/src/main.cc
-    ${root}/src/params.cc)
+    ${root}/src/main.cc)
 
 set(COMMON_INCLUDES
     ${root}/src
