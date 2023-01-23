@@ -9,6 +9,7 @@ private:
 	bool _time_changed = true;
 	bool _inf_changed = false;
 	bool _rev_changed = false;
+	float _scroll_loop_amt = 0.f;
 
 public:
 	uint32_t mute_on_boot_ctr = 12000;
@@ -28,8 +29,16 @@ public:
 		_rev_changed = false;
 		return t;
 	}
+	float take_scroll_amt() {
+		auto amt = _scroll_loop_amt;
+		_scroll_loop_amt = 0.f;
+		return amt;
+	}
+
 	void set_time_changed() { _time_changed = true; }
 	void set_inf_changed() { _inf_changed = true; }
 	void set_rev_changed() { _rev_changed = true; }
+	void set_scroll_amt(float amt) { _scroll_loop_amt = amt; }
+	void add_scroll_amt(float amt) { _scroll_loop_amt += amt; }
 };
 } // namespace LDKit

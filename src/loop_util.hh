@@ -20,6 +20,16 @@ struct Util {
 		return ((mid >= end) && (mid <= beg)) == reverse;
 	}
 
+	//  !rev &&  (end > start): |     [->........]     |   NOT WRAPPING: rev != (end>start)
+	//   rev &&  (end > start): |...<-]          [.....|       WRAPPING: rev == (end>start)
+	//  !rev && !(end > start): |.....]          [->...|       WRAPPING: rev == (end>start)
+	//   rev && !(end > start): |     [........<-]     |   NOT WRAPPING: rev != (end>start)
+	// Key:
+	//  [-> or <-] === start
+	//    [ or ]   === end
+	//     .....   === loop
+	//     |   |   === memory boundaries
+
 	constexpr static uint32_t offset_samples(uint32_t base_addr, int32_t offset, bool subtract = false) {
 		uint32_t t_addr;
 

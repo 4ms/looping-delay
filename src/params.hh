@@ -34,7 +34,6 @@ struct ChannelMode {
 	bool ping_locked = false;
 	bool quantize_mode_changes = true;
 	bool adjust_loop_end = false; // flag_pot_changed_revdown[TIME]
-	float scroll_loop_amount = 0;
 };
 
 // Settings cannot be changed in Normal operation mode
@@ -166,7 +165,12 @@ struct Params {
 
 	void reset_loopled_tmr() {}
 
+	// TODO: to use a double-buffer params, then
+	// looping delay should set a flag that tells params to set a
+	// new state for these
 	void set_inf_state(InfState newstate) { modes.inf = newstate; }
+	void toggle_reverse() { modes.reverse = !modes.reverse; }
+	void set_divmult(float new_divmult) { divmult_time = new_divmult; }
 
 private:
 	void update_pot_states() {
@@ -267,7 +271,7 @@ private:
 
 	void update_scroll_loop_amount() {
 		if (pot_state[FeedbackPot].moved_while_inf_down) {
-			modes.scroll_loop_amount += (float)pot_state[FeedbackPot].delta /* + cv_delta*/ / 4096.f;
+			flags.add_scroll_amt((float)pot_state[FeedbackPot].delta /* + cv_delta*/ / 4096.f);
 			pot_state[FeedbackPot].moved_while_inf_down = false;
 		}
 	}

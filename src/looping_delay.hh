@@ -64,9 +64,8 @@ public:
 
 		Debug::Pin3::high();
 
-		if (params.modes.scroll_loop_amount) {
-			params.modes.scroll_loop_amount = 0;
-			// TODO: scroll loop
+		if (float amt = flags.take_scroll_amt(); amt != 0.f) {
+			scroll_loop(amt);
 		}
 
 		if (flags.take_time_changed())
@@ -280,13 +279,13 @@ public:
 			if (is_crossfading()) {
 				queued_divmult_time = t_divmult_time;
 			} else {
-				params.divmult_time = t_divmult_time;
+				params.set_divmult(t_divmult_time);
 				uint32_t t_read_addr = calculate_read_addr(params.divmult_time);
 				if (t_read_addr != read_head)
 					start_crossfade(t_read_addr);
 			}
 		} else {
-			params.divmult_time = t_divmult_time;
+			params.set_divmult(t_divmult_time);
 
 			if (params.modes.adjust_loop_end)
 				loop_end = Util::offset_samples(loop_start, t_divmult_time, params.modes.reverse);
@@ -323,7 +322,7 @@ public:
 
 				if (queued_divmult_time) {
 					start_crossfade(calculate_read_addr(queued_divmult_time));
-					params.divmult_time = queued_divmult_time;
+					params.set_divmult(queued_divmult_time);
 				} else if (queued_read_fade_ending_addr) {
 					start_crossfade(queued_read_fade_ending_addr);
 					queued_read_fade_ending_addr = 0;
@@ -352,7 +351,7 @@ public:
 	}
 
 	void toggle_rev() {
-		params.modes.reverse = !params.modes.reverse;
+		params.toggle_reverse();
 		if (params.modes.inf == InfState::Off)
 			swap_read_write();
 		else
@@ -409,8 +408,21 @@ public:
 			write_fade_state = FadeState::FadingDown;
 			write_fade_ending_addr = write_head;
 
-			params.set_inf_state(InfState::On);
+			params.set_inf_state(InfState::TransitioningOn);
 		}
+	}
+
+	void scroll_loop(float amt) {
+		uint32_t hi = loop_end;
+		uint32_t lo = loop_start;
+		if (params.modes.reverse)
+			std::swap(hi, lo);
+
+		uint32_t loop_length = (hi > lo) ? (hi - lo) : hi + (Board::MemorySizeBytes - lo);
+		uint32_t loop_shift = (uint32_t)(amt * (float)loop_length);
+		loop_shift /= Board::MemorySampleSize;
+		loop_start = Util::offset_samples(loop_start, loop_shift);
+		loop_end = Util::offset_samples(loop_end, loop_shift);
 	}
 };
 
