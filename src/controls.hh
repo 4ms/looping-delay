@@ -54,17 +54,19 @@ public:
 	SwitchPos read_time_switch() { return static_cast<SwitchPos>(time_switch.read()); }
 
 	void start() {
-		mdrivlib::InterruptManager::register_and_start_isr(DMA2_Stream0_IRQn, 0, 0, [this] {
-			DMA2->LIFCR = DMA_LIFCR_CTCIF0;
-			DMA2->LIFCR = DMA_LIFCR_CHTIF0;
+		pot_adcs.register_callback([this] {
+			// mdrivlib::InterruptManager::register_and_start_isr(DMA2_Stream0_IRQn, 0, 0, [this] {
+			// DMA2->LIFCR = DMA_LIFCR_CTCIF0;
+			// DMA2->LIFCR = DMA_LIFCR_CHTIF0;
 			Debug::Pin1::high();
 			for (unsigned i = 0; auto &pot : pots)
 				pot.add_val(pot_adc_buffer[i++]);
 			Debug::Pin1::low();
 		});
-		mdrivlib::InterruptManager::register_and_start_isr(DMA2_Stream2_IRQn, 0, 0, [this] {
-			DMA2->LIFCR = DMA_LIFCR_CTCIF2;
-			DMA2->LIFCR = DMA_LIFCR_CHTIF2;
+		cv_adcs.register_callback([this] {
+			// mdrivlib::InterruptManager::register_and_start_isr(DMA2_Stream2_IRQn, 0, 0, [this] {
+			// DMA2->LIFCR = DMA_LIFCR_CTCIF2;
+			// DMA2->LIFCR = DMA_LIFCR_CHTIF2;
 			Debug::Pin0::high();
 			for (unsigned i = 0; auto &cv : cvs)
 				cv.add_val(cv_adc_buffer[i++]);

@@ -47,12 +47,12 @@ using ClkLED = mdrivlib::FPin<GPIO::A, PinNum::_8, Output, Inverted>;
 using ClkOut = mdrivlib::FPin<GPIO::I, PinNum::_7, Output, Normal>;
 using LoopClkOut = mdrivlib::FPin<GPIO::H, PinNum::_5, Output, Normal>;
 
-struct AdcCommonIsrConf : mdrivlib::DefaultAdcCommonIsrConf {
-	static constexpr auto adc1_enabled = true;
-	static constexpr auto adc2_enabled = true;
-	static constexpr auto pri = 0;
-	static constexpr auto subpri = 0;
-};
+// struct AdcCommonIsrConf : mdrivlib::DefaultAdcCommonIsrConf {
+// 	static constexpr auto adc1_enabled = true;
+// 	static constexpr auto adc2_enabled = true;
+// 	static constexpr auto pri = 0;
+// 	static constexpr auto subpri = 0;
+// };
 
 struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 	static constexpr auto resolution = mdrivlib::AdcResolution::Bits12;
@@ -68,6 +68,9 @@ struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 		static constexpr auto StreamNum = 0;
 		static constexpr auto RequestNum = DMA_CHANNEL_0;
 		static constexpr auto dma_priority = Low;
+		static constexpr IRQn_Type IRQn = DMA2_Stream0_IRQn;
+		static constexpr uint32_t pri = 0;
+		static constexpr uint32_t subpri = 0;
 	};
 };
 
@@ -85,6 +88,9 @@ struct CVAdcConf : mdrivlib::DefaultAdcPeriphConf {
 		static constexpr auto StreamNum = 2;
 		static constexpr auto RequestNum = DMA_CHANNEL_1;
 		static constexpr auto dma_priority = Low;
+		static constexpr IRQn_Type IRQn = DMA2_Stream2_IRQn;
+		static constexpr uint32_t pri = 0;
+		static constexpr uint32_t subpri = 0;
 	};
 };
 
