@@ -29,7 +29,7 @@ public:
 	// Buttons/Switches:
 	Board::PingButton ping_button;
 	Board::RevButton reverse_button;
-	Board::HoldButton hold_button;
+	Board::HoldButton inf_button;
 	Board::TimeSwitch time_switch;
 
 	// Trig Jacks
@@ -77,7 +77,7 @@ public:
 	void update() {
 		ping_button.update();
 		reverse_button.update();
-		hold_button.update();
+		inf_button.update();
 
 		ping_jack.update();
 		reverse_jack.update();
@@ -87,7 +87,7 @@ public:
 	void test() {
 		ping_button.is_high();
 		reverse_button.is_high();
-		hold_button.is_high();
+		inf_button.is_high();
 
 		ping_jack.is_high();
 		reverse_jack.is_high();

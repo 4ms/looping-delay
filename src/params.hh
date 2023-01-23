@@ -197,23 +197,16 @@ private:
 					ignore_inf_release = true; // if i==TimePot || FeedbackPot in InfMode only?
 				}
 			}
-
-			if (!controls.hold_button.is_pressed()) {
-				if (!ignore_inf_release) {
-					// TODO: handle INF released
-				}
-				pot.moved_while_inf_down = false;
-			}
 		}
 	}
 
 	void update_button_modes() {
-		if (controls.hold_button.is_just_released()) {
+		if (controls.inf_button.is_just_released()) {
 			if (!ignore_inf_release) {
 				flags.set_inf_changed();
 			}
 
-			ignore_rev_release = false;
+			ignore_inf_release = false;
 			for (auto &pot : pot_state)
 				pot.moved_while_inf_down = false;
 		}
