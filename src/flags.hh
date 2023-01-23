@@ -13,17 +13,17 @@ private:
 public:
 	uint32_t mute_on_boot_ctr = 12000;
 
-	bool time_changed() {
+	bool take_time_changed() {
 		auto t = _time_changed;
 		_time_changed = false;
 		return t;
 	}
-	bool inf_changed() {
+	bool take_inf_changed() {
 		auto t = _inf_changed;
 		_inf_changed = false;
 		return t;
 	}
-	bool rev_changed() {
+	bool take_rev_changed() {
 		auto t = _rev_changed;
 		_rev_changed = false;
 		return t;

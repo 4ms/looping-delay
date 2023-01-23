@@ -166,6 +166,8 @@ struct Params {
 
 	void reset_loopled_tmr() {}
 
+	void set_inf_state(InfState newstate) { modes.inf = newstate; }
+
 private:
 	void update_pot_states() {
 		for (auto [i, pot] : enumerate(pot_state)) {
