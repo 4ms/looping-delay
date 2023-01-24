@@ -35,7 +35,7 @@ public:
 	Board::TimeSwitch time_switch;
 
 	// Trig Jacks
-	Board::PingJack ping_jack;
+	// Board::PingJack ping_jack;
 	Board::RevJack reverse_jack;
 	Board::HoldJack hold_jack;
 
@@ -89,7 +89,7 @@ public:
 		reverse_button.update();
 		inf_button.update();
 
-		ping_jack.update();
+		// ping_jack.update();
 		reverse_jack.update();
 		hold_jack.update();
 	}
@@ -99,7 +99,7 @@ public:
 		reverse_button.is_high();
 		inf_button.is_high();
 
-		ping_jack.is_high();
+		// ping_jack.is_high();
 		reverse_jack.is_high();
 		hold_jack.is_high();
 

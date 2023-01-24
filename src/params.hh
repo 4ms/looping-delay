@@ -7,7 +7,7 @@
 #include "leds.hh"
 #include "log_taper_lut.hh"
 #include "modes.hh"
-#include "trig_ins.hh"
+#include "timer.hh"
 #include "util/countzip.hh"
 #include "util/math.hh"
 #include <cstdint>
@@ -19,7 +19,7 @@ namespace LDKit
 struct Params {
 	Controls &controls;
 	Flags &flags;
-	TrigIns trig_ins;
+	Timer &timer;
 
 	// TODO: double-buffer Params:
 	// put just these into its own struct
@@ -41,11 +41,12 @@ struct Params {
 	Params(Controls &controls, Flags &flags, Timer &timer)
 		: controls{controls}
 		, flags{flags}
-		, trig_ins{controls, modes, flags, timer} {}
+		, timer{timer} {}
 
 	void update() {
 		controls.update();
-		ping_time = trig_ins.update_ping(ping_time);
+
+		update_ping_jack();
 
 		update_pot_states();
 		update_cv_states();
@@ -84,11 +85,7 @@ struct Params {
 			flags.mute_on_boot_ctr--;
 	}
 
-	void process_mode_flags() {
-		// all handled in looping delay and flags
-	}
-
-	void reset_loopled_tmr() {}
+	void reset_loopled_tmr() { timer.reset_loopled_tmr(); }
 
 	// TODO: to use a double-buffer params, then
 	// looping delay should set a flag that tells params to set a
@@ -98,6 +95,16 @@ struct Params {
 	void set_divmult(float new_divmult) { divmult_time = new_divmult; }
 
 private:
+	void update_ping_jack() {
+		if (timer.take_ping_changed()) {
+			controls.clk_out.high();
+			controls.ping_led.high();
+			ping_time = timer.get_ping_time();
+			if (!modes.ping_locked)
+				flags.set_time_changed();
+		}
+	}
+
 	void update_pot_states() {
 		for (auto [i, pot] : enumerate(pot_state)) {
 			pot.cur_val = (int16_t)controls.read_pot(static_cast<PotAdcElement>(i++));

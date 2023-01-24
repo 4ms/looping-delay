@@ -20,7 +20,6 @@ struct TrigIns {
 		, timer{timer} {}
 
 	uint32_t update_ping(uint32_t ping_time) {
-
 		if (controls.ping_jack.just_went_high()) {
 			uint32_t t_ping_tmr = timer.get_ping_tmr();
 			timer.reset_ping_tmr();
