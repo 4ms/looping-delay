@@ -4,67 +4,15 @@
 #include "controls.hh"
 #include "epp_lut.hh"
 #include "flags.hh"
+#include "leds.hh"
 #include "log_taper_lut.hh"
+#include "modes.hh"
 #include "util/countzip.hh"
 #include "util/math.hh"
 #include <cstdint>
 
 namespace LDKit
 {
-enum class GateType { Gate, Trig };
-enum class InfState { Off, On, TransitioningOn, TransitioningOff };
-enum class PingMethod {
-	IGNORE_FLAT_DEVIATION_10,
-	IGNORE_PERCENT_DEVIATION,
-	ONE_TO_ONE,
-	MOVING_AVERAGE_2,
-	LINEAR_AVERAGE_4,
-	EXPO_AVERAGE_8,
-	IGNORE_FLAT_DEVIATION_5,
-	MOVING_AVERAGE_4,
-	EXPO_AVERAGE_4,
-	LINEAR_AVERAGE_8,
-};
-
-struct ChannelMode {
-	InfState inf = InfState::Off;
-	bool reverse = false;
-	bool time_pot_quantized = true;
-	bool time_cv_quantized = true;
-	bool ping_locked = false;
-	bool quantize_mode_changes = true;
-	bool adjust_loop_end = false; // flag_pot_changed_revdown[TIME]
-};
-
-// Settings cannot be changed in Normal operation mode
-struct Settings {
-	bool auto_mute = true;
-	bool soft_clip = true;
-	bool dc_input = false;
-	PingMethod ping_method = PingMethod::IGNORE_FLAT_DEVIATION_10;
-	GateType rev_jack = GateType::Trig;
-	GateType inf_jack = GateType::Trig;
-	GateType loop_clock = GateType::Trig;
-	GateType main_clock = GateType::Gate;
-	bool log_delay_feed = true;
-	bool runaway_dc_block = true;
-	bool auto_unquantize_timejack = true;
-	bool send_return_before_loop = false;
-	uint32_t led_brightness = 4;
-	bool levelcv_mix = false;
-
-	uint32_t crossfade_samples = 192;									 // SLOW_FADE_SAMPLES
-	float crossfade_rate = calc_fade_increment(crossfade_samples);		 // SLOW_FADE_INCREMENT
-	uint32_t write_crossfade_samples = 192;								 // FAST_FADE_SAMPLES
-	float write_crossfade_rate = calc_fade_increment(crossfade_samples); // FAST_FADE_INCREMENT
-
-	static constexpr float calc_fade_increment(uint32_t samples) {
-		return (1.f / (((float)samples / (float)AudioStreamConf::BlockSize) + 1.f));
-	}
-};
-
-enum class OperationMode { Normal, SysSettings, Calibrate };
-
 // Params holds all the modes, settings and parameters for the looping delay
 // Params are set by controls (knobs, jacks, buttons, etc)
 struct Params {
@@ -84,6 +32,7 @@ struct Params {
 	ChannelMode modes;
 	Settings settings;
 	OperationMode op_mode = OperationMode::Normal;
+	Leds leds{controls, modes};
 
 	Params(Controls &controls, Flags &flags)
 		: controls{controls}
@@ -112,18 +61,16 @@ struct Params {
 		if (op_mode == OperationMode::Calibrate) {
 			// TODO: Calibrate mode
 			//  update_calibration();
-			//  update_calibration_leds();
 		}
 
 		if (op_mode == OperationMode::SysSettings) {
 			// TODO: System Settings mode
 			//  update_system_settings();
-			//  update_system_settings_leds();
 		}
 
 		// check_entering_system_mode();
 
-		// update_leds();
+		leds.update();
 
 		update_button_modes();
 
@@ -172,6 +119,20 @@ private:
 		}
 	}
 
+	void update_cv_states() {
+		for (auto [i, cv] : enumerate(cv_state)) {
+			cv.cur_val = (int16_t)controls.read_cv(static_cast<CVAdcElement>(i++));
+			if (op_mode == OperationMode::Calibrate) {
+				// TODO: use raw values, without calibration offset
+			}
+			int16_t diff = std::abs(cv.cur_val - cv.prev_val);
+			if (diff > Board::MinCVChange) {
+				cv.delta = diff;
+				cv.prev_val = cv.cur_val;
+			}
+		}
+	}
+
 	void update_button_modes() {
 		if (controls.inf_button.is_just_released()) {
 			if (!ignore_inf_release) {
@@ -191,20 +152,6 @@ private:
 			ignore_rev_release = false;
 			for (auto &pot : pot_state)
 				pot.moved_while_rev_down = false;
-		}
-	}
-
-	void update_cv_states() {
-		for (auto [i, cv] : enumerate(cv_state)) {
-			cv.cur_val = (int16_t)controls.read_cv(static_cast<CVAdcElement>(i++));
-			if (op_mode == OperationMode::Calibrate) {
-				// TODO: use raw values, without calibration offset
-			}
-			int16_t diff = std::abs(cv.cur_val - cv.prev_val);
-			if (diff > Board::MinCVChange) {
-				cv.delta = diff;
-				cv.prev_val = cv.cur_val;
-			}
 		}
 	}
 
