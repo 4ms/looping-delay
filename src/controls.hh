@@ -11,7 +11,7 @@ namespace LDKit
 {
 
 class Controls {
-	static constexpr bool debug = true;
+	static constexpr bool debug = false;
 
 	using enum mdrivlib::PinPolarity;
 	template<typename ConfT>
@@ -67,13 +67,13 @@ public:
 
 	void start() {
 		if constexpr (!debug) {
-			pot_adcs.dma.register_callback([this] {
+			pot_adcs.register_callback([this] {
 				Debug::Pin1::high();
 				for (unsigned i = 0; auto &pot : pots)
 					pot.add_val(pot_adc_buffer[i++]);
 				Debug::Pin1::low();
 			});
-			cv_adcs.dma.register_callback([this] {
+			cv_adcs.register_callback([this] {
 				Debug::Pin0::high();
 				for (unsigned i = 0; auto &cv : cvs)
 					cv.add_val(cv_adc_buffer[i++]);
