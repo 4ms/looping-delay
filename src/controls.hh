@@ -11,6 +11,8 @@ namespace LDKit
 {
 
 class Controls {
+	static constexpr bool debug = true;
+
 	using enum mdrivlib::PinPolarity;
 	template<typename ConfT>
 	using AdcDmaPeriph = mdrivlib::AdcDmaPeriph<ConfT>;
@@ -22,7 +24,7 @@ class Controls {
 	std::array<uint16_t, NumPots> pot_adc_buffer;
 	AdcDmaPeriph<Board::PotAdcConf> pot_adcs{pot_adc_buffer, Board::PotAdcChans};
 
-	std::array<Oversampler<16, uint16_t>, NumPots> pots;
+	std::array<Oversampler<32, uint16_t>, NumPots> pots;
 	std::array<Oversampler<8, uint16_t>, NumCVs> cvs;
 
 public:
@@ -48,30 +50,36 @@ public:
 
 	enum class SwitchPos { Invalid = 0b00, Up = 0b01, Down = 0b10, Center = 0b11 };
 
-	uint16_t read_pot(PotAdcElement adcnum) { return pots[adcnum].val(); }
-	uint16_t read_cv(CVAdcElement adcnum) { return cvs[adcnum].val(); }
+	uint16_t read_pot(PotAdcElement adcnum) {
+		if constexpr (debug)
+			return pot_adc_buffer[adcnum];
+		else
+			return pots[adcnum].val();
+	}
+	uint16_t read_cv(CVAdcElement adcnum) {
+		if constexpr (debug)
+			return cv_adc_buffer[adcnum];
+		else
+			return cvs[adcnum].val();
+	}
 
 	SwitchPos read_time_switch() { return static_cast<SwitchPos>(time_switch.read()); }
 
 	void start() {
-		pot_adcs.register_callback([this] {
-			// mdrivlib::InterruptManager::register_and_start_isr(DMA2_Stream0_IRQn, 0, 0, [this] {
-			// DMA2->LIFCR = DMA_LIFCR_CTCIF0;
-			// DMA2->LIFCR = DMA_LIFCR_CHTIF0;
-			Debug::Pin1::high();
-			for (unsigned i = 0; auto &pot : pots)
-				pot.add_val(pot_adc_buffer[i++]);
-			Debug::Pin1::low();
-		});
-		cv_adcs.register_callback([this] {
-			// mdrivlib::InterruptManager::register_and_start_isr(DMA2_Stream2_IRQn, 0, 0, [this] {
-			// DMA2->LIFCR = DMA_LIFCR_CTCIF2;
-			// DMA2->LIFCR = DMA_LIFCR_CHTIF2;
-			Debug::Pin0::high();
-			for (unsigned i = 0; auto &cv : cvs)
-				cv.add_val(cv_adc_buffer[i++]);
-			Debug::Pin0::low();
-		});
+		if constexpr (!debug) {
+			pot_adcs.dma.register_callback([this] {
+				Debug::Pin1::high();
+				for (unsigned i = 0; auto &pot : pots)
+					pot.add_val(pot_adc_buffer[i++]);
+				Debug::Pin1::low();
+			});
+			cv_adcs.dma.register_callback([this] {
+				Debug::Pin0::high();
+				for (unsigned i = 0; auto &cv : cvs)
+					cv.add_val(cv_adc_buffer[i++]);
+				Debug::Pin0::low();
+			});
+		}
 		pot_adcs.start();
 		cv_adcs.start();
 	}

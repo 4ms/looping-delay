@@ -99,8 +99,8 @@ constexpr inline auto AdcSampTime = mdrivlib::AdcSamplingTime::_480Cycles;
 constexpr std::array<AdcChannelConf, NumPots> PotAdcChans = {{
 	{{GPIO::C, PinNum::_3}, AdcChanNum::_13, TimePot, AdcSampTime},
 	{{GPIO::A, PinNum::_1}, AdcChanNum::_1, FeedbackPot, AdcSampTime},
-	{{GPIO::C, PinNum::_4}, AdcChanNum::_14, DelayFeedPot, AdcSampTime},
-	{{GPIO::A, PinNum::_0}, AdcChanNum::_0, MixPot, AdcSampTime},
+	{{GPIO::A, PinNum::_0}, AdcChanNum::_0, DelayFeedPot, AdcSampTime},
+	{{GPIO::C, PinNum::_4}, AdcChanNum::_14, MixPot, AdcSampTime},
 }};
 
 constexpr std::array<AdcChannelConf, NumCVs> CVAdcChans = {{

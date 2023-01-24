@@ -76,10 +76,10 @@ struct Params {
 	float feedback = 0.5f;	 // FEEDBACK: amount of regeneration
 	float mix_dry = 0.7f;	 // MIX: mix of delayed and clean on the main output
 	float mix_wet = 0.7f;
-	float tracking_comp = 1.f; // TRACKING_COMP: -2.0 .. 2.0 compensation for 1V/oct tracking
-	float divmult_time;		   // samples between read and write heads
-	uint32_t ping_time;
-	uint32_t locked_ping_time;
+	float tracking_comp = 1.f;	// TRACKING_COMP: -2.0 .. 2.0 compensation for 1V/oct tracking
+	float divmult_time = 12000; // samples between read and write heads
+	uint32_t ping_time = 12000;
+	uint32_t locked_ping_time = 12000;
 
 	ChannelMode modes;
 	Settings settings;
@@ -196,7 +196,7 @@ private:
 
 	void update_cv_states() {
 		for (auto [i, cv] : enumerate(cv_state)) {
-			cv.cur_val = (int16_t)controls.read_cv(static_cast<CVAdcElement>(NumPots + i++));
+			cv.cur_val = (int16_t)controls.read_cv(static_cast<CVAdcElement>(i++));
 			if (op_mode == OperationMode::Calibrate) {
 				// TODO: use raw values, without calibration offset
 			}
@@ -248,8 +248,9 @@ private:
 		}
 
 		int16_t df = pot_state[DelayFeedPot].cur_val;
-		if (!settings.levelcv_mix)
+		if (!settings.levelcv_mix) {
 			df = __USAT(df + cv_state[DelayFeedCV].cur_val, 12);
+		}
 
 		if (settings.log_delay_feed)
 			delay_feed = log_taper[df];
