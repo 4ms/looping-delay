@@ -31,7 +31,7 @@ struct Memory {
 	// TODO: another version of this that doesnt check for loop_addr
 	// TODO: Use an enum, not bool for reverse
 	static bool
-	read(uint32_t addr, std::array<int32_t, AudioStreamConf::BlockSize> &rd_buff, uint32_t loop_addr, bool reverse) {
+	read(uint32_t &addr, std::array<int16_t, AudioStreamConf::BlockSize> &rd_buff, uint32_t loop_addr, bool reverse) {
 		bool heads_crossed = false;
 
 		addr = ensure_valid(addr);
@@ -48,7 +48,7 @@ struct Memory {
 		return heads_crossed;
 	}
 
-	static void write(uint32_t addr, const std::array<int32_t, AudioStreamConf::BlockSize> &wr_buff, bool reverse) {
+	static void write(uint32_t &addr, const std::array<int16_t, AudioStreamConf::BlockSize> &wr_buff, bool reverse) {
 		addr = ensure_valid(addr);
 		for (auto s : wr_buff) {
 			// SDRAM_Wait();
@@ -63,8 +63,8 @@ struct Memory {
 	// fade=1.0 means write 100% wr_buff and 0% read.
 	// fade=0.5 means write 50% wr_buff and 50% read.
 	// fade=0.0 means write 0% wr_buff and 100% read.
-	static void fade_write(uint32_t addr,
-						   const std::array<int32_t, AudioStreamConf::BlockSize> &wr_buff,
+	static void fade_write(uint32_t &addr,
+						   const std::array<int16_t, AudioStreamConf::BlockSize> &wr_buff,
 						   bool reverse,
 						   float fade) {
 		int32_t rd;
