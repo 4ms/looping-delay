@@ -122,9 +122,9 @@ public:
 			// Read from the loop and save this value so we can output it to the Delay Out jack
 			auto phase = (uint16_t)(4095.f * read_fade_phase);
 			phase = __USAT(phase, 12);
-			mem_rd *= 256;
-			mem_rd_dest *= 256;
 			int32_t rd = ((float)mem_rd * epp_lut[phase]) + ((float)mem_rd_dest * epp_lut[4095 - phase]);
+			rd *= 256;
+
 			rd = clip(rd);
 
 			// Attenuate the delayed signal with REGEN
