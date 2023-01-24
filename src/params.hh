@@ -224,7 +224,7 @@ private:
 
 	void update_cv_states() {
 		for (auto [i, cv] : enumerate(cv_state)) {
-			cv.cur_val = (int16_t)controls.read_cv(static_cast<CVAdcElement>(NumPots + i++));
+			cv.cur_val = (int16_t)controls.read_cv(static_cast<CVAdcElement>(i++));
 			if (op_mode == OperationMode::Calibrate) {
 				// TODO: use raw values, without calibration offset
 			}
