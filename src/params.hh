@@ -132,35 +132,7 @@ struct Params {
 	}
 
 	void process_mode_flags() {
-		// if (!disable_mode_changes) {
-		// 	if (flag_inf_change[channel]) {
-		// 		change_inf_mode(channel);
-		// 	}
-
-		// 	if (flag_rev_change[channel]) {
-		// 		// mode[channel][CONTINUOUS_REVERSE] = 0;
-
-		// 		if (!doing_reverse_fade[channel]) {
-		// 			flag_rev_change[channel] = 0;
-
-		// 			mode[channel][REV] = 1 - mode[channel][REV];
-
-		// 			if (mode[channel][INF] == INF_ON || mode[channel][INF] == INF_TRANSITIONING_OFF ||
-		// 				mode[channel][INF] == INF_TRANSITIONING_ON)
-		// 				reverse_loop(channel);
-
-		// 			else
-		// 				swap_read_write(channel);
-		// 		}
-		// 	}
-		// }
-
-		// handled in looping delay:
-		// if (flag_time_changed || flag_ping_changed) {
-		// 	flag_time_changed = false;
-		// 	flag_ping_changed = false;
-		// 	set_divmult_time();
-		// }
+		// all handled in looping delay and flags
 	}
 
 	void reset_loopled_tmr() {}
@@ -381,6 +353,6 @@ private:
 	bool ignore_rev_release = false;
 };
 
-constexpr auto ParamsSize = sizeof(Params); // 164B
+constexpr auto ParamsSize = sizeof(Params);
 
 } // namespace LDKit
