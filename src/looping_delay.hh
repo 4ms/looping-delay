@@ -49,15 +49,15 @@ public:
 	LoopingDelay(Params &params, Flags &flags, DelayBuffer &delay_buffer)
 		: params{params}
 		, flags{flags}
-		, buf{delay_buffer} {
+		, buf{delay_buffer}
+		, read_head{Board::MemoryStartAddr}
+		, write_head{Board::MemoryStartAddr + 12000} {
 		Memory::clear();
-		// for (auto &s : buf)
-		// 	s = 0;
-		//
 	}
 
 	// TODO: when global_mode[CALIBRATE] is set, we should change the audio callback
-	void update(const AudioStreamConf::AudioInBlock &inblock, AudioStreamConf::AudioOutBlock &outblock) {
+	void GCC_OPTIMIZE_OFF update(const AudioStreamConf::AudioInBlock &inblock,
+								 AudioStreamConf::AudioOutBlock &outblock) {
 		// sz on the DLD is 8, but it's 64 here. sz/2 = AudioStreamConf::BlockSize
 		constexpr uint32_t sz = AudioStreamConf::BlockSize * 2;
 		constexpr uint32_t blksz = AudioStreamConf::BlockSize;
@@ -81,12 +81,12 @@ public:
 				toggle_rev();
 		}
 
-		std::array<int32_t, AudioStreamConf::BlockSize> rd_buff; // on DLD this is 2x size.. bug?
-		std::array<int32_t, AudioStreamConf::BlockSize> rd_buff_dest;
-		std::array<int32_t, AudioStreamConf::BlockSize> wr_buff;
+		std::array<int16_t, AudioStreamConf::BlockSize> rd_buff; // on DLD this is 2x size.. bug?
+		std::array<int16_t, AudioStreamConf::BlockSize> rd_buff_dest;
+		std::array<int16_t, AudioStreamConf::BlockSize> wr_buff;
 
+		// Read into rd_buff:
 		bool read_decrementing = doing_reverse_fade != params.modes.reverse;
-
 		if (params.modes.inf == InfState::Off) {
 			check_read_write_head_spacing();
 			Memory::read(read_head, rd_buff, 0, read_decrementing);
@@ -99,11 +99,12 @@ public:
 				start_looping_crossfade();
 		}
 
+		// Read into crossfading buffer (TODO: shouldn't this only happen if we're xfading?)
 		Memory::read(read_fade_ending_addr, rd_buff_dest, 0, params.modes.reverse);
 
 		for (auto [mem_wr, mem_rd, mem_rd_dest, out, in] : zip(wr_buff, rd_buff, rd_buff_dest, outblock, inblock)) {
-			auto mainin = in.chan[0];
-			auto auxin = in.chan[1];
+			auto auxin = AudioStreamConf::AudioInFrame::sign_extend(in.chan[0]);
+			auto mainin = AudioStreamConf::AudioInFrame::sign_extend(in.chan[1]);
 
 			if (flags.mute_on_boot_ctr) {
 				mainin = 0;
@@ -121,8 +122,9 @@ public:
 			// Read from the loop and save this value so we can output it to the Delay Out jack
 			auto phase = (uint16_t)(4095.f * read_fade_phase);
 			phase = __USAT(phase, 12);
+			mem_rd *= 256;
+			mem_rd_dest *= 256;
 			int32_t rd = ((float)mem_rd * epp_lut[phase]) + ((float)mem_rd_dest * epp_lut[4095 - phase]);
-
 			rd = clip(rd);
 
 			// Attenuate the delayed signal with REGEN
@@ -134,27 +136,23 @@ public:
 			int32_t wr;
 			int32_t auxout;
 			if (params.settings.send_return_before_loop) {
-				// Assign the auxin signal to the write head
 				wr = auxin;
-				// Add the loop contents to the input signal, and assign to the auxout signal
 				auxout = (int32_t)(regen + mainin_atten);
 			} else {
-				// Add the loop contents to the input signal, as well as the auxin signal, and assign to the write head
 				wr = (int32_t)(regen + mainin_atten + (float)auxin);
-				// Assign the non-attenuated loop contents to the auxout signal
 				auxout = rd;
 			}
 
 			// Wet/dry mix, as determined by the MIX parameter
 			int32_t mix = clip(((float)dry * params.mix_dry) + ((float)rd * params.mix_wet));
 
-			out.chan[0] = mix; // TODO: + CODEC_DAC_CALIBRATION_DCOFFSET
-			out.chan[1] = auxout;
+			out.chan[0] = auxout;
+			out.chan[1] = mix; // TODO: + CODEC_DAC_CALIBRATION_DCOFFSET
 
 			// High-pass filter before writing to memory
 			if (params.settings.runaway_dc_block)
 				wr = dcblock.update(wr);
-			mem_wr = clip(wr);
+			mem_wr = clip(wr) / 256;
 		}
 
 		write_block_to_memory(wr_buff);
@@ -164,7 +162,7 @@ public:
 		Debug::Pin3::low();
 	}
 
-	void write_block_to_memory(std::array<int32_t, AudioStreamConf::BlockSize> &wr_buff) {
+	void write_block_to_memory(std::array<int16_t, AudioStreamConf::BlockSize> &wr_buff) {
 		if (params.modes.inf == InfState::On)
 			return;
 
@@ -253,11 +251,11 @@ public:
 	//// util:
 
 	int32_t clip(int32_t val) {
-		static constexpr size_t max = std::numeric_limits<Board::RAMSampleT>::max();
+		static constexpr size_t Max24bit = (1 << 23) - 1;
 		if (params.settings.soft_clip)
-			val = compress<max, 0.75f>(val);
-		else if (Board::MemorySampleSize == 2)
-			val = __SSAT(val, 16);
+			val = compress<Max24bit, 0.75f>(val);
+		else
+			val = __SSAT(val, 24);
 		return val;
 	}
 
