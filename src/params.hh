@@ -7,6 +7,7 @@
 #include "leds.hh"
 #include "log_taper_lut.hh"
 #include "modes.hh"
+#include "trig_ins.hh"
 #include "util/countzip.hh"
 #include "util/math.hh"
 #include <cstdint>
@@ -18,7 +19,10 @@ namespace LDKit
 struct Params {
 	Controls &controls;
 	Flags &flags;
+	TrigIns trig_ins;
 
+	// TODO: double-buffer Params:
+	// put just these into its own struct
 	float time = 0.f;		 // TIME: fractional value for time multiplication, integer value for time division
 	float delay_feed = 0.7f; // DELAY FEED: amount of main input mixed into delay loop
 	float feedback = 0.5f;	 // FEEDBACK: amount of regeneration
@@ -34,12 +38,14 @@ struct Params {
 	OperationMode op_mode = OperationMode::Normal;
 	Leds leds{controls, modes};
 
-	Params(Controls &controls, Flags &flags)
+	Params(Controls &controls, Flags &flags, Timer &timer)
 		: controls{controls}
-		, flags{flags} {}
+		, flags{flags}
+		, trig_ins{controls, modes, flags, timer} {}
 
 	void update() {
 		controls.update();
+		ping_time = trig_ins.update_ping(ping_time);
 
 		update_pot_states();
 		update_cv_states();

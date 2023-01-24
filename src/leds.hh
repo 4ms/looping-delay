@@ -1,3 +1,4 @@
+#pragma once
 #include "controls.hh"
 #include "modes.hh"
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "drivers//pin_change_conf.hh"
 #include "drivers/adc_builtin_conf.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/dma_config_struct.hh"
@@ -14,6 +15,9 @@ namespace LDKit
 
 namespace Board
 {
+
+// TODO: split this into separate files in conf/
+
 using mdrivlib::AdcChannelConf;
 using mdrivlib::AdcChanNum;
 using mdrivlib::GPIO;
@@ -47,13 +51,7 @@ using ClkLED = mdrivlib::FPin<GPIO::A, PinNum::_8, Output, Inverted>;
 using ClkOut = mdrivlib::FPin<GPIO::I, PinNum::_7, Output, Normal>;
 using LoopClkOut = mdrivlib::FPin<GPIO::H, PinNum::_5, Output, Normal>;
 
-// struct AdcCommonIsrConf : mdrivlib::DefaultAdcCommonIsrConf {
-// 	static constexpr auto adc1_enabled = true;
-// 	static constexpr auto adc2_enabled = true;
-// 	static constexpr auto pri = 0;
-// 	static constexpr auto subpri = 0;
-// };
-
+// ADC Conf:
 struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 	static constexpr auto resolution = mdrivlib::AdcResolution::Bits12;
 	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_1;
@@ -110,6 +108,10 @@ constexpr std::array<AdcChannelConf, NumCVs> CVAdcChans = {{
 	{{GPIO::A, PinNum::_4}, AdcChanNum::_4, MixCV, AdcSampTime},
 }};
 
+constexpr inline int16_t MinPotChange = 10;
+constexpr inline int16_t MinCVChange = 10;
+
+// memory_conf:
 constexpr inline uint32_t MemoryStartAddr = 0xD0000000;
 constexpr inline uint32_t MemorySizeBytes = 0x00800000;
 constexpr inline uint32_t MemoryEndAddr = MemoryStartAddr + MemorySizeBytes;
@@ -118,8 +120,15 @@ using RAMSampleT = int16_t;
 constexpr inline uint32_t MemorySampleSize = sizeof(RAMSampleT);
 constexpr inline uint32_t MemorySamplesNum = MemorySizeBytes / MemorySampleSize;
 
-constexpr inline int16_t MinPotChange = 10;
-constexpr inline int16_t MinCVChange = 10;
+// clock sync conf
+struct LRClkPinChangeConf : mdrivlib::DefaultPinChangeConf {
+	static constexpr uint32_t pin = 4;
+	static constexpr GPIO port = GPIO::E;
+	static constexpr bool on_rising_edge = true;
+	static constexpr bool on_falling_edge = false;
+	static constexpr uint32_t priority1 = 0;
+	static constexpr uint32_t priority2 = 0;
+};
 
 } // namespace Board
 } // namespace LDKit

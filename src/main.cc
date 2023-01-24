@@ -6,6 +6,7 @@
 #include "drivers/timekeeper.hh"
 #include "looping_delay.hh"
 #include "system.hh"
+#include "timer.hh"
 
 namespace
 {
@@ -24,7 +25,8 @@ void main() {
 
 	Controls controls;
 	Flags flags;
-	Params params{controls, flags};
+	Timer timer;
+	Params params{controls, flags, timer};
 	DelayBuffer &audio_buffer = get_delay_buffer();
 	LoopingDelay looping_delay{params, flags, audio_buffer};
 	AudioStream audio([&looping_delay](const AudioInBlock &in, AudioOutBlock &out) { looping_delay.update(in, out); });
@@ -32,7 +34,6 @@ void main() {
 	// TODO: Make Params thread-safe:
 	// Use double-buffering (two Params structs), and LoopingDelay is constructed with a Params*
 	// And right before looping_delay.update(), call params.load_updated_values()
-	//
 
 	__HAL_DBGMCU_FREEZE_TIM6();
 	mdrivlib::Timekeeper params_update_task(Board::param_update_task_conf, [&]() {
@@ -41,6 +42,7 @@ void main() {
 		Debug::Pin2::low();
 	});
 
+	timer.start();
 	controls.start();
 	params_update_task.start();
 	audio.start();
