@@ -1,4 +1,5 @@
 #pragma once
+#define GCC_OPTIMIZE_OFF __attribute__((optimize("-O0")))
 #include "util/audio_frame.hh"
 
 struct AudioStreamConf {
