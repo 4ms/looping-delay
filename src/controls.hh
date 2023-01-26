@@ -37,14 +37,14 @@ public:
 	// Trig Jacks
 	// Board::PingJack ping_jack;
 	Board::RevJack reverse_jack;
-	Board::HoldJack hold_jack;
+	Board::HoldJack inf_jack;
 
 	Board::ClkOut clk_out;
 	Board::LoopClkOut loop_out;
 
 	// LEDs:
 	Board::PingLED ping_led;
-	Board::HoldLED hold_led;
+	Board::HoldLED inf_led;
 	Board::RevLED reverse_led;
 	Board::ClkLED clk_led;
 
@@ -91,7 +91,7 @@ public:
 
 		// ping_jack.update();
 		reverse_jack.update();
-		hold_jack.update();
+		inf_jack.update();
 	}
 
 	void test() {
@@ -101,10 +101,22 @@ public:
 
 		// ping_jack.is_high();
 		reverse_jack.is_high();
-		hold_jack.is_high();
+		inf_jack.is_high();
 
 		ping_led.high();
-		// etc..
+		inf_led.high();
+		reverse_led.high();
+		clk_led.high();
+
+		ping_led.low();
+		inf_led.low();
+		reverse_led.low();
+		clk_led.low();
+
+		clk_out.high();
+		clk_out.low();
+		loop_out.high();
+		loop_out.low();
 	}
 };
 } // namespace LDKit

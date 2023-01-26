@@ -15,9 +15,9 @@ struct Leds {
 
 	void update() {
 		if (modes.inf == InfState::TransitioningOn)
-			controls.hold_led.high();
+			controls.inf_led.high();
 		else if (modes.inf == InfState::TransitioningOff)
-			controls.hold_led.low();
+			controls.inf_led.low();
 
 		controls.reverse_led.set(modes.reverse);
 	}
