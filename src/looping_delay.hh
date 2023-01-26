@@ -56,8 +56,7 @@ public:
 	}
 
 	// TODO: when global_mode[CALIBRATE] is set, we should change the audio callback
-	void GCC_OPTIMIZE_OFF update(const AudioStreamConf::AudioInBlock &inblock,
-								 AudioStreamConf::AudioOutBlock &outblock) {
+	void update(const AudioStreamConf::AudioInBlock &inblock, AudioStreamConf::AudioOutBlock &outblock) {
 		// sz on the DLD is 8, but it's 64 here. sz/2 = AudioStreamConf::BlockSize
 		constexpr uint32_t sz = AudioStreamConf::BlockSize * 2;
 		constexpr uint32_t blksz = AudioStreamConf::BlockSize;
