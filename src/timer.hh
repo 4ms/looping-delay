@@ -29,7 +29,6 @@ public:
 		_pingled_tmr++;
 		ping_jack.update();
 		if (ping_jack.just_went_high()) {
-			_ping_tmr = 0;
 			int32_t diff = std::abs((int32_t)_ping_time - (int32_t)_ping_tmr);
 			if (diff > 10) {
 				_clkout_tmr = 0;
@@ -43,6 +42,7 @@ public:
 				_ping_time = _ping_tmr;
 				_ping_changed = true;
 			}
+			_ping_tmr = 0;
 		}
 	}
 
