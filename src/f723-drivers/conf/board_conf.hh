@@ -43,10 +43,10 @@ using PingJack = mdrivlib::DebouncedPin<PinDef{GPIO::I, PinNum::_1}, Normal>;
 using HoldJack = mdrivlib::DebouncedPin<PinDef{GPIO::I, PinNum::_5}, Normal>;
 using RevJack = mdrivlib::DebouncedPin<PinDef{GPIO::B, PinNum::_8}, Normal>;
 
-using PingLED = mdrivlib::FPin<GPIO::A, PinNum::_2, Output, Inverted>;
-using HoldLED = mdrivlib::FPin<GPIO::I, PinNum::_0, Output, Inverted>;
-using RevLED = mdrivlib::FPin<GPIO::D, PinNum::_2, Output, Inverted>;
-using ClkLED = mdrivlib::FPin<GPIO::A, PinNum::_8, Output, Inverted>;
+using PingLED = mdrivlib::FPin<GPIO::A, PinNum::_2, Output, Normal>;
+using HoldLED = mdrivlib::FPin<GPIO::I, PinNum::_0, Output, Normal>;
+using RevLED = mdrivlib::FPin<GPIO::D, PinNum::_2, Output, Normal>;
+using ClkLED = mdrivlib::FPin<GPIO::A, PinNum::_8, Output, Normal>;
 
 using ClkOut = mdrivlib::FPin<GPIO::I, PinNum::_7, Output, Normal>;
 using LoopClkOut = mdrivlib::FPin<GPIO::H, PinNum::_5, Output, Normal>;
