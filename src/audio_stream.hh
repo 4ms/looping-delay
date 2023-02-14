@@ -4,7 +4,7 @@
 #include "conf/codec_conf.hh"
 #include "conf/rcc_conf.hh"
 #include "drivers/callable.hh"
-#include "drivers/codec_WM8731.hh"
+#include "drivers/codec_PCM3060.hh"
 #include "drivers/i2c.hh"
 #include <functional>
 
@@ -45,15 +45,9 @@ public:
 
 private:
 	mdrivlib::I2CPeriph codec_i2c;
-	mdrivlib::CodecWM8731 codec;
+	mdrivlib::CodecPCM3060 codec;
 
 	AudioProcessFunction _process_func;
 };
 
 } // namespace LDKit
-
-// TODO: would be nice to give SAI LoopingDelay::update directly
-// IRQ -> ISRs[n]
-// -> if saiflag { callback(0); } else { callback(1); }
-// -> AudioStream::_process_func(buf[0/1])
-// -> LoopingDelay::update(bufs)
