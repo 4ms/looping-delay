@@ -48,6 +48,7 @@ void main() {
 	audio.start();
 
 	while (true) {
+		__NOP();
 	}
 }
 
