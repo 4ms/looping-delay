@@ -42,7 +42,6 @@ struct Settings {
 	bool auto_unquantize_timejack = true;
 	bool send_return_before_loop = false;
 	uint32_t led_brightness = 4;
-	bool levelcv_mix = false;
 
 	uint32_t crossfade_samples = 192;									 // SLOW_FADE_SAMPLES
 	float crossfade_rate = calc_fade_increment(crossfade_samples);		 // SLOW_FADE_INCREMENT

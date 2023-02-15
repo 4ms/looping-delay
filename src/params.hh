@@ -207,10 +207,7 @@ private:
 			return;
 		}
 
-		int16_t df = pot_state[DelayFeedPot].cur_val;
-		if (!settings.levelcv_mix) {
-			df = __USAT(df + cv_state[DelayFeedCV].cur_val, 12);
-		}
+		uint16_t df = __USAT(pot_state[DelayFeedPot].cur_val + cv_state[DelayFeedCV].cur_val, 12);
 
 		if (settings.log_delay_feed)
 			delay_feed = log_taper[df];
@@ -269,11 +266,7 @@ private:
 	}
 
 	void calc_mix() {
-		uint16_t mx;
-		if (settings.levelcv_mix)
-			mx = __USAT(cv_state[MixCV].cur_val + pot_state[MixPot].cur_val, 12);
-		else
-			mx = pot_state[MixPot].cur_val;
+		uint16_t mx = __USAT(cv_state[MixCV].cur_val + pot_state[MixPot].cur_val, 12);
 
 		mix_dry = epp_lut[mx];
 		mix_wet = epp_lut[4095 - mx];
