@@ -26,18 +26,11 @@ using mdrivlib::PinNum;
 using enum mdrivlib::PinPolarity;
 using enum mdrivlib::PinMode;
 
-const mdrivlib::TimekeeperConfig param_update_task_conf = {
-	.TIMx = TIM6,
-	.period_ns = 1'000'000'000 / 6000, // 6kHz
-	.priority1 = 2,
-	.priority2 = 3,
-};
-
 using PingButton = mdrivlib::DebouncedSwitch<PinDef{GPIO::C, PinNum::_7}, Inverted>;
 using HoldButton = mdrivlib::DebouncedSwitch<PinDef{GPIO::C, PinNum::_11}, Inverted>;
 using RevButton = mdrivlib::DebouncedSwitch<PinDef{GPIO::A, PinNum::_15}, Inverted>;
 
-using TimeSwitch = mdrivlib::Switch3Pos<PinDef{GPIO::C, PinNum::_8}, PinDef{GPIO::C, PinNum::_9}>;
+using TimeSwitch = mdrivlib::Switch3Pos<PinDef{GPIO::C, PinNum::_9}, PinDef{GPIO::C, PinNum::_8}>;
 
 using PingJack = mdrivlib::DebouncedPin<PinDef{GPIO::I, PinNum::_1}, Normal>;
 using HoldJack = mdrivlib::DebouncedPin<PinDef{GPIO::I, PinNum::_5}, Normal>;
@@ -51,7 +44,26 @@ using ClkLED = mdrivlib::FPin<GPIO::A, PinNum::_8, Output, Normal>;
 using ClkOut = mdrivlib::FPin<GPIO::I, PinNum::_7, Output, Normal>;
 using LoopClkOut = mdrivlib::FPin<GPIO::H, PinNum::_5, Output, Normal>;
 
-// ADC Conf:
+constexpr inline auto AdcSampTime = mdrivlib::AdcSamplingTime::_480Cycles;
+
+constexpr std::array<AdcChannelConf, NumPots> PotAdcChans = {{
+	{{GPIO::C, PinNum::_3}, AdcChanNum::_13, TimePot, AdcSampTime},
+	{{GPIO::A, PinNum::_1}, AdcChanNum::_1, FeedbackPot, AdcSampTime},
+	{{GPIO::C, PinNum::_4}, AdcChanNum::_14, DelayFeedPot, AdcSampTime},
+	{{GPIO::A, PinNum::_6}, AdcChanNum::_6, MixPot, AdcSampTime},
+}};
+
+constexpr std::array<AdcChannelConf, NumCVs> CVAdcChans = {{
+	{{GPIO::C, PinNum::_0}, AdcChanNum::_10, TimeCV, AdcSampTime},
+	{{GPIO::A, PinNum::_5}, AdcChanNum::_5, FeedbackCV, AdcSampTime},
+	{{GPIO::A, PinNum::_4}, AdcChanNum::_4, DelayFeedCV, AdcSampTime},
+	{{GPIO::C, PinNum::_1}, AdcChanNum::_11, MixCV, AdcSampTime},
+}};
+
+constexpr inline int16_t MinPotChange = 10;
+constexpr inline int16_t MinCVChange = 10;
+
+// ADC Peripheral Conf:
 struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 	static constexpr auto resolution = mdrivlib::AdcResolution::Bits12;
 	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_1;
@@ -92,25 +104,6 @@ struct CVAdcConf : mdrivlib::DefaultAdcPeriphConf {
 	};
 };
 
-constexpr inline auto AdcSampTime = mdrivlib::AdcSamplingTime::_480Cycles;
-
-constexpr std::array<AdcChannelConf, NumPots> PotAdcChans = {{
-	{{GPIO::C, PinNum::_3}, AdcChanNum::_13, TimePot, AdcSampTime},
-	{{GPIO::A, PinNum::_1}, AdcChanNum::_1, FeedbackPot, AdcSampTime},
-	{{GPIO::A, PinNum::_0}, AdcChanNum::_0, DelayFeedPot, AdcSampTime},
-	{{GPIO::C, PinNum::_4}, AdcChanNum::_14, MixPot, AdcSampTime},
-}};
-
-constexpr std::array<AdcChannelConf, NumCVs> CVAdcChans = {{
-	{{GPIO::C, PinNum::_0}, AdcChanNum::_10, TimeCV, AdcSampTime},
-	{{GPIO::A, PinNum::_5}, AdcChanNum::_5, FeedbackCV, AdcSampTime},
-	{{GPIO::C, PinNum::_1}, AdcChanNum::_11, DelayFeedCV, AdcSampTime},
-	{{GPIO::A, PinNum::_4}, AdcChanNum::_4, MixCV, AdcSampTime},
-}};
-
-constexpr inline int16_t MinPotChange = 10;
-constexpr inline int16_t MinCVChange = 10;
-
 // memory_conf:
 constexpr inline uint32_t MemoryStartAddr = 0xD0000000;
 constexpr inline uint32_t MemorySizeBytes = 0x00800000;
@@ -128,6 +121,13 @@ struct LRClkPinChangeConf : mdrivlib::DefaultPinChangeConf {
 	static constexpr bool on_falling_edge = false;
 	static constexpr uint32_t priority1 = 0;
 	static constexpr uint32_t priority2 = 0;
+};
+
+const mdrivlib::TimekeeperConfig param_update_task_conf = {
+	.TIMx = TIM6,
+	.period_ns = 1'000'000'000 / 6000, // 6kHz
+	.priority1 = 2,
+	.priority2 = 3,
 };
 
 } // namespace Board
