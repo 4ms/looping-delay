@@ -8,6 +8,11 @@
 #include "system.hh"
 #include "timer.hh"
 
+// Testing
+#include "util/oscs.hh"
+TriangleOscillator<48000> osc1{1000};
+TriangleOscillator<48000> osc2{15000};
+
 namespace
 {
 LDKit::System _init;
@@ -29,18 +34,29 @@ void main() {
 	Params params{controls, flags, timer};
 	DelayBuffer &audio_buffer = get_delay_buffer();
 	LoopingDelay looping_delay{params, flags, audio_buffer};
-	AudioStream audio([&looping_delay](const AudioInBlock &in, AudioOutBlock &out) { looping_delay.update(in, out); });
+	AudioStream audio([&looping_delay, &params](const AudioInBlock &in, AudioOutBlock &out) {
+		if (params.delay_feed > 0.5f) {
+			for (auto [o, i] : zip(out, in)) {
+				o.chan[0] = i.chan[0];
+				o.chan[1] = i.chan[0];
+			}
+		} else {
+			osc1.set_frequency(params.time * 100.f);
+			osc2.set_frequency(params.time * 1000.f);
+			for (auto [o, i] : zip(out, in)) {
+				o.chan[0] = (osc1.process_float() - 0.5f) * 0x00FFFFFFUL;
+				o.chan[1] = (osc2.process_float() - 0.5f) * 0x00FFFFFFUL;
+			}
+		}
+		// looping_delay.update(in, out);
+	});
 
 	// TODO: Make Params thread-safe:
 	// Use double-buffering (two Params structs), and LoopingDelay is constructed with a Params*
 	// And right before looping_delay.update(), call params.load_updated_values()
 
 	__HAL_DBGMCU_FREEZE_TIM6();
-	mdrivlib::Timekeeper params_update_task(Board::param_update_task_conf, [&]() {
-		Debug::Pin2::high();
-		params.update();
-		Debug::Pin2::low();
-	});
+	mdrivlib::Timekeeper params_update_task(Board::param_update_task_conf, [&]() { params.update(); });
 
 	timer.start();
 	controls.start();
