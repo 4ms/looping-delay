@@ -41,7 +41,7 @@ class LoopingDelay {
 
 	bool doing_reverse_fade = false;
 
-	AutoMute<0.0002f, 10, 0.02f, 0.02f> main_automute;
+	AutoMute<0.0002f, 1000, 0.02f, 0.02f> main_automute;
 	AutoMute<0.0002f, 10, 0.02f, 0.02f> aux_automute;
 	DCBlock<1.f / 4800.f> dcblock;
 
@@ -105,6 +105,9 @@ public:
 		for (auto [mem_wr, mem_rd, mem_rd_dest, out, in] : zip(wr_buff, rd_buff, rd_buff_dest, outblock, inblock)) {
 			auto auxin = AudioStreamConf::AudioInFrame::sign_extend(in.chan[0]);
 			auto mainin = AudioStreamConf::AudioInFrame::sign_extend(in.chan[1]);
+
+			// Fix for noisy input on unmodded p3:
+			auxin = 0;
 
 			if (flags.mute_on_boot_ctr) {
 				mainin = 0;
