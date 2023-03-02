@@ -21,15 +21,13 @@ public:
 		std::function<void(const AudioStreamConf::AudioInBlock &, AudioStreamConf::AudioOutBlock &)>;
 
 	AudioStream(AudioProcessFunction &&process_func)
-		: codec_i2c{codec_i2c_conf}
-		, codec{codec_i2c, sai_conf}
+		: codec_i2c{Board::codec_i2c_conf}
+		, codec{codec_i2c, Board::sai_conf}
 		, _process_func{std::move(process_func)} {
 
-		codec.init();
+		codec.init(mdrivlib::CodecPCM3060Register::default_setup_i2s_24bit_hpf);
 		codec.set_rx_buffer_start(audio_in_dma_buffer);
 		codec.set_tx_buffer_start(audio_out_dma_buffer);
-
-		//{TC, HT}
 		codec.set_callbacks([this] { _process<1>(); }, [this] { _process<0>(); });
 	}
 
@@ -37,9 +35,6 @@ public:
 
 	template<uint32_t buffer_half>
 	void _process() {
-		// NOTE: this only works when:
-		// 	TC processes in[0] -> out[1] (dma just finished sending out[1], seems like it just finished filling in[0]?)
-		// 	HT processes in[1] -> out[0] (dma just finished sending out[0], seems like it just finished filling in[1]?)
 		_process_func(audio_in_dma_buffer[1 - buffer_half], audio_out_dma_buffer[buffer_half]);
 	}
 

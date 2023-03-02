@@ -1,6 +1,10 @@
 #include "audio_stream_conf.hh"
+#include "drivers/codec_PCM3060_registers.hh"
 #include "drivers/i2c_config_struct.hh"
 #include "drivers/sai_config_struct.hh"
+
+namespace LDKit::Board
+{
 
 using mdrivlib::GPIO;
 using mdrivlib::I2CConfig;
@@ -68,3 +72,5 @@ const SaiConfig sai_conf = {
 	.sync_send = SaiConfig::NoSendSync,
 	.sync_receive_from = SaiConfig::NoReceiveSync,
 };
+
+} // namespace LDKit::Board
