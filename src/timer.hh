@@ -12,7 +12,7 @@ class Timer {
 	Board::PingJack ping_jack;
 	mdrivlib::PinChangeInt<Board::LRClkPinChangeConf> pin_change;
 
-	uint32_t _clkout_tmr = 0;
+	// uint32_t _clkout_tmr = 0;
 	uint32_t _pingled_tmr = 0;
 	uint32_t _loopled_tmr = 0;
 
@@ -25,15 +25,18 @@ public:
 
 	void inc() {
 		_ping_tmr++;
-		_clkout_tmr++;
+		// _clkout_tmr++;
 		_pingled_tmr++;
+		_loopled_tmr++;
+
 		ping_jack.update();
 		if (ping_jack.just_went_high()) {
 			int32_t diff = std::abs((int32_t)_ping_time - (int32_t)_ping_tmr);
 			if (diff > 10) {
-				_clkout_tmr = 0;
+				// _clkout_tmr = 0;
 				_pingled_tmr = 0;
 
+				// TODO: see if this reduces jitter by much:
 				// controls.clk_out.high();
 				// controls.ping_led.high();
 				// if (!modes.ping_locked)
@@ -56,8 +59,11 @@ public:
 
 	uint32_t get_ping_time() { return _ping_time; }
 
-	uint32_t get_clkout_tmr() { return _clkout_tmr; }
-	void reset_clkout_tmr() { _clkout_tmr = 0; }
+	uint32_t get_ping_tmr() { return _ping_tmr; }
+	void reset_ping_tmr() { _ping_tmr = 0; }
+
+	// uint32_t get_clkout_tmr() { return _clkout_tmr; }
+	// void reset_clkout_tmr() { _clkout_tmr = 0; }
 
 	uint32_t get_pingled_tmr() { return _pingled_tmr; }
 	void reset_pingled_tmr() { _pingled_tmr = 0; }

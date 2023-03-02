@@ -46,7 +46,7 @@ public:
 	Board::PingLED ping_led;
 	Board::HoldLED inf_led;
 	Board::RevLED reverse_led;
-	Board::ClkLED clk_led;
+	Board::LoopLED loop_led;
 
 	enum class SwitchPos { Invalid = 0b00, Up = 0b01, Down = 0b10, Center = 0b11 };
 
@@ -106,12 +106,12 @@ public:
 		ping_led.high();
 		inf_led.high();
 		reverse_led.high();
-		clk_led.high();
+		loop_led.high();
 
 		ping_led.low();
 		inf_led.low();
 		reverse_led.low();
-		clk_led.low();
+		loop_led.low();
 
 		clk_out.high();
 		clk_out.low();
