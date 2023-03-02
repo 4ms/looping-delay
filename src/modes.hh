@@ -43,9 +43,9 @@ struct Settings {
 	bool send_return_before_loop = false;
 	uint32_t led_brightness = 4;
 
-	uint32_t crossfade_samples = 192;									 // SLOW_FADE_SAMPLES
+	uint32_t crossfade_samples = 4800;									 // SLOW_FADE_SAMPLES
 	float crossfade_rate = calc_fade_increment(crossfade_samples);		 // SLOW_FADE_INCREMENT
-	uint32_t write_crossfade_samples = 192;								 // FAST_FADE_SAMPLES
+	uint32_t write_crossfade_samples = 4800;							 // FAST_FADE_SAMPLES
 	float write_crossfade_rate = calc_fade_increment(crossfade_samples); // FAST_FADE_INCREMENT
 
 	static constexpr float calc_fade_increment(uint32_t samples) {
