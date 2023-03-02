@@ -4,7 +4,6 @@
 #include "controls.hh"
 #include "epp_lut.hh"
 #include "flags.hh"
-#include "leds.hh"
 #include "log_taper_lut.hh"
 #include "modes.hh"
 #include "timer.hh"
@@ -36,7 +35,6 @@ struct Params {
 	ChannelMode modes;
 	Settings settings;
 	OperationMode op_mode = OperationMode::Normal;
-	Leds leds{controls, modes};
 
 	Params(Controls &controls, Flags &flags, Timer &timer)
 		: controls{controls}
@@ -77,8 +75,7 @@ struct Params {
 
 		// check_entering_system_mode();
 
-		leds.update();
-
+		update_leds();
 		update_button_modes();
 
 		if (flags.mute_on_boot_ctr)
@@ -147,6 +144,57 @@ private:
 	}
 
 	void update_button_modes() {
+		if (controls.ping_button.just_went_low()) {
+			// TODO: handle entering modes: QMC, Ping Locked
+			// if (!INF1BUT && !INF2BUT && REV1BUT && REV2BUT) {
+			// 	flag_acknowlegde_qcm = (6 << 8);
+
+			// 	if (global_mode[QUANTIZE_MODE_CHANGES] == 0)
+			// 		global_mode[QUANTIZE_MODE_CHANGES] = 1;
+			// 	else
+			// 		global_mode[QUANTIZE_MODE_CHANGES] = 0;
+
+			// 	flag_ignore_revdown[0] = 1;
+			// 	flag_ignore_revdown[1] = 1;
+			// } else if (REV1BUT && !INF1BUT && !INF2BUT && !REV2BUT) {
+			// 	flag_ignore_revdown[0] = 1;
+			// } else if (REV2BUT && !INF1BUT && !INF2BUT && !REV1BUT) {
+			// 	flag_ignore_revdown[1] = 1;
+			// }
+
+			// else if (INF1BUT && !INF2BUT && !REV1BUT && !REV2BUT)
+			// {
+			// 	if (mode[0][PING_LOCKED] == 0) {
+			// 		locked_ping_time[0] = ping_time;
+			// 		mode[0][PING_LOCKED] = 1;
+			// 	} else {
+			// 		mode[0][PING_LOCKED] = 0;
+			// 		set_divmult_time(0);
+			// 	}
+
+			// 	flag_ignore_infdown[0] = 1;
+
+			// } else if (INF2BUT && INF1BUT && REV1BUT && REV2BUT) {
+			// 	flag_ignore_revdown[0] = 1;
+			// 	flag_ignore_revdown[1] = 1;
+			// 	flag_ignore_infdown[0] = 1;
+			// 	flag_ignore_infdown[1] = 1;
+
+			// } else if (!INF2BUT && !INF1BUT && !REV1BUT && !REV2BUT) {
+			ping_time = timer.get_ping_tmr();
+			controls.clk_out.high();
+			timer.reset_ping_tmr();
+			timer.reset_pingled_tmr();
+			// timer.reset_clkout_tmr();
+
+			// TODO: this is handled automatically now, right?
+			if (modes.quantize_mode_changes) {
+				// 	process_mode_flags();
+			}
+			if (!modes.ping_locked)
+				flags.set_time_changed();
+		}
+
 		if (controls.inf_button.is_just_released()) {
 			if (!ignore_inf_release) {
 				flags.set_inf_changed();
@@ -165,6 +213,55 @@ private:
 			ignore_rev_release = false;
 			for (auto &pot : pot_state)
 				pot.moved_while_rev_down = false;
+		}
+	}
+
+	void update_leds() {
+		if (modes.inf == InfState::TransitioningOn)
+			controls.inf_led.high();
+		else if (modes.inf == InfState::TransitioningOff)
+			controls.inf_led.low();
+
+		controls.reverse_led.set(modes.reverse);
+
+		// if (flag_acknowlegde_qcm) {
+		// 	flag_acknowlegde_qcm--;
+		// 	if ((flag_acknowlegde_qcm & (1 << 8)) || (!global_mode[QUANTIZE_MODE_CHANGES] && (flag_acknowlegde_qcm & (1
+		// << 6))))
+		// 	{
+		// 		LED_PINGBUT_ON;
+		// 		LED_REV1_ON;
+		// 		LED_REV2_ON;
+		// 	} else {
+		// 		LED_PINGBUT_OFF;
+		// 		LED_REV1_OFF;
+		// 		LED_REV2_OFF;
+		// 	}
+		// }
+
+		if (controls.ping_button.is_pressed()) {
+			controls.ping_led.high();
+		}
+
+		auto ping_ledbut_tmr = timer.get_pingled_tmr();
+		if (ping_ledbut_tmr >= ping_time) {
+			controls.ping_led.high();
+			timer.reset_pingled_tmr();
+			controls.clk_out.high();
+		} else if (ping_ledbut_tmr >= (ping_time / 2)) {
+			if (!controls.ping_button.is_pressed())
+				controls.ping_led.low();
+			controls.clk_out.low();
+		}
+
+		auto loopled_tmr = timer.get_loopled_tmr();
+		if (loopled_tmr >= divmult_time) {
+			controls.loop_led.high();
+			controls.loop_out.high();
+			timer.reset_loopled_tmr();
+		} else if (loopled_tmr >= (divmult_time / 2)) {
+			controls.loop_led.low();
+			controls.loop_out.low();
 		}
 	}
 
