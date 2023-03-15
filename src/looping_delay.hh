@@ -31,10 +31,10 @@ class LoopingDelay {
 	uint32_t queued_divmult_time;		   // fade_queued_dest_divmult_time
 	uint32_t queued_read_fade_ending_addr; // fade_queued_dest_read_addr
 
-	float write_fade_phase; // write_fade_pos
+	float write_fade_phase = 0.f; // write_fade_pos
 	enum class FadeState { NotFading, FadingDown, FadingUp, Crossfading };
-	FadeState write_fade_state;		 // write_fade_state
-	uint32_t write_fade_ending_addr; // fade_dest_write_addr
+	FadeState write_fade_state = FadeState::NotFading; // write_fade_state
+	uint32_t write_fade_ending_addr;				   // fade_dest_write_addr
 
 	uint32_t loop_start;
 	uint32_t loop_end;
@@ -108,6 +108,7 @@ public:
 
 			// Fix for noisy input on unmodded p3:
 			auxin = 0;
+			//////////////////////////
 
 			if (flags.mute_on_boot_ctr) {
 				mainin = 0;
@@ -195,9 +196,13 @@ public:
 
 	void check_read_head_in_loop() {
 		// If we're not crossfading, check if the read head is inside the loop
-		if (!Util::in_between(read_head, loop_start, loop_end, params.modes.reverse) && !is_crossfading()) {
-			start_crossfade(loop_start);
-			params.reset_loopled_tmr();
+		if (!Util::in_between(read_head, loop_start, loop_end, params.modes.reverse)) {
+			if (is_crossfading()) {
+				queued_read_fade_ending_addr = loop_start;
+			} else {
+				start_crossfade(loop_start);
+				params.reset_loop();
+			}
 		}
 	}
 
@@ -216,17 +221,18 @@ public:
 			return loop_end;
 		else
 			return Util::offset_samples(
-				loop_end, params.settings.crossfade_samples / Board::MemorySampleSize, !params.modes.reverse);
+				loop_end, params.settings.crossfade_samples /* / Board::MemorySampleSize*/, !params.modes.reverse);
 		// FIXME: should that be / 2 (for 2 channels), not / sample size?
 		//  Or else crossfade_samples should be named crossfade_bytes
 	}
 
 	// When we near the end of the loop, start a crossfade to the beginning
+	GCC_OPTIMIZE_OFF
 	void start_looping_crossfade() {
 		constexpr uint32_t sz = AudioStreamConf::BlockSize * 2;
-		params.reset_loopled_tmr();
+		params.reset_loop();
 
-		if (!is_crossfading()) {
+		if (params.divmult_time < params.settings.crossfade_samples) {
 			read_head = loop_start;
 			read_fade_phase = 0.0;
 
@@ -294,14 +300,16 @@ public:
 				loop_start = Util::offset_samples(loop_end, t_divmult_time, 1 - params.modes.reverse);
 
 			// If the read addr is not in between the loop start and end, then fade to the loop start
-			if (!Util::in_between(read_head, loop_start, loop_end, params.modes.reverse)) {
-				if (is_crossfading()) {
-					queued_read_fade_ending_addr = loop_start;
-				} else {
-					start_crossfade(loop_start);
-					params.reset_loopled_tmr();
-				}
-			}
+			check_read_head_in_loop();
+			// TODO: this is almost the same as check_read_head_in_loop(), combine them?
+			// if (!Util::in_between(read_head, loop_start, loop_end, params.modes.reverse)) {
+			// 	if (is_crossfading()) {
+			// 		queued_read_fade_ending_addr = loop_start;
+			// 	} else {
+			// 		start_crossfade(loop_start);
+			// 		params.reset_loopled_tmr();
+			// 	}
+			// }
 		}
 	}
 
@@ -313,6 +321,7 @@ public:
 		read_fade_ending_addr = addr;
 	}
 
+	GCC_OPTIMIZE_OFF
 	void increment_crossfading() {
 		if (read_fade_phase > 0.0f) {
 			read_fade_phase += params.settings.crossfade_rate;
@@ -395,7 +404,7 @@ public:
 			// (recent enough that we're still TransitioningOff)
 			// This is because the read and write heads are in the same spot
 			if (params.modes.inf != InfState::TransitioningOff) {
-				params.reset_loopled_tmr();
+				params.reset_loop();
 
 				loop_start = read_fade_ending_addr;
 				// set loop_start to the fade ending addr because if we happen to
@@ -405,7 +414,7 @@ public:
 
 				loop_end = Util::offset_samples(loop_start, params.divmult_time, params.modes.reverse);
 			}
-			write_fade_phase = params.settings.crossfade_samples;
+			write_fade_phase = params.settings.crossfade_rate;
 			write_fade_state = FadeState::FadingDown;
 			write_fade_ending_addr = write_head;
 

@@ -26,3 +26,5 @@ struct DebugConsole {
 		// 	Debug::Pin1{}.Gpio_v, Debug::Pin1{}.PinNum_v, mdrivlib::PinMode::Alt, mdrivlib::PinAF::AltFunc8};
 	}
 };
+
+#define GCC_OPTIMIZE_OFF __attribute__((optimize("-O0")))

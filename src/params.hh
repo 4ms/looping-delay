@@ -82,7 +82,11 @@ struct Params {
 			flags.mute_on_boot_ctr--;
 	}
 
-	void reset_loopled_tmr() { timer.reset_loopled_tmr(); }
+	void reset_loop() {
+		controls.loop_led.high();
+		controls.loop_out.high();
+		timer.reset_loopled_tmr();
+	}
 
 	// TODO: to use a double-buffer params, then
 	// looping delay should set a flag that tells params to set a
@@ -216,6 +220,7 @@ private:
 		}
 	}
 
+	GCC_OPTIMIZE_OFF
 	void update_leds() {
 		if (modes.inf == InfState::TransitioningOn)
 			controls.inf_led.high();
@@ -255,10 +260,8 @@ private:
 		}
 
 		auto loopled_tmr = timer.get_loopled_tmr();
-		if (loopled_tmr >= divmult_time) {
-			controls.loop_led.high();
-			controls.loop_out.high();
-			timer.reset_loopled_tmr();
+		if (loopled_tmr >= divmult_time && modes.inf == InfState::Off) {
+			reset_loop();
 		} else if (loopled_tmr >= (divmult_time / 2)) {
 			controls.loop_led.low();
 			controls.loop_out.low();
