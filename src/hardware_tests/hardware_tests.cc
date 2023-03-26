@@ -111,8 +111,8 @@ void run(Controls &controls) {
 	controls.start();
 
 	printf_("Turn each pot from low to high to center\n");
-	CenterFlatRamp test_waveform_0_5{1., 0.3, -4'200'000, 300'000, 0, 48000};
-	CenterFlatRamp test_waveform_n5_5{1., 0.3, 4'000'000, -4'000'000, 0, 48000};
+	CenterFlatRamp test_waveform_0_5{1., 0.5, -4'500'000, 200'000, 0, 48000};
+	CenterFlatRamp test_waveform_n5_5{1., 0.5, 4'800'000, -4'800'000, 0, 48000};
 	audio.set_callback([&](const AudioStreamConf::AudioInBlock &in, AudioStreamConf::AudioOutBlock &out) {
 		for (auto &o : out) {
 			o.chan[0] = test_waveform_0_5.update();	 // R

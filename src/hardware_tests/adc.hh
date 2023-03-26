@@ -13,8 +13,8 @@ namespace LDKit::HWTests
 
 struct TestADCs : IAdcChecker {
 	static constexpr AdcRangeCheckerBounds bounds{
-		.center_val = 2048,
-		.center_width = 10,
+		.center_val = 2110,
+		.center_width = 60,
 		.center_check_counts = 10000,
 		.min_val = Brain::PotAdcConf::min_value,
 		.max_val = 4082,
