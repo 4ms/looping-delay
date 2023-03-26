@@ -46,7 +46,7 @@ public:
 	Board::RevLED reverse_led;
 	Board::LoopLED loop_led;
 
-	enum class SwitchPos { Invalid = 0b00, Up = 0b01, Down = 0b10, Center = 0b11 };
+	using SwitchPos = mdrivlib::SwitchPos;
 
 	uint16_t read_pot(PotAdcElement adcnum) {
 		if constexpr (hardware_oversampling)

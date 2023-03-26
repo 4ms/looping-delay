@@ -375,10 +375,9 @@ private:
 	// }
 
 	static constexpr float adjust_time_by_switch(float timeval, Controls::SwitchPos switch_pos) {
-		uint16_t switch_val = static_cast<uint16_t>(switch_pos);
-		if (switch_val == 0b10)
+		if (switch_pos == Controls::SwitchPos::Up)
 			return timeval + 16.f; // switch up: 17-32
-		if (switch_val == 0b01)
+		if (switch_pos == Controls::SwitchPos::Down)
 			return timeval / 8.f; // switch down: eighth notes
 		return timeval;
 	}
