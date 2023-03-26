@@ -57,7 +57,7 @@ void run(Controls &controls) {
 	buttontester.run_test();
 
 	//////////////////////////////
-	print_test_name("Audio Output Test");
+	print_test_name("Audio and Gate Output Test");
 	SkewedTriOsc oscL{500, 0.3, 1, -1, 0, 48000};
 	SkewedTriOsc oscR{3700, 0.85, 1, -1, 0, 48000};
 	AudioStream audio([&oscL, &oscR](const AudioStreamConf::AudioInBlock &in, AudioStreamConf::AudioOutBlock &out) {
@@ -75,7 +75,8 @@ void run(Controls &controls) {
 	printf_("Verify:\n");
 	printf_("  1) Out Left: 500Hz right-leaning triangle, -10V to +10V [+/- 0.3V]\n");
 	printf_("  2) Out Right: 3700Hz left-leaning triangle, -10V to +10V [+/- 0.3V]\n");
-	printf_("  3) End Out: 750Hz square wave, 0V to +8V [+/- 0.5V]\n");
+	printf_("  3) Loop Clk Out: 750Hz square wave, 0V to +8V [+/- 0.5V]\n");
+	printf_("  4) Clk Out: 375Hz square wave, 0V to +8V [+/- 0.5V]\n");
 
 	print_press_button();
 	Util::flash_mainbut_until_pressed();
@@ -101,9 +102,6 @@ void run(Controls &controls) {
 	controls.start();
 
 	printf_("Turn each pot from low to high to center\n");
-	printf_("After the pots, patch Out L into Pitch CV (bi-polar CV)\n");
-	printf_("Then patch Out R into the other CV jacks (uni-polar CV)\n");
-
 	CenterFlatRamp test_waveform_0_5{1., 0.3, -4'200'000, 300'000, 0, 48000};
 	CenterFlatRamp test_waveform_n5_5{1., 0.3, 4'000'000, -4'000'000, 0, 48000};
 	audio.set_callback([&](const AudioStreamConf::AudioInBlock &in, AudioStreamConf::AudioOutBlock &out) {

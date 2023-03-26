@@ -18,11 +18,11 @@ struct TestGateIns : IGateInChecker {
 
 	bool read_gate(uint8_t gate_num) override {
 		if (gate_num == 0)
-			return Board::PingJack::PinT::read();
-		if (gate_num == 1)
-			return Board::RevJack::PinT::read();
-		if (gate_num == 2)
 			return Board::HoldJack::PinT::read();
+		if (gate_num == 1)
+			return Board::PingJack::PinT::read();
+		if (gate_num == 2)
+			return Board::RevJack::PinT::read();
 		return false;
 	}
 
@@ -33,11 +33,11 @@ struct TestGateIns : IGateInChecker {
 
 	void set_indicator(uint8_t indicate_num, bool newstate) override {
 		if (indicate_num == 0)
-			Board::PingLED::set(newstate);
-		if (indicate_num == 1)
-			Board::RevLED::set(newstate);
-		if (indicate_num == 2)
 			Board::HoldLED::set(newstate);
+		if (indicate_num == 1)
+			Board::PingLED::set(newstate);
+		if (indicate_num == 2)
+			Board::RevLED::set(newstate);
 	}
 
 	void set_error_indicator(uint8_t channel, ErrorType err) override { Board::LoopLED::set(err != ErrorType::None); }

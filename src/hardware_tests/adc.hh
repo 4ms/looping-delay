@@ -69,13 +69,25 @@ struct TestADCs : IAdcChecker {
 	}
 
 	void set_indicator(uint8_t adc_i, AdcType adctype, AdcCheckState state) override {
+		static bool first_bipolar = true;
+		static bool first_unipolar = true;
+
 		if (state == AdcCheckState::NoCoverage) {
-			if (adctype == AdcType::Pot)
+			if (adctype == AdcType::Pot) {
 				printf_("\nChecking Pot %.10s (#%d):\n", pot_names[adc_i].data(), adc_i);
-			if (adctype == AdcType::BipolarCV)
+			}
+			if (adctype == AdcType::BipolarCV) {
 				printf_("\nChecking Bipolar CV Jack %.10s (#%d):\n", bi_cv_names[adc_i].data(), adc_i);
-			if (adctype == AdcType::UnipolarCV)
+				if (first_bipolar)
+					printf_("Patch Out L into Time CV (bi-polar CV)\n");
+				first_bipolar = false;
+			}
+			if (adctype == AdcType::UnipolarCV) {
 				printf_("\nChecking Unipolar CV Jack %.10s (#%d):\n", uni_cv_names[adc_i].data(), adc_i);
+				if (first_unipolar)
+					printf_("Patch Out R into the remaining CV jacks (uni-polar CV)\n");
+				first_unipolar = false;
+			}
 
 			Board::LoopLED{}.set(false);
 			Board::RevLED{}.set(true);
