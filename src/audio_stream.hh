@@ -12,9 +12,11 @@ namespace LDKit
 {
 
 struct AudioStream {
-	// TODO: Verify this region is non-cacheable:
-	alignas(256) static inline AudioStreamConf::AudioInBuffer audio_in_dma_buffer;
-	alignas(256) static inline AudioStreamConf::AudioOutBuffer audio_out_dma_buffer;
+	// TODO: Verify this region is non-cacheable on F7
+	alignas(256) static inline
+		__attribute__((section(".noncachable"))) AudioStreamConf::AudioInBuffer audio_in_dma_buffer;
+	alignas(256) static inline
+		__attribute__((section(".noncachable"))) AudioStreamConf::AudioOutBuffer audio_out_dma_buffer;
 
 public:
 	using AudioProcessFunction =
@@ -32,10 +34,12 @@ public:
 	}
 
 	void start() { codec.start(); }
+	void stop() { codec.stop(); }
 
-	template<uint32_t buffer_half>
-	void _process() {
-		_process_func(audio_in_dma_buffer[1 - buffer_half], audio_out_dma_buffer[buffer_half]);
+	void set_callback(AudioProcessFunction &&process_func) {
+		stop();
+		_process_func = std::move(process_func);
+		start();
 	}
 
 private:
@@ -43,6 +47,11 @@ private:
 	mdrivlib::CodecPCM3060 codec;
 
 	AudioProcessFunction _process_func;
+
+	template<uint32_t buffer_half>
+	void _process() {
+		_process_func(audio_in_dma_buffer[1 - buffer_half], audio_out_dma_buffer[buffer_half]);
+	}
 };
 
 } // namespace LDKit

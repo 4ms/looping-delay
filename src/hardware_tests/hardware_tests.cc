@@ -94,7 +94,7 @@ void run(Controls &controls) {
 
 	print_press_button();
 	Util::flash_mainbut_until_pressed();
-	controls.play_button.clear_events();
+	controls.ping_button.clear_events();
 
 	//////////////////////////////
 	print_test_name("Pot and CV jack Test");
@@ -117,7 +117,7 @@ void run(Controls &controls) {
 	adctester.run_test();
 
 	all_lights_off();
-	controls.play_button.clear_events();
+	controls.ping_button.clear_events();
 
 	//////////////////////////////
 	print_test_name("Gate Input Test");
@@ -130,21 +130,22 @@ void run(Controls &controls) {
 	//////////////////////////////
 	print_test_name("RAM Test (automatic)");
 	printf_("If this takes longer than 20 seconds then RAM Test fails.\n");
-	Board::BankLED{}.set_color(Colors::white);
+	Board::HoldLED{}.set(true);
 	auto err = mdrivlib::RamTest::test(Brain::MemoryStartAddr, Brain::MemorySizeBytes);
 	if (err) {
 		print_error("RAM Test Failed: readback did not match\n");
 		while (1) {
-			Board::PlayLED{}.set_color(Colors::red);
-			Board::BankLED{}.set_color(Colors::red);
-			Board::RevLED{}.set_color(Colors::red);
+			Board::PingLED{}.set(true);
+			Board::RevLED{}.set(true);
+			Board::HoldLED{}.set(true);
+			Board::LoopLED{}.set(true);
 			HAL_Delay(200);
 			all_lights_off();
 			HAL_Delay(200);
 		}
 	}
-	Board::RevLED{}.set_color(Colors::white);
-	Board::BankLED{}.set_color(Colors::off);
+	Board::RevLED{}.set(true);
+	Board::HoldLED{}.set(false);
 
 	//////////////////////////////
 	printf_("Hardware Test Complete.\n");
