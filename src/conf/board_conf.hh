@@ -1,22 +1,18 @@
 #pragma once
-#include "drivers//pin_change_conf.hh"
+#include "brain_conf.hh"
+#include "brain_pinout.hh"
 #include "drivers/adc_builtin_conf.hh"
 #include "drivers/debounced_switch.hh"
-#include "drivers/dma_config_struct.hh"
-#include "drivers/pin.hh"
+// #include "drivers/dma_config_struct.hh"
+// #include "drivers/pin.hh"
+// #include "drivers/pin_change_conf.hh"
 #include "drivers/switch_3pos.hh"
+// #include "drivers/timekeeper.hh"
 #include "elements.hh"
 #include <array>
-// #include "drivers/stm32xx.h"
-#include "drivers/timekeeper.hh"
 
-namespace LDKit
+namespace LDKit::Board
 {
-
-namespace Board
-{
-
-// TODO: split this into separate files in conf/
 
 using mdrivlib::AdcChannelConf;
 using mdrivlib::AdcChanNum;
@@ -26,11 +22,11 @@ using mdrivlib::PinNum;
 using enum mdrivlib::PinPolarity;
 using enum mdrivlib::PinMode;
 
-using PingButton = mdrivlib::DebouncedSwitch<PinDef{GPIO::C, PinNum::_7}, Inverted>;
-using HoldButton = mdrivlib::DebouncedSwitch<PinDef{GPIO::C, PinNum::_11}, Inverted>;
-using RevButton = mdrivlib::DebouncedSwitch<PinDef{GPIO::A, PinNum::_15}, Inverted>;
+using PingButton = mdrivlib::DebouncedButton<Brain::Pin::D11, Inverted>;
+using HoldButton = mdrivlib::DebouncedButton<Brain::Pin::D19, Inverted>;
+using RevButton = mdrivlib::DebouncedButton<Brain::Pin::D10, Inverted>;
 
-using TimeSwitch = mdrivlib::Switch3Pos<PinDef{GPIO::C, PinNum::_9}, PinDef{GPIO::C, PinNum::_8}>;
+using TimeSwitch = mdrivlib::Switch3Pos<Brain::Pin::D17, Brain::Pin::D16>;
 
 using PingJack = mdrivlib::DebouncedPin<PinDef{GPIO::I, PinNum::_1}, Normal>;
 using HoldJack = mdrivlib::DebouncedPin<PinDef{GPIO::I, PinNum::_5}, Normal>;
@@ -130,5 +126,4 @@ const mdrivlib::TimekeeperConfig param_update_task_conf = {
 	.priority2 = 3,
 };
 
-} // namespace Board
-} // namespace LDKit
+} // namespace LDKit::Board
