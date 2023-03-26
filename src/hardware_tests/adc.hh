@@ -27,9 +27,9 @@ struct TestADCs : IAdcChecker {
 	uint16_t window_min = 4095;
 	uint16_t window_max = 0;
 
-	static constexpr std::string_view pot_names[] = {"Pitch", "StartPos", "Length", "Sample"};
-	static constexpr std::string_view bi_cv_names[] = {"Pitch"};
-	static constexpr std::string_view uni_cv_names[] = {"StartPos", "Length", "Sample", "Bank"};
+	static constexpr std::string_view pot_names[] = {"Time", "Feedback", "DelayFeed", "Mix"};
+	static constexpr std::string_view bi_cv_names[] = {"Time"};
+	static constexpr std::string_view uni_cv_names[] = {"Feedback", "DelayFeed", "Mix"};
 
 	TestADCs(Controls &controls)
 		: IAdcChecker{bounds, NumPots, 1, NumCVs - 1}
@@ -42,7 +42,7 @@ struct TestADCs : IAdcChecker {
 			val = controls.read_pot(static_cast<PotAdcElement>(adc_i));
 
 		if (adctype == AdcType::BipolarCV)
-			val = controls.read_cv(PitchCV);
+			val = controls.read_cv(TimeCV);
 
 		if (adctype == AdcType::UnipolarCV)
 			val = controls.read_cv(static_cast<CVAdcElement>(adc_i + 1));
@@ -77,39 +77,40 @@ struct TestADCs : IAdcChecker {
 			if (adctype == AdcType::UnipolarCV)
 				printf_("\nChecking Unipolar CV Jack %.10s (#%d):\n", uni_cv_names[adc_i].data(), adc_i);
 
-			Board::BankLED{}.set_color(Colors::red);
-			Board::PlayLED{}.set_color(Colors::green);
-			Board::RevLED{}.set_color(Colors::red);
+			Board::LoopLED{}.set(false);
+			Board::RevLED{}.set(true);
+			Board::PingLED{}.set(true);
+			Board::HoldLED{}.set(true);
 		}
 
 		if (state == AdcCheckState::AtMin) {
-			Board::BankLED{}.set_color(Colors::off);
+			Board::RevLED{}.set(false);
 		}
 
 		if (state == AdcCheckState::AtMax)
-			Board::RevLED{}.set_color(Colors::off);
+			Board::HoldLED{}.set(false);
 
 		if (state == AdcCheckState::AtCenter)
-			Board::PlayLED{}.set_color(Colors::off);
+			Board::PingLED{}.set(false);
 
 		if (state == AdcCheckState::Elsewhere)
-			Board::PlayLED{}.set_color(Colors::green);
+			Board::PingLED{}.set(true);
 
 		if (state == AdcCheckState::FullyCovered) {
 			printf_(" OK\n");
-			Board::PlayLED{}.set_color(Colors::off);
-			Board::RevLED{}.set_color(Colors::off);
-			Board::BankLED{}.set_color(Colors::off);
+			Board::RevLED{}.set(false);
+			Board::PingLED{}.set(false);
+			Board::HoldLED{}.set(false);
 		}
 	}
 
 	void pause_between_steps() override { HAL_Delay(10); }
 
-	void show_multiple_nonzeros_error() override { Board::PlayLED{}.set_color(Colors::red); }
+	void show_multiple_nonzeros_error() override { Board::LoopLED{}.set(true); }
 
 	bool button_to_skip_step() override {
-		controls.play_button.update();
-		bool skip = controls.play_button.is_just_pressed();
+		controls.ping_button.update();
+		bool skip = controls.ping_button.is_just_pressed();
 		if (skip)
 			printf_(" XXX SKIPPED\n");
 		return skip;

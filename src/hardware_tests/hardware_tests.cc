@@ -61,13 +61,15 @@ void run(Controls &controls) {
 	SkewedTriOsc oscL{500, 0.3, 1, -1, 0, 48000};
 	SkewedTriOsc oscR{3700, 0.85, 1, -1, 0, 48000};
 	AudioStream audio([&oscL, &oscR](const AudioStreamConf::AudioInBlock &in, AudioStreamConf::AudioOutBlock &out) {
-		static bool endout;
+		static bool loopclk;
+		static uint32_t clkout = 0;
 		for (auto &o : out) {
 			o.chan[0] = oscR.update() * 0x7FFFFF;
 			o.chan[1] = oscL.update() * 0x7FFFFF;
 		}
-		Board::EndOut::set(endout);
-		endout = !endout;
+		Board::LoopClkOut::set(loopclk);
+		Board::ClkOut::set((clkout & 0b11) == 0b00);
+		clkout++;
 	});
 	audio.start();
 	printf_("Verify:\n");

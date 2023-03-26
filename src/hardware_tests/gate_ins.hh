@@ -13,43 +13,42 @@ struct TestGateIns : IGateInChecker {
 	Controls &controls;
 
 	TestGateIns(Controls &controls)
-		: IGateInChecker{2}
+		: IGateInChecker{3}
 		, controls{controls} {}
 
 	bool read_gate(uint8_t gate_num) override {
 		if (gate_num == 0)
-			return Board::PlayJack::PinT::read();
+			return Board::PingJack::PinT::read();
 		if (gate_num == 1)
 			return Board::RevJack::PinT::read();
+		if (gate_num == 2)
+			return Board::HoldJack::PinT::read();
 		return false;
 	}
 
 	void set_test_signal(bool newstate) override {
-		Board::EndOut::set(newstate);
+		Board::ClkOut::set(newstate);
 		HAL_Delay(1);
 	}
 
 	void set_indicator(uint8_t indicate_num, bool newstate) override {
 		if (indicate_num == 0)
-			Board::PlayB::set(newstate);
+			Board::PingLED::set(newstate);
 		if (indicate_num == 1)
-			Board::RevB::set(newstate);
+			Board::RevLED::set(newstate);
+		if (indicate_num == 2)
+			Board::HoldLED::set(newstate);
 	}
 
-	void set_error_indicator(uint8_t channel, ErrorType err) override {
-		if (channel == 0)
-			Board::PlayR::set(err != ErrorType::None);
-		if (channel == 1)
-			Board::RevR::set(err != ErrorType::None);
-	}
+	void set_error_indicator(uint8_t channel, ErrorType err) override { Board::LoopLED::set(err != ErrorType::None); }
 
 	void signal_jack_done(uint8_t chan) override {}
 
 	bool is_ready_to_read_jack(uint8_t chan) override { return true; }
 
 	bool button_to_skip_step() override {
-		controls.play_button.update();
-		bool skip = controls.play_button.is_just_pressed();
+		controls.ping_button.update();
+		bool skip = controls.ping_button.is_just_pressed();
 		if (skip)
 			printf_(" XXX SKIPPED\n");
 		return skip;
