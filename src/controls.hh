@@ -1,8 +1,9 @@
 #pragma once
-// #include "drivers/analog_in_ext.hh"
+#include "brain_conf.hh"
 #include "conf/board_conf.hh"
 #include "debug.hh"
 #include "drivers/adc_builtin.hh"
+#include "drivers/analog_in_ext.hh"
 #include "drivers/debounced_switch.hh"
 #include "elements.hh"
 #include "util/filter.hh"
@@ -11,23 +12,20 @@ namespace LDKit
 {
 
 class Controls {
-	static constexpr bool debug = false;
-
-	using enum mdrivlib::PinPolarity;
-	template<typename ConfT>
-	using AdcDmaPeriph = mdrivlib::AdcDmaPeriph<ConfT>;
-
 	// ADCs (Pots and CV):
-	std::array<uint16_t, NumCVs> cv_adc_buffer;
-	AdcDmaPeriph<Board::CVAdcConf> cv_adcs{cv_adc_buffer, Board::CVAdcChans};
+	static inline __attribute__((section(".noncachable"))) std::array<uint16_t, NumCVs> cv_adc_buffer;
+	mdrivlib::AdcDmaPeriph<Brain::CVAdcConf> cv_adcs{cv_adc_buffer, Board::CVAdcChans};
 
-	std::array<uint16_t, NumPots> pot_adc_buffer;
-	AdcDmaPeriph<Board::PotAdcConf> pot_adcs{pot_adc_buffer, Board::PotAdcChans};
+	static inline __attribute__((section(".noncachable"))) std::array<uint16_t, NumPots> pot_adc_buffer;
+	mdrivlib::AdcDmaPeriph<Brain::PotAdcConf> pot_adcs{pot_adc_buffer, Board::PotAdcChans};
 
-	std::array<Oversampler<16, uint16_t>, NumPots> pots;
-	std::array<Oversampler<8, uint16_t>, NumCVs> cvs;
+	static constexpr bool hardware_oversampling = Brain::PotAdcConf::oversample;
+	std::array<Oversampler<128, uint16_t>, NumPots> pots;
+	std::array<Oversampler<32, uint16_t>, NumCVs> cvs;
 
 public:
+	Controls() = default;
+
 	// Buttons/Switches:
 	Board::PingButton ping_button;
 	Board::RevButton reverse_button;
@@ -51,13 +49,13 @@ public:
 	enum class SwitchPos { Invalid = 0b00, Up = 0b01, Down = 0b10, Center = 0b11 };
 
 	uint16_t read_pot(PotAdcElement adcnum) {
-		if constexpr (debug)
+		if constexpr (hardware_oversampling)
 			return pot_adc_buffer[adcnum];
 		else
 			return pots[adcnum].val();
 	}
 	uint16_t read_cv(CVAdcElement adcnum) {
-		if constexpr (debug)
+		if constexpr (hardware_oversampling)
 			return cv_adc_buffer[adcnum];
 		else
 			return cvs[adcnum].val();
@@ -66,7 +64,7 @@ public:
 	SwitchPos read_time_switch() { return static_cast<SwitchPos>(time_switch.read()); }
 
 	void start() {
-		if constexpr (!debug) {
+		if constexpr (!hardware_oversampling) {
 			pot_adcs.register_callback([this] {
 				Debug::Pin1::high();
 				for (unsigned i = 0; auto &pot : pots)
