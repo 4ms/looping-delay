@@ -9,7 +9,6 @@
 #include "timer.hh"
 #include "util/countzip.hh"
 #include "util/math.hh"
-#include <cstdint>
 
 namespace LDKit
 {
@@ -44,7 +43,7 @@ struct Params {
 	void update() {
 		controls.update();
 
-		update_ping_jack();
+		update_trig_jacks();
 
 		update_pot_states();
 		update_cv_states();
@@ -96,13 +95,20 @@ struct Params {
 	void set_divmult(float new_divmult) { divmult_time = new_divmult; }
 
 private:
-	void update_ping_jack() {
+	void update_trig_jacks() {
 		if (timer.take_ping_changed()) {
 			controls.clk_out.high();
 			controls.ping_led.high();
 			ping_time = timer.get_ping_time();
 			if (!modes.ping_locked)
 				flags.set_time_changed();
+		}
+
+		if (controls.reverse_jack.is_just_pressed()) {
+			flags.set_rev_changed();
+		}
+		if (controls.inf_jack.is_just_pressed()) {
+			flags.set_inf_changed();
 		}
 	}
 
