@@ -2,7 +2,7 @@
 #include "hardware_tests/util.hh"
 #include "libhwtests/LEDTester.hh"
 
-namespace SamplerKit::HWTests
+namespace LDKit::HWTests
 {
 
 struct TestLEDs : ILEDTester {
@@ -61,4 +61,4 @@ struct TestLEDs : ILEDTester {
 		Util::pause_until_button_released();
 	}
 };
-} // namespace SamplerKit::HWTests
+} // namespace LDKit::HWTests

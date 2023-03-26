@@ -8,26 +8,27 @@
 #include "hardware_tests/buttons.hh"
 #include "hardware_tests/gate_ins.hh"
 #include "hardware_tests/leds.hh"
-#include "hardware_tests/sd.hh"
 #include "hardware_tests/util.hh"
 #include "libhwtests/CodecCallbacks.hh"
 #include "printf.h"
 #include "util/term_codes.hh"
 #include "util/zip.hh"
 
-namespace SamplerKit::HWTests
+namespace LDKit::HWTests
 {
 
 void all_lights_off() {
-	Board::PlayLED{}.set_color(Colors::off);
-	Board::RevLED{}.set_color(Colors::off);
-	Board::BankLED{}.set_color(Colors::off);
+	Board::PingLED{}.set(false);
+	Board::RevLED{}.set(false);
+	Board::HoldLED{}.set(false);
+	Board::LoopLED{}.set(false);
 }
 
 void print_test_name(std::string_view nm) {
 	printf_("\n-------------------------------------\n");
 	printf_("%s%.64s%s\n", Term::BoldYellow, nm.data(), Term::Normal);
 }
+
 void print_press_button() { printf_("%sPress button to continue%s\n", Term::BlinkGreen, Term::Normal); }
 void print_error(std::string_view err) { printf_("%s%.255s%s\n", Term::BoldRed, err.data(), Term::Normal); }
 
@@ -35,11 +36,6 @@ void run(Controls &controls) {
 	printf_("\n\n%sSampler Kit Hardware Test%s\n", Term::BoldGreen, Term::Normal);
 
 	//////////////////////////////
-	print_test_name("SD Card Test");
-	TestSDCard sdtest;
-	// sdtest.run_test();
-	sdtest.run_fatfs_test();
-
 	all_lights_off();
 	Util::pause_until_button_released();
 
@@ -157,4 +153,4 @@ void run(Controls &controls) {
 	while (true)
 		;
 }
-} // namespace SamplerKit::HWTests
+} // namespace LDKit::HWTests

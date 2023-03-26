@@ -5,7 +5,7 @@
 #include "libhwtests/GateInChecker.hh"
 #include "printf.h"
 
-namespace SamplerKit::HWTests
+namespace LDKit::HWTests
 {
 
 // Patch EndOut to Play, then Rev
@@ -55,4 +55,4 @@ struct TestGateIns : IGateInChecker {
 		return skip;
 	}
 };
-} // namespace SamplerKit::HWTests
+} // namespace LDKit::HWTests

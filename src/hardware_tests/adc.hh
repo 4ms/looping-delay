@@ -8,7 +8,7 @@
 #include "printf.h"
 #include <string_view>
 
-namespace SamplerKit::HWTests
+namespace LDKit::HWTests
 {
 
 struct TestADCs : IAdcChecker {
@@ -117,4 +117,4 @@ struct TestADCs : IAdcChecker {
 
 	void delay_ms(uint32_t x) override { HAL_Delay(x); }
 };
-} // namespace SamplerKit::HWTests
+} // namespace LDKit::HWTests
