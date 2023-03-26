@@ -110,8 +110,8 @@ private:
 		for (auto [i, pot] : enumerate(pot_state)) {
 			pot.cur_val = (int16_t)controls.read_pot(static_cast<PotAdcElement>(i++));
 
-			int16_t diff = std::abs(pot.cur_val - pot.prev_val);
-			if (diff > Brain::MinPotChange)
+			int16_t diff = pot.cur_val - pot.prev_val;
+			if (std::abs(diff) > Brain::MinPotChange)
 				pot.track_moving_ctr = 250;
 
 			if (pot.track_moving_ctr) {
@@ -139,8 +139,8 @@ private:
 			if (op_mode == OperationMode::Calibrate) {
 				// TODO: use raw values, without calibration offset
 			}
-			int16_t diff = std::abs(cv.cur_val - cv.prev_val);
-			if (diff > Brain::MinCVChange) {
+			int16_t diff = cv.cur_val - cv.prev_val;
+			if (std::abs(diff) > Brain::MinCVChange) {
 				cv.delta = diff;
 				cv.prev_val = cv.cur_val;
 			}
@@ -295,7 +295,8 @@ private:
 
 	void update_scroll_loop_amount() {
 		if (pot_state[FeedbackPot].moved_while_inf_down) {
-			flags.add_scroll_amt((float)pot_state[FeedbackPot].delta /* + cv_delta*/ / 4096.f);
+			float scroll_amt = (float)pot_state[FeedbackPot].delta / 4096.f;
+			flags.add_scroll_amt(scroll_amt);
 			pot_state[FeedbackPot].moved_while_inf_down = false;
 		}
 	}
