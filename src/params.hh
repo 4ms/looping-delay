@@ -111,7 +111,7 @@ private:
 			pot.cur_val = (int16_t)controls.read_pot(static_cast<PotAdcElement>(i++));
 
 			int16_t diff = std::abs(pot.cur_val - pot.prev_val);
-			if (diff > Board::MinPotChange)
+			if (diff > Brain::MinPotChange)
 				pot.track_moving_ctr = 250;
 
 			if (pot.track_moving_ctr) {
@@ -140,7 +140,7 @@ private:
 				// TODO: use raw values, without calibration offset
 			}
 			int16_t diff = std::abs(cv.cur_val - cv.prev_val);
-			if (diff > Board::MinCVChange) {
+			if (diff > Brain::MinCVChange) {
 				cv.delta = diff;
 				cv.prev_val = cv.cur_val;
 			}
@@ -220,7 +220,6 @@ private:
 		}
 	}
 
-	GCC_OPTIMIZE_OFF
 	void update_leds() {
 		if (modes.inf == InfState::TransitioningOn)
 			controls.inf_led.high();

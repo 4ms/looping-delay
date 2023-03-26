@@ -23,9 +23,9 @@ void main() {
 	using AudioOutBlock = AudioStreamConf::AudioOutBlock;
 
 	Controls controls;
-	if (Board::PingButton::PinT::read() && Board::RevButton::PinT::read()) {
-		HWTests::run(controls);
-	}
+	// if (Board::PingButton::PinT::read() && Board::RevButton::PinT::read()) {
+	HWTests::run(controls);
+	// }
 
 	Flags flags;
 	Timer timer;

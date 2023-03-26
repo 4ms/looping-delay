@@ -14,15 +14,14 @@ struct System {
 	System() {
 		mdrivlib::System::SetVectorTable(AppStartAddr);
 		mdrivlib::SystemClocks::init_clocks(osc_conf, clk_conf, rcc_periph_conf);
-		// mdrivlib::SDRAMPeriph sdram{SDRAM_conf, SdramBank, SdramKernelClock};
-
-		SystemTarget::init();
 
 		Console::init();
 		Debug::Pin0{};
 		Debug::Pin1{};
 		Debug::Pin2{};
 		Debug::Pin3{};
+
+		SystemTarget::init();
 
 		__HAL_DBGMCU_FREEZE_TIM6();
 		__HAL_DBGMCU_FREEZE_TIM7();

@@ -3,7 +3,7 @@
 #include "drivers/i2c_config_struct.hh"
 #include "drivers/sai_config_struct.hh"
 
-namespace SamplerKit::Board
+namespace LDKit::Board
 {
 
 using mdrivlib::GPIO;
@@ -78,4 +78,4 @@ const SaiConfig sai_conf = {
 	.sync_receive_from = SaiConfig::NoReceiveSync,
 };
 
-} // namespace SamplerKit::Board
+} // namespace LDKit::Board

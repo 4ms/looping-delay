@@ -10,7 +10,7 @@ class Timer {
 	uint32_t _ping_time = 0;
 	bool _ping_changed = true;
 	Board::PingJack ping_jack;
-	mdrivlib::PinChangeInt<Board::LRClkPinChangeConf> pin_change;
+	mdrivlib::PinChangeInt<Brain::LRClkPinChangeConf> pin_change;
 
 	// uint32_t _clkout_tmr = 0;
 	uint32_t _pingled_tmr = 0;

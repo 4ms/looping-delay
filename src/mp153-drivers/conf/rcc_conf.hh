@@ -1,7 +1,7 @@
 #pragma once
 #include "drivers/stm32xx.h"
 
-namespace SamplerKit
+namespace LDKit
 {
 const RCC_OscInitTypeDef osc_conf = {
 	.PLL3 =
@@ -56,4 +56,4 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_conf = {
 
 };
 
-} // namespace SamplerKit
+} // namespace LDKit
