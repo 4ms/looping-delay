@@ -94,30 +94,5 @@ public:
 		reverse_jack.update();
 		inf_jack.update();
 	}
-
-	void test() {
-		ping_button.is_high();
-		reverse_button.is_high();
-		inf_button.is_high();
-
-		// ping_jack.is_high();
-		reverse_jack.is_high();
-		inf_jack.is_high();
-
-		ping_led.high();
-		inf_led.high();
-		reverse_led.high();
-		loop_led.high();
-
-		ping_led.low();
-		inf_led.low();
-		reverse_led.low();
-		loop_led.low();
-
-		clk_out.high();
-		clk_out.low();
-		loop_out.high();
-		loop_out.low();
-	}
 };
 } // namespace LDKit
