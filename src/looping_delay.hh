@@ -129,7 +129,7 @@ public:
 			int32_t rd = ((float)mem_rd * epp_lut[phase]) + ((float)mem_rd_dest * epp_lut[4095 - phase]);
 			rd *= 256;
 
-			rd = clip(rd);
+			// rd = clip(rd);
 
 			// Attenuate the delayed signal with REGEN
 			int32_t regen = (float)rd * params.feedback;
@@ -148,10 +148,10 @@ public:
 			}
 
 			// Wet/dry mix, as determined by the MIX parameter
-			int32_t mix = clip(((float)dry * params.mix_dry) + ((float)rd * params.mix_wet));
+			int32_t mix = ((float)dry * params.mix_dry) + ((float)rd * params.mix_wet);
 
-			out.chan[0] = auxout;
-			out.chan[1] = mix; // TODO: + CODEC_DAC_CALIBRATION_DCOFFSET
+			out.chan[0] = clip(auxout);
+			out.chan[1] = clip(mix); // TODO: + CODEC_DAC_CALIBRATION_DCOFFSET
 
 			// High-pass filter before writing to memory
 			if (params.settings.runaway_dc_block)
@@ -259,7 +259,7 @@ public:
 	//// util:
 
 	int32_t clip(int32_t val) {
-		static constexpr size_t Max24bit = (1U << 23) - 1U;
+		constexpr size_t Max24bit = (1U << 23);
 		if (params.settings.soft_clip)
 			val = compress<Max24bit, 0.75f>(val);
 		else
