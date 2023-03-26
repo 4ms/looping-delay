@@ -32,20 +32,20 @@ void main() {
 	Params params{controls, flags, timer};
 	DelayBuffer &audio_buffer = get_delay_buffer();
 	LoopingDelay looping_delay{params, flags, audio_buffer};
-	// TestAudio looping_delay{params};
-	AudioStream audio(
-		[&looping_delay, &params](const AudioInBlock &in, AudioOutBlock &out) { looping_delay.update(in, out); });
-	mdrivlib::Timekeeper params_update_task(Brain::param_update_task_conf, [&params]() { params.update(); });
+	AudioStream audio([&looping_delay, &params](const AudioInBlock &in, AudioOutBlock &out) {
+		params.update();
+		looping_delay.update(in, out);
+	});
+
+	// mdrivlib::Timekeeper params_update_task(Brain::param_update_task_conf, [&params]() { params.update(); });
 
 	// TODO: Make Params thread-safe:
 	// Use double-buffering (two Params structs), and LoopingDelay is constructed with a Params*
 	// And right before looping_delay.update(), call params.load_updated_values()
 
-	__HAL_DBGMCU_FREEZE_TIM6();
-
 	timer.start();
 	controls.start();
-	params_update_task.start();
+	// params_update_task.start();
 	audio.start();
 
 	while (true) {
