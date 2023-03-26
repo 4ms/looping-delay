@@ -427,7 +427,7 @@ public:
 			std::swap(hi, lo);
 
 		uint32_t loop_length = (hi > lo) ? (hi - lo) : hi + (Brain::MemorySizeBytes - lo);
-		uint32_t loop_shift = (uint32_t)(amt * (float)loop_length);
+		int32_t loop_shift = (int32_t)(amt * (float)loop_length);
 		loop_shift /= MemorySampleSize;
 		loop_start = Util::offset_samples(loop_start, loop_shift);
 		loop_end = Util::offset_samples(loop_end, loop_shift);

@@ -35,7 +35,7 @@ public:
 		return t;
 	}
 	float take_scroll_amt() {
-		auto amt = _scroll_loop_amt;
+		float amt = _scroll_loop_amt;
 		_scroll_loop_amt = 0.f;
 		return amt;
 	}
