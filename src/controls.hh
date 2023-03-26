@@ -1,5 +1,5 @@
 #pragma once
-#include "analog_in_ext.hh"
+// #include "drivers/analog_in_ext.hh"
 #include "conf/board_conf.hh"
 #include "debug.hh"
 #include "drivers/adc_builtin.hh"
