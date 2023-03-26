@@ -35,7 +35,7 @@ void main() {
 	// TestAudio looping_delay{params};
 	AudioStream audio(
 		[&looping_delay, &params](const AudioInBlock &in, AudioOutBlock &out) { looping_delay.update(in, out); });
-	mdrivlib::Timekeeper params_update_task(Board::param_update_task_conf, [&params]() { params.update(); });
+	mdrivlib::Timekeeper params_update_task(Brain::param_update_task_conf, [&params]() { params.update(); });
 
 	// TODO: Make Params thread-safe:
 	// Use double-buffering (two Params structs), and LoopingDelay is constructed with a Params*
@@ -53,4 +53,4 @@ void main() {
 	}
 }
 
-void recover_from_task_fault() { NVIC_SystemReset(); }
+void recover_from_task_fault() { LDKit::SystemTarget::restart(); }

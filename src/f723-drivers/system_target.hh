@@ -10,7 +10,9 @@ struct SystemTarget {
 	static void init() {
 		mdrivlib::SDRAMPeriph sdram{Brain::SDRAM_conf, Brain::SdramBank, Brain::SdramKernelClock};
 		SCB_InvalidateICache();
-		SCB_DisableICache();
+		SCB_EnableICache();
 	}
+
+	static void restart() { NVIC_SystemReset(); }
 };
 } // namespace LDKit
