@@ -43,4 +43,4 @@ set(TARGET_SOURCES
 )
 
 set_hal_sources(HAL_SOURCES stm32mp1)
-create_target(${target})
+create_target(${target} stm32mp1_ca7)
