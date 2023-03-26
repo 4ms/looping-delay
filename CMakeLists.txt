@@ -17,7 +17,7 @@ project(
 )
 
 add_subdirectory(src/f723-drivers f723)
-# add_subdirectory(src/mp153-drivers mp153)
+add_subdirectory(src/mp153-drivers mp153)
 
 add_custom_target(
   tests ALL
