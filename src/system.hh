@@ -4,6 +4,7 @@
 #include "conf/sdram_conf.hh"
 #include "drivers/sdram.hh"
 #include "drivers/system.hh"
+#include "drivers/system_clocks.hh"
 
 namespace LDKit
 {
