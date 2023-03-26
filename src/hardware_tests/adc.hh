@@ -44,8 +44,11 @@ struct TestADCs : IAdcChecker {
 		if (adctype == AdcType::BipolarCV)
 			val = controls.read_cv(TimeCV);
 
-		if (adctype == AdcType::UnipolarCV)
+		if (adctype == AdcType::UnipolarCV) {
 			val = controls.read_cv(static_cast<CVAdcElement>(adc_i + 1));
+			if (adc_i > 2)
+				printf_("Bug: adc_i = %d\n", adc_i);
+		}
 
 		if (val > window_max)
 			window_max = val;
@@ -96,11 +99,11 @@ struct TestADCs : IAdcChecker {
 		}
 
 		if (state == AdcCheckState::AtMin) {
-			Board::RevLED{}.set(false);
+			Board::HoldLED{}.set(false);
 		}
 
 		if (state == AdcCheckState::AtMax)
-			Board::HoldLED{}.set(false);
+			Board::RevLED{}.set(false);
 
 		if (state == AdcCheckState::AtCenter)
 			Board::PingLED{}.set(false);

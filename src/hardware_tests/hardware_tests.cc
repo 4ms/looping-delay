@@ -11,6 +11,8 @@
 #include "hardware_tests/util.hh"
 #include "libhwtests/CodecCallbacks.hh"
 #include "printf.h"
+#include "switch.hh"
+#include "system_target.hh"
 #include "util/term_codes.hh"
 #include "util/zip.hh"
 
@@ -44,8 +46,7 @@ void run(Controls &controls) {
 
 	//////////////////////////////
 	print_test_name("LED Test");
-	printf_("Press the Play button to verify each LED. You'll see red=>green=>blue\n");
-	printf_("The LEDs will each turn white for you to verify color balance\n");
+	printf_("Press the Play button to verify each LED\n");
 	TestLEDs ledtester;
 	ledtester.run_test();
 
@@ -57,17 +58,25 @@ void run(Controls &controls) {
 	buttontester.run_test();
 
 	//////////////////////////////
+	print_test_name("Switch Test");
+	printf_("Flip the switch to all 3 positions\n");
+	all_lights_off();
+	TestSwitch switchtester;
+	switchtester.run_test();
+
+	//////////////////////////////
 	print_test_name("Audio and Gate Output Test");
 	SkewedTriOsc oscL{500, 0.3, 1, -1, 0, 48000};
 	SkewedTriOsc oscR{3700, 0.85, 1, -1, 0, 48000};
 	AudioStream audio([&oscL, &oscR](const AudioStreamConf::AudioInBlock &in, AudioStreamConf::AudioOutBlock &out) {
-		static bool loopclk;
+		static uint32_t loopclk = 0;
 		static uint32_t clkout = 0;
 		for (auto &o : out) {
 			o.chan[0] = oscR.update() * 0x7FFFFF;
 			o.chan[1] = oscL.update() * 0x7FFFFF;
 		}
-		Board::LoopClkOut::set(loopclk);
+		Board::LoopClkOut::set(loopclk & 0b1);
+		loopclk++;
 		Board::ClkOut::set((clkout & 0b11) == 0b00);
 		clkout++;
 	});
@@ -76,7 +85,7 @@ void run(Controls &controls) {
 	printf_("  1) Out Left: 500Hz right-leaning triangle, -10V to +10V [+/- 0.3V]\n");
 	printf_("  2) Out Right: 3700Hz left-leaning triangle, -10V to +10V [+/- 0.3V]\n");
 	printf_("  3) Loop Clk Out: 750Hz square wave, 0V to +8V [+/- 0.5V]\n");
-	printf_("  4) Clk Out: 375Hz square wave, 0V to +8V [+/- 0.5V]\n");
+	printf_("  4) Clk Out: 375Hz pulse wave (High 25%, low 75%), 0V to +8V [+/- 0.5V]\n");
 
 	print_press_button();
 	Util::flash_mainbut_until_pressed();
@@ -119,7 +128,7 @@ void run(Controls &controls) {
 
 	//////////////////////////////
 	print_test_name("Gate Input Test");
-	printf_("Patch End Out into Play Trig, then Rev Trig\n");
+	printf_("Patch Clock Out into Hold Trig, then Ping Trig, then Rev Trig\n");
 	TestGateIns gateintester{controls};
 	gateintester.run_test();
 
@@ -150,6 +159,9 @@ void run(Controls &controls) {
 
 	printf_("Please reboot\n"); //, or system will automatically reboot in 5 seconds\n.");
 	all_lights_off();
+
+	HAL_Delay(200);
+	SystemTarget::restart();
 
 	while (true)
 		;
