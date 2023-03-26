@@ -66,16 +66,19 @@ public:
 	void start() {
 		if constexpr (!hardware_oversampling) {
 			pot_adcs.register_callback([this] {
-				Debug::Pin1::high();
+				// F723: 168kHz. With 128 O.S. = 1.3kHz
+				// Debug::Pin1::high();
 				for (unsigned i = 0; auto &pot : pots)
 					pot.add_val(pot_adc_buffer[i++]);
-				Debug::Pin1::low();
+				// Debug::Pin1::low();
 			});
 			cv_adcs.register_callback([this] {
-				Debug::Pin0::high();
+				// F723: 168kHz. With 32 O.S. = 5kHz
+				// Step response is worst-case 2 windows = 32 * 2 = 64 / 168kHz = 0.38ms
+				// Debug::Pin0::high();
 				for (unsigned i = 0; auto &cv : cvs)
 					cv.add_val(cv_adc_buffer[i++]);
-				Debug::Pin0::low();
+				// Debug::Pin0::low();
 			});
 		}
 		pot_adcs.start();
