@@ -1,6 +1,5 @@
 #pragma once
 #include "brain_pinout.hh"
-#include "conf/sdram_conf.hh"
 #include "drivers/adc_builtin_conf.hh"
 #include "drivers/dma_config_struct.hh"
 #include "drivers/pin.hh"
