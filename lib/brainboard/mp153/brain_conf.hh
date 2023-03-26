@@ -62,13 +62,10 @@ struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 };
 
 // memory_conf:
-const inline uint32_t MemoryStartAddr = A7_HEAP;
-const inline uint32_t MemorySizeBytes = A7_HEAP_SZ;
-const inline uint32_t MemoryEndAddr = MemoryStartAddr + MemorySizeBytes;
-
-// using RAMSampleT = int16_t;
-// constexpr inline uint32_t MemorySampleSize = sizeof(RAMSampleT);
-// constexpr inline uint32_t MemorySamplesNum = MemorySizeBytes / MemorySampleSize;
+// FIXME: this should not change from project to project
+constexpr inline uint32_t MemoryStartAddr = 0xC500'0000;
+constexpr inline uint32_t MemorySizeBytes = 175 * 1024 * 1024;				 // 0x0AF0'0000
+constexpr inline uint32_t MemoryEndAddr = MemoryStartAddr + MemorySizeBytes; // 0xCFF0'0000
 
 // clock sync conf
 struct LRClkPinChangeConf : mdrivlib::DefaultPinChangeConf {

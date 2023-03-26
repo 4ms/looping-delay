@@ -63,10 +63,6 @@ constexpr inline uint32_t MemoryStartAddr = 0xD0000000;
 constexpr inline uint32_t MemorySizeBytes = 0x00800000;
 constexpr inline uint32_t MemoryEndAddr = MemoryStartAddr + MemorySizeBytes;
 
-using RAMSampleT = int16_t;
-constexpr inline uint32_t MemorySampleSize = sizeof(RAMSampleT);
-constexpr inline uint32_t MemorySamplesNum = MemorySizeBytes / MemorySampleSize;
-
 // clock sync conf
 struct LRClkPinChangeConf : mdrivlib::DefaultPinChangeConf {
 	static constexpr uint32_t pin = 4;

@@ -34,21 +34,21 @@ struct Util {
 		uint32_t t_addr;
 
 		// convert samples to addresses
-		offset *= Board::MemorySampleSize;
+		offset *= MemorySampleSize;
 
 		if (subtract)
 			offset = -offset;
 		t_addr = base_addr + offset;
 
-		while (t_addr >= Board::MemoryEndAddr)
-			t_addr = t_addr - Board::MemorySizeBytes;
-		while (t_addr < Board::MemoryStartAddr)
-			t_addr = t_addr + Board::MemorySizeBytes;
+		while (t_addr >= Brain::MemoryEndAddr)
+			t_addr = t_addr - Brain::MemorySizeBytes;
+		while (t_addr < Brain::MemoryStartAddr)
+			t_addr = t_addr + Brain::MemorySizeBytes;
 
 		// std::clamp(t_addr, Board::MemoryStartAddr, Board::MemoryEndAddr);
 
 		// addresses must be aligned
-		constexpr uint32_t mask = (UINT32_MAX - Board::MemorySampleSize) + 1; // 0xFFFFFFFE;
+		constexpr uint32_t mask = (UINT32_MAX - MemorySampleSize) + 1; // 0xFFFFFFFE;
 		t_addr = t_addr & mask;
 
 		return t_addr;
@@ -70,10 +70,18 @@ static_assert(Util::in_between(3, 3, 3, 0), "zero length, not reverse, mid equal
 static_assert(!Util::in_between(2, 3, 3, 1), "zero length, reverse, mid not equal");
 static_assert(!Util::in_between(2, 3, 3, 0), "zero length, not reverse, mid not equal");
 
-static_assert(Util::offset_samples(0xD0000000, 8) == 0xD0000010, "add");
-static_assert(Util::offset_samples(0xD0000000, -8) == 0xD07FFFF0, "subtract across loop boundary");
-static_assert(Util::offset_samples(0xD0000000, 8, 1) == 0xD07FFFF0, "subtract across loop boundary");
-static_assert(Util::offset_samples(0xD07FFFF8, 8) == 0xD0000008, "add across loop boundary");
-static_assert(Util::offset_samples(0xD07FFFF8, -8) == 0xD07FFFE8, "subtract");
-static_assert(Util::offset_samples(0xD0000002, 0x30000000) == 0xD0000002, "integer overflow");
+static_assert(Util::offset_samples(Brain::MemoryStartAddr, 8) == Brain::MemoryStartAddr + 0x10, "add");
+static_assert(Util::offset_samples(Brain::MemoryStartAddr, -8) == Brain::MemoryEndAddr - 0x10,
+			  "subtract across loop boundary");
+static_assert(Util::offset_samples(Brain::MemoryStartAddr, 8, 1) == Brain::MemoryEndAddr - 0x10,
+			  "subtract across loop boundary");
+static_assert(Util::offset_samples(Brain::MemoryEndAddr - 0x8, 8) == Brain::MemoryStartAddr + 0x8,
+			  "add across loop boundary");
+static_assert(Util::offset_samples(Brain::MemoryEndAddr - 0x8, -8) == (Brain::MemoryEndAddr - 0x18), "subtract");
+
+static_assert(Util::offset_samples(Brain::MemoryStartAddr + 2, Brain::MemorySizeBytes) == Brain::MemoryStartAddr + 2,
+			  "integer overflow");
+static_assert(Util::offset_samples(Brain::MemoryStartAddr + 2, Brain::MemorySizeBytes * 2) ==
+				  Brain::MemoryStartAddr + 2,
+			  "integer overflow");
 } // namespace LDKit

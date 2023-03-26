@@ -12,8 +12,8 @@ struct Memory {
 
 	static uint32_t ensure_valid(uint32_t addr) {
 		// Enforce valid addr range
-		if ((addr < Board::MemoryStartAddr) || (addr > Board::MemoryEndAddr))
-			addr = Board::MemoryStartAddr;
+		if ((addr < Brain::MemoryStartAddr) || (addr > Brain::MemoryEndAddr))
+			addr = Brain::MemoryStartAddr;
 		// even addresses only
 		addr &= 0xFFFFFFFE;
 		return addr;
@@ -23,7 +23,7 @@ struct Memory {
 		uint32_t i;
 
 		// On F427: Takes 700ms to clear the channel buffer in 32-bit chunks, roughly 83ns per write
-		for (i = Board::MemoryStartAddr; i < Board::MemoryEndAddr; i += 4)
+		for (i = Brain::MemoryStartAddr; i < Brain::MemoryEndAddr; i += 4)
 			*((uint32_t *)i) = 0x00000000;
 	}
 
@@ -37,7 +37,7 @@ struct Memory {
 		addr = ensure_valid(addr);
 		for (auto &s : rd_buff) {
 			// SDRAM_Wait();
-			s = *((Board::RAMSampleT *)(addr));
+			s = *((RAMSampleT *)(addr));
 
 			addr = Util::offset_samples(addr, 1, reverse);
 
@@ -52,7 +52,7 @@ struct Memory {
 		addr = ensure_valid(addr);
 		for (auto s : wr_buff) {
 			// SDRAM_Wait();
-			*((Board::RAMSampleT *)(addr)) = s;
+			*((RAMSampleT *)(addr)) = s;
 			addr = Util::offset_samples(addr, 1, reverse);
 		}
 	}
@@ -74,11 +74,11 @@ struct Memory {
 		addr = ensure_valid(addr);
 		for (auto s : wr_buff) {
 			// SDRAM_Wait();
-			rd = *((Board::RAMSampleT *)(addr));
+			rd = *((RAMSampleT *)(addr));
 			mix = ((float)s * fade) + ((float)rd * (1.f - fade));
 
 			// SDRAM_Wait();
-			*((Board::RAMSampleT *)(addr)) = mix;
+			*((RAMSampleT *)(addr)) = mix;
 
 			addr = Util::offset_samples(addr, 1, reverse);
 		}

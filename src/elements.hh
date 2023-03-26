@@ -1,5 +1,5 @@
 #pragma once
-
+#include "brain_conf.hh"
 #include <cstdint>
 
 namespace LDKit
@@ -26,5 +26,9 @@ constexpr static uint32_t NumAdcs = NumPots + NumCVs;
 enum TrigInJackElement : uint32_t {
 	PingJack,
 };
+
+using RAMSampleT = int16_t;
+constexpr inline uint32_t MemorySampleSize = sizeof(RAMSampleT);
+constexpr inline uint32_t MemorySamplesNum = Brain::MemorySizeBytes / MemorySampleSize;
 
 } // namespace LDKit

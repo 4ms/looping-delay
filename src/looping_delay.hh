@@ -50,8 +50,8 @@ public:
 		: params{params}
 		, flags{flags}
 		, buf{delay_buffer}
-		, read_head{Board::MemoryStartAddr}
-		, write_head{Board::MemoryStartAddr + 12000} {
+		, read_head{Brain::MemoryStartAddr}
+		, write_head{Brain::MemoryStartAddr + 12000} {
 		Memory::clear();
 	}
 
@@ -227,7 +227,6 @@ public:
 	}
 
 	// When we near the end of the loop, start a crossfade to the beginning
-	GCC_OPTIMIZE_OFF
 	void start_looping_crossfade() {
 		constexpr uint32_t sz = AudioStreamConf::BlockSize * 2;
 		params.reset_loop();
@@ -247,7 +246,7 @@ public:
 				loop_size = -loop_size;
 
 			uint32_t f_addr =
-				Util::offset_samples(read_head, (loop_size + sz) / Board::MemorySampleSize, !params.modes.reverse);
+				Util::offset_samples(read_head, (loop_size + sz) / MemorySampleSize, !params.modes.reverse);
 
 			// From DLD code : "Issue: clearing a queued divmult time"
 			start_crossfade(f_addr);
@@ -277,7 +276,7 @@ public:
 		uint32_t t_divmult_time = use_ping_time * params.time;
 		// t_divmult_time = t_divmult_time & 0xFFFFFFFC; //force it to be a multiple of 4
 
-		std::clamp(t_divmult_time, (uint32_t)0, Board::MemorySamplesNum);
+		std::clamp(t_divmult_time, (uint32_t)0, MemorySamplesNum);
 
 		if (params.divmult_time == t_divmult_time)
 			return;
@@ -321,7 +320,6 @@ public:
 		read_fade_ending_addr = addr;
 	}
 
-	GCC_OPTIMIZE_OFF
 	void increment_crossfading() {
 		if (read_fade_phase > 0.0f) {
 			read_fade_phase += params.settings.crossfade_rate;
@@ -428,9 +426,9 @@ public:
 		if (params.modes.reverse)
 			std::swap(hi, lo);
 
-		uint32_t loop_length = (hi > lo) ? (hi - lo) : hi + (Board::MemorySizeBytes - lo);
+		uint32_t loop_length = (hi > lo) ? (hi - lo) : hi + (Brain::MemorySizeBytes - lo);
 		uint32_t loop_shift = (uint32_t)(amt * (float)loop_length);
-		loop_shift /= Board::MemorySampleSize;
+		loop_shift /= MemorySampleSize;
 		loop_start = Util::offset_samples(loop_start, loop_shift);
 		loop_end = Util::offset_samples(loop_end, loop_shift);
 	}
