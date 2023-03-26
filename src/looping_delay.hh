@@ -259,7 +259,7 @@ public:
 	//// util:
 
 	int32_t clip(int32_t val) {
-		static constexpr size_t Max24bit = (1 << 23) - 1;
+		static constexpr size_t Max24bit = (1U << 23) - 1U;
 		if (params.settings.soft_clip)
 			val = compress<Max24bit, 0.75f>(val);
 		else
