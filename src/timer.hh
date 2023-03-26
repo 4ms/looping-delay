@@ -7,7 +7,7 @@ namespace LDKit
 
 class Timer {
 	uint32_t _ping_tmr = 0;
-	uint32_t _ping_time = 0;
+	uint32_t _ping_time = 12000;
 	bool _ping_changed = true;
 	Board::PingJack ping_jack;
 	mdrivlib::PinChangeInt<Brain::LRClkPinChangeConf> pin_change;
