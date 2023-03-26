@@ -4,6 +4,7 @@
 #include "debug.hh"
 #include "delay_buffer.hh"
 #include "drivers/timekeeper.hh"
+#include "hardware_tests.hh"
 #include "looping_delay.hh"
 #include "system.hh"
 #include "timer.hh"
@@ -21,12 +22,11 @@ void main() {
 	using AudioInBlock = AudioStreamConf::AudioInBlock;
 	using AudioOutBlock = AudioStreamConf::AudioOutBlock;
 
-	Debug::Pin0{};
-	Debug::Pin1{};
-	Debug::Pin2{};
-	Debug::Pin3{};
-
 	Controls controls;
+	if (Board::PingButton::PinT::read() && Board::RevButton::PinT::read()) {
+		HWTests::run(controls);
+	}
+
 	Flags flags;
 	Timer timer;
 	Params params{controls, flags, timer};

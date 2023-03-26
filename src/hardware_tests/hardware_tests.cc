@@ -33,7 +33,7 @@ void print_press_button() { printf_("%sPress button to continue%s\n", Term::Blin
 void print_error(std::string_view err) { printf_("%s%.255s%s\n", Term::BoldRed, err.data(), Term::Normal); }
 
 void run(Controls &controls) {
-	printf_("\n\n%sSampler Kit Hardware Test%s\n", Term::BoldGreen, Term::Normal);
+	printf_("\n\n%sLooping Delay Kit Hardware Test%s\n", Term::BoldGreen, Term::Normal);
 
 	//////////////////////////////
 	all_lights_off();

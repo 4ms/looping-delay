@@ -2,6 +2,9 @@
 #include "drivers/sdram_IS42S16400J-7BL.hh"
 #include "drivers/sdram_config_struct.hh"
 
+namespace Brain
+{
+
 using mdrivlib::GPIO;
 using mdrivlib::PinAF;
 using mdrivlib::PinNum;
@@ -59,3 +62,5 @@ constexpr inline mdrivlib::SDRAMConfig SDRAM_conf = {
 
 constexpr inline mdrivlib::SDRAMBank SdramBank = mdrivlib::SDRAMBank::Bank2;
 constexpr inline uint32_t SdramKernelClock = 216'000'000;
+
+} // namespace Brain

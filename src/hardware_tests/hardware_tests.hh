@@ -1,7 +1,7 @@
 #pragma once
 #include "controls.hh"
 
-namespace SamplerKit::HWTests
+namespace LDKit::HWTests
 {
 void run(Controls &controls);
 }
