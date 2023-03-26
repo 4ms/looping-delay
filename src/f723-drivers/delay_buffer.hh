@@ -6,10 +6,10 @@
 namespace LDKit
 {
 
-using DelayBuffer = std::array<int16_t, Board::MemorySizeBytes / sizeof(int16_t)>;
+using DelayBuffer = std::array<int16_t, Brain::MemorySizeBytes / sizeof(int16_t)>;
 
 static inline DelayBuffer &get_delay_buffer() {
-	DelayBuffer::value_type *p = reinterpret_cast<DelayBuffer::value_type *>(Board::MemoryStartAddr);
+	DelayBuffer::value_type *p = reinterpret_cast<DelayBuffer::value_type *>(Brain::MemoryStartAddr);
 	DelayBuffer *arr = new (p) DelayBuffer;
 	return (*arr);
 }
