@@ -28,11 +28,11 @@ using RevButton = mdrivlib::DebouncedButton<Brain::Pin::D10, Inverted>;
 
 using TimeSwitch = mdrivlib::Switch3Pos<Brain::Pin::D17, Brain::Pin::D16>;
 
-using PingJack = mdrivlib::DebouncedPin<PinDef{GPIO::I, PinNum::_1}, Normal>;
-using HoldJack = mdrivlib::DebouncedPin<PinDef{GPIO::I, PinNum::_5}, Normal>;
-using RevJack = mdrivlib::DebouncedPin<PinDef{GPIO::B, PinNum::_8}, Normal>;
+using PingJack = mdrivlib::DebouncedPin<Brain::Pin::D6, Normal>;
+using HoldJack = mdrivlib::DebouncedPin<Brain::Pin::D2, Normal>;
+using RevJack = mdrivlib::DebouncedPin<Brain::Pin::D3, Normal>;
 
-using PingLED = mdrivlib::FPin<GPIO::A, PinNum::_2, Output, Normal>;
+using PingLED = mdrivlib::FPin<Brain::Pin::D14.gpio, Brain::Pin::D14.pin, Output, Normal>;
 using HoldLED = mdrivlib::FPin<GPIO::I, PinNum::_0, Output, Normal>;
 using RevLED = mdrivlib::FPin<GPIO::D, PinNum::_2, Output, Normal>;
 using LoopLED = mdrivlib::FPin<GPIO::A, PinNum::_8, Output, Normal>;
