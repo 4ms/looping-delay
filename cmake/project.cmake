@@ -56,7 +56,7 @@ endfunction()
 
 # ############### Common commands #####################
 
-function(create_target target)
+function(create_target target driver_arch)
   message("Creating target ${target}")
 
   # Create <target>_ARCH: Interface library for defs/options common to all builds on this architecture
@@ -109,10 +109,10 @@ function(create_target target)
     ${root}/lib/mdrivlib/drivers/timekeeper.cc
     ${root}/lib/mdrivlib/drivers/i2c.cc
     ${root}/lib/mdrivlib/drivers/codec_PCM3060.cc
-    ${root}/lib/mdrivlib/drivers/hal_handlers.cc
-    ${root}/lib/mdrivlib/drivers/sdram.cc
-    ${root}/lib/mdrivlib/target/stm32f7xx/drivers/interrupt_handler.cc
-    ${root}/lib/mdrivlib/target/stm32f7xx/drivers/sai_tdm.cc
+    ${root}/lib/mdrivlib/target/${driver_arch}/drivers/sai_tdm.cc
+    ${root}/lib/mdrivlib/target/${driver_arch}/drivers/interrupt_handler.cc
+    ${root}/lib/mdrivlib/target/${driver_arch}/boot/startup.s
+    ${root}/lib/mdrivlib/target/${driver_arch}/boot/system_init.c
     ${root}/lib/libhwtests/src/AdcChecker.cc
     ${root}/lib/libhwtests/src/AdcRangeChecker.cc
     ${root}/lib/libhwtests/src/ButtonChecker.cc
@@ -125,10 +125,10 @@ function(create_target target)
     ${root}/src/libcpp_stub.cc
     ${root}/src/main.cc
     ${root}/src/console.cc
-    # ${root}/src/hardware_tests/hardware_tests.cc
+    ${root}/src/hardware_tests/hardware_tests.cc
     # ${root}/src/calibration_storage.cc
     # Printf:
-    # ${root}/lib/printf/printf.c
+    ${root}/lib/printf/printf.c
     ${TARGET_SOURCES}
     ${HAL_SOURCES}
   )

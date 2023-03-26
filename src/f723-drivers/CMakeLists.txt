@@ -6,6 +6,8 @@ project(f723 LANGUAGES C CXX ASM)
 message("Configuring f723")
 include(${CMAKE_SOURCE_DIR}/cmake/project.cmake)
 
+set(root ${CMAKE_SOURCE_DIR})
+
 set(target 723)
 set(TARGET_LINK_SCRIPT ${CMAKE_SOURCE_DIR}/linker/STM32F723IETx_FLASH.ld)
 set(ARCH_DEFINES STM32F723xx STM32F7 ARM_MATH_CM7)
@@ -23,10 +25,9 @@ set(TARGET_INCLUDES
 set(TARGET_SOURCES
     ${root}/lib/mdrivlib/drivers/sdram.cc
     ${root}/lib/mdrivlib/drivers/hal_handlers.cc
-    ${root}/lib/mdrivlib/target/stm32f7xx/drivers/sai_tdm.cc
-    ${root}/lib/mdrivlib/target/stm32f7xx/drivers/interrupt_handler.cc
-    ${root}/lib/mdrivlib/target/stm32f7xx/boot/startup.s
-    ${root}/lib/mdrivlib/target/stm32f7xx/boot/system_init.c
+    # ${root}/lib/mdrivlib/target/stm32f7xx/drivers/sai_tdm.cc
+    # ${root}/lib/mdrivlib/target/stm32f7xx/drivers/interrupt_handler.cc
+    # ${root}/lib/mdrivlib/target/stm32f7xx/boot/startup.s ${root}/lib/mdrivlib/target/stm32f7xx/boot/system_init.c
 )
 
 set(WAV_ENCODE_PYTHON_CMD
@@ -39,7 +40,7 @@ set(WAV_ENCODE_PYTHON_CMD
 )
 
 set_hal_sources(HAL_SOURCES stm32f7)
-create_target(${target})
+create_target(${target} stm32f7xx)
 
 set(TARGET_BOOTLOADER_SOURCES)
 set(TARGET_BOOTLOADER_LINK_SCRIPT ${CMAKE_SOURCE_DIR}/linker/STM32F723IETx_FLASH_BOOTLOADER.ld)
