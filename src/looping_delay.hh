@@ -107,7 +107,7 @@ public:
 			auto mainin = AudioStreamConf::AudioInFrame::sign_extend(in.chan[1]);
 
 			// Fix for noisy input on unmodded p3:
-			auxin = 0;
+			// auxin = 0;
 			//////////////////////////
 
 			if (flags.mute_on_boot_ctr) {
