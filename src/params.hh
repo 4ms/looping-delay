@@ -98,6 +98,7 @@ private:
 	void update_trig_jacks() {
 		if (timer.take_ping_changed()) {
 			controls.clk_out.high();
+			controls.bus_clk_out.high();
 			controls.ping_led.high();
 			ping_time = timer.get_ping_time();
 			if (!modes.ping_locked)
@@ -193,6 +194,7 @@ private:
 			// } else if (!INF2BUT && !INF1BUT && !REV1BUT && !REV2BUT) {
 			ping_time = timer.get_ping_tmr();
 			controls.clk_out.high();
+			controls.bus_clk_out.high();
 			timer.reset_ping_tmr();
 			timer.reset_pingled_tmr();
 			// timer.reset_clkout_tmr();
@@ -258,10 +260,12 @@ private:
 			controls.ping_led.high();
 			timer.reset_pingled_tmr();
 			controls.clk_out.high();
+			controls.bus_clk_out.high();
 		} else if (ping_ledbut_tmr >= (ping_time / 2)) {
 			if (!controls.ping_button.is_pressed())
 				controls.ping_led.low();
 			controls.clk_out.low();
+			controls.bus_clk_out.low();
 		}
 
 		auto loopled_tmr = timer.get_loopled_tmr();

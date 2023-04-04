@@ -39,6 +39,7 @@ public:
 
 	Board::ClkOut clk_out;
 	Board::LoopClkOut loop_out;
+	Board::BusClkOut bus_clk_out;
 
 	// LEDs:
 	Board::PingLED ping_led;

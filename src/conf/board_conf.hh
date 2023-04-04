@@ -36,6 +36,7 @@ using LoopLED = mdrivlib::FPin<BrainPin::D12.gpio, BrainPin::D12.pin, Output, No
 
 using ClkOut = mdrivlib::FPin<BrainPin::D0.gpio, BrainPin::D0.pin, Output, Normal>;
 using LoopClkOut = mdrivlib::FPin<BrainPin::D15.gpio, BrainPin::D15.pin, Output, Normal>;
+using BusClkOut = mdrivlib::FPin<BrainPin::D18.gpio, BrainPin::D18.pin, Output, Normal>;
 
 constexpr std::array<AdcChannelConf, NumPots> PotAdcChans = {{
 	{BrainPin::A3, BrainPin::A3AdcChan, TimePot, Brain::AdcSampTime},
