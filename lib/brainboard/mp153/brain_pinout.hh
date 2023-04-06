@@ -47,8 +47,8 @@ constexpr inline PinDef D1{GPIO::E, PinNum::_13};
 constexpr inline PinDef D2{GPIO::B, PinNum::_7};
 constexpr inline PinDef D3{GPIO::B, PinNum::_4};
 constexpr inline PinDef D4{GPIO::D, PinNum::_2};
-constexpr inline PinDef D5{GPIO::B, PinNum::_12}; // p3
-// constexpr inline PinDef D5{GPIO::A, PinNum::_11}; //p4
+// constexpr inline PinDef D5{GPIO::B, PinNum::_12}; // p3
+constexpr inline PinDef D5{GPIO::A, PinNum::_11}; //p4
 constexpr inline PinDef D6{GPIO::B, PinNum::_10};
 constexpr inline PinDef D7{GPIO::C, PinNum::_2};
 constexpr inline PinDef D8{GPIO::C, PinNum::_1};
@@ -84,11 +84,11 @@ constexpr inline mdrivlib::TimChanConf D1PwmConf{
 };
 
 // p4 only: (p3 has no PWM)
-// constexpr inline mdrivlib::TimChanConf D5PwmConf{
-// 	.pin = {D5.gpio, D5.pin, PinAF::AltFunc1},
-// 	.TIM = TIM1_BASE,
-// 	.channum = TimChannelNum::_4,
-// };
+constexpr inline mdrivlib::TimChanConf D5PwmConf{
+	.pin = {D5.gpio, D5.pin, PinAF::AltFunc1},
+	.TIM = TIM1_BASE,
+	.channum = TimChannelNum::_4,
+};
 
 constexpr inline mdrivlib::TimChanConf D3PwmConf{
 	.pin = {D3.gpio, D3.pin, PinAF::AltFunc2},
