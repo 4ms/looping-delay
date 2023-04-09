@@ -24,7 +24,9 @@ void main() {
 
 	Controls controls;
 	if (Board::PingButton::PinT::read() && Board::RevButton::PinT::read()) {
-		HWTests::run(controls);
+		HAL_Delay(50);
+		if (Board::PingButton::PinT::read() && Board::RevButton::PinT::read())
+			HWTests::run(controls);
 	}
 
 	Flags flags;
