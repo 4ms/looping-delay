@@ -14,7 +14,11 @@ struct TestGateIns : IGateInChecker {
 
 	TestGateIns(Controls &controls)
 		: IGateInChecker{3}
-		, controls{controls} {}
+		, controls{controls} {
+		Board::PingJack::PinT ping_jack_init;
+		Board::RevJack::PinT rev_jack_init;
+		Board::HoldJack::PinT hold_jack_init;
+	}
 
 	bool read_gate(uint8_t gate_num) override {
 		if (gate_num == 0)
