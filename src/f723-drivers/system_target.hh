@@ -2,6 +2,7 @@
 #include "brain_conf.hh"
 #include "drivers/sdram.hh"
 #include "drivers/stm32xx.h"
+#include "sdram_conf.hh"
 
 namespace LDKit
 {
