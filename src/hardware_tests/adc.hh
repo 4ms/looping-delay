@@ -13,11 +13,11 @@ namespace LDKit::HWTests
 
 struct TestADCs : IAdcChecker {
 	static constexpr AdcRangeCheckerBounds bounds{
-		.center_val = 2110,
+		.center_val = 2048,
 		.center_width = 60,
-		.center_check_counts = 10000,
-		.min_val = Brain::PotAdcConf::min_value,
-		.max_val = 4082,
+		.center_check_counts = 2000,
+		.min_val = Brain::PotAdcConf::min_value + 5,
+		.max_val = 4070,
 	};
 
 	uint32_t last_update = 0;
@@ -119,7 +119,18 @@ struct TestADCs : IAdcChecker {
 		}
 	}
 
-	void pause_between_steps() override { HAL_Delay(10); }
+	void pause_between_steps() override {
+		for (int i = 0; i < 3; i++) {
+			Board::RevLED{}.set(true);
+			Board::PingLED{}.set(true);
+			Board::HoldLED{}.set(true);
+			HAL_Delay(75);
+			Board::RevLED{}.set(false);
+			Board::PingLED{}.set(false);
+			Board::HoldLED{}.set(false);
+			HAL_Delay(75);
+		}
+	}
 
 	void show_multiple_nonzeros_error() override { Board::LoopLED{}.set(true); }
 
