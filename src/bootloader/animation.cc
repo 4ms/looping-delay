@@ -12,18 +12,20 @@ LEDs leds;
 }
 
 void animate_signal(int32_t peak) {
+	uint32_t tmr = HAL_GetTick() & 255;
+
 	if (peak > 3000)
-		leds.set(RgbLeds::Bank, Colors::red);
+		leds.set(Leds::Hold, true);
 	else if (peak > 2500)
-		leds.set(RgbLeds::Bank, Colors::yellow);
+		leds.set(Leds::Hold, tmr > 200);
 	else if (peak > 1000)
-		leds.set(RgbLeds::Bank, Colors::green);
+		leds.set(Leds::Hold, tmr > 127);
 	else if (peak > 500)
-		leds.set(RgbLeds::Bank, Colors::cyan);
+		leds.set(Leds::Hold, tmr > 100);
 	else if (peak > 200)
-		leds.set(RgbLeds::Bank, Colors::blue);
+		leds.set(Leds::Hold, tmr > 50);
 	else
-		leds.set(RgbLeds::Bank, Colors::off);
+		leds.set(Leds::Hold, false);
 }
 
 void animate(Animation animation_type) {
@@ -36,8 +38,9 @@ void animate(Animation animation_type) {
 
 	switch (animation_type) {
 		case Animation::RESET:
-			leds.set(RgbLeds::Play, Colors::black);
-			leds.set(RgbLeds::Rev, Colors::black);
+			leds.set(Leds::Hold, false);
+			leds.set(Leds::Ping, false);
+			leds.set(Leds::Rev, false);
 
 			last_tm = cur_tm;
 			ctr = 0;
@@ -45,45 +48,49 @@ void animate(Animation animation_type) {
 
 		case Animation::SUCCESS:
 			if (ctr == 0) {
-				leds.set(RgbLeds::Play, Colors::red);
-				leds.set(RgbLeds::Rev, Colors::red);
+				leds.set(Leds::Hold, true);
+				leds.set(Leds::Ping, false);
+				leds.set(Leds::Rev, false);
 			} else if (ctr == 1) {
-				leds.set(RgbLeds::Play, Colors::yellow);
-				leds.set(RgbLeds::Rev, Colors::yellow);
+				leds.set(Leds::Hold, false);
+				leds.set(Leds::Ping, true);
+				leds.set(Leds::Rev, false);
 			} else if (ctr == 2) {
-				leds.set(RgbLeds::Play, Colors::white);
-				leds.set(RgbLeds::Rev, Colors::white);
+				leds.set(Leds::Hold, false);
+				leds.set(Leds::Ping, false);
+				leds.set(Leds::Rev, true);
 			} else if (ctr == 3) {
-				leds.set(RgbLeds::Play, Colors::cyan);
-				leds.set(RgbLeds::Rev, Colors::cyan);
-			} else if (ctr == 4) {
-				leds.set(RgbLeds::Play, Colors::green);
-				leds.set(RgbLeds::Rev, Colors::green);
-			} else if (ctr == 5) {
-				leds.set(RgbLeds::Play, Colors::blue);
-				leds.set(RgbLeds::Rev, Colors::blue);
+				leds.set(Leds::Hold, false);
+				leds.set(Leds::Ping, true);
+				leds.set(Leds::Rev, false);
 			} else
 				ctr = 0;
 			break;
 
 		case Animation::WAITING:
-			// Flash button green/off when waiting
-			if (ctr == 0)
-				leds.set(RgbLeds::Play, Colors::black);
-			else if (ctr == 1)
-				leds.set(RgbLeds::Play, Colors::green);
-			else
+			// Flash button when waiting
+			if (ctr == 0) {
+				leds.set(Leds::Hold, true);
+				leds.set(Leds::Ping, true);
+				leds.set(Leds::Rev, true);
+			} else if (ctr == 1) {
+				leds.set(Leds::Hold, false);
+				leds.set(Leds::Ping, false);
+				leds.set(Leds::Rev, false);
+			} else
 				ctr = 0;
 			break;
 
 		case Animation::RECEIVING:
 			step_time = 200 * TICKS_PER_MS;
 			if (ctr == 0) {
-				leds.set(RgbLeds::Play, Colors::blue);
-				leds.set(RgbLeds::Rev, Colors::white);
+				leds.set(Leds::Hold, false);
+				leds.set(Leds::Ping, true);
+				leds.set(Leds::Rev, false);
 			} else if (ctr == 1) {
-				leds.set(RgbLeds::Play, Colors::white);
-				leds.set(RgbLeds::Rev, Colors::blue);
+				leds.set(Leds::Hold, false);
+				leds.set(Leds::Ping, false);
+				leds.set(Leds::Rev, true);
 			} else
 				ctr = 0;
 			break;
@@ -91,11 +98,9 @@ void animate(Animation animation_type) {
 		case Animation::SYNC:
 			step_time = 100 * TICKS_PER_MS;
 			if (ctr == 0) {
-				leds.set(RgbLeds::Play, Colors::black);
-				leds.set(RgbLeds::Rev, Colors::black);
+				leds.set(Leds::Hold, true);
 			} else if (ctr == 1) {
-				leds.set(RgbLeds::Play, Colors::magenta);
-				leds.set(RgbLeds::Rev, Colors::black);
+				leds.set(Leds::Hold, false);
 			} else
 				ctr = 0;
 			break;
@@ -103,11 +108,13 @@ void animate(Animation animation_type) {
 		case Animation::WRITING:
 			step_time = 100 * TICKS_PER_MS;
 			if (ctr == 0) {
-				leds.set(RgbLeds::Play, Colors::black);
-				leds.set(RgbLeds::Rev, Colors::yellow);
+				leds.set(Leds::Hold, true);
+				leds.set(Leds::Ping, false);
+				leds.set(Leds::Rev, true);
 			} else if (ctr == 1) {
-				leds.set(RgbLeds::Play, Colors::yellow);
-				leds.set(RgbLeds::Rev, Colors::black);
+				leds.set(Leds::Hold, false);
+				leds.set(Leds::Ping, true);
+				leds.set(Leds::Rev, false);
 			} else
 				ctr = 0;
 			break;
@@ -115,11 +122,13 @@ void animate(Animation animation_type) {
 		case Animation::FAIL_ERR:
 			step_time = 100 * TICKS_PER_MS;
 			if (ctr == 0) {
-				leds.set(RgbLeds::Play, Colors::black);
-				leds.set(RgbLeds::Rev, Colors::red);
+				leds.set(Leds::Hold, false);
+				leds.set(Leds::Ping, false);
+				leds.set(Leds::Rev, true);
 			} else if (ctr == 1) {
-				leds.set(RgbLeds::Play, Colors::red);
-				leds.set(RgbLeds::Rev, Colors::black);
+				leds.set(Leds::Hold, false);
+				leds.set(Leds::Ping, false);
+				leds.set(Leds::Rev, false);
 			} else
 				ctr = 0;
 			break;

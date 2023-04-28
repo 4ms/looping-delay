@@ -6,19 +6,19 @@ namespace LDKit::Bootloader
 {
 
 static inline void init_buttons() {
-	Board::PlayButton init_play_button;
+	Board::PingButton init_ping_button;
 	Board::RevButton init_rev_button;
-	Board::BankButton init_bank_button;
+	Board::HoldButton init_hold_button;
 }
 
-enum class Button { Play, Rev, Bank };
+enum class Button { Ping, Rev, Hold };
 
 static inline bool button_pushed(Button button) {
-	if (button == Button::Play)
-		return Board::PlayButton::PinT::read();
+	if (button == Button::Ping)
+		return Board::PingButton::PinT::read();
 	else if (button == Button::Rev)
 		return Board::RevButton::PinT::read();
 	else
-		return Board::BankButton::PinT::read();
+		return Board::HoldButton::PinT::read();
 }
 } // namespace LDKit::Bootloader

@@ -3,33 +3,33 @@
 
 namespace LDKit::Bootloader
 {
-enum class RgbLeds {
-	Bank,
-	Play,
+enum class Leds {
+	Hold,
+	Ping,
 	Rev,
 };
 
 class LEDs {
-	LDKit::Board::BankLED bank;
-	LDKit::Board::PlayLED play;
+	LDKit::Board::HoldLED bank;
+	LDKit::Board::PingLED play;
 	LDKit::Board::RevLED rev;
 
 public:
 	LEDs() {
-		set(RgbLeds::Bank, Colors::off);
-		set(RgbLeds::Play, Colors::off);
-		set(RgbLeds::Rev, Colors::off);
+		set(Leds::Hold, false);
+		set(Leds::Ping, false);
+		set(Leds::Rev, false);
 	}
-	void set(RgbLeds led, Color color) {
+	void set(Leds led, bool on) {
 		switch (led) {
-			case RgbLeds::Bank:
-				bank.set_color(color);
+			case Leds::Hold:
+				bank.set(on);
 				break;
-			case RgbLeds::Play:
-				play.set_color(color);
+			case Leds::Ping:
+				play.set(on);
 				break;
-			case RgbLeds::Rev:
-				rev.set_color(color);
+			case Leds::Rev:
+				rev.set(on);
 				break;
 		}
 	}

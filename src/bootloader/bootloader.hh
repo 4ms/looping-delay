@@ -61,13 +61,13 @@ struct AudioBootloader {
 		animate(Animation::RESET);
 	}
 
-	bool check_enter_bootloader() {
+	static bool check_enter_bootloader() {
 		HAL_Delay(300);
 
 		uint32_t dly = 32000;
 		uint32_t button_debounce = 0;
 		while (dly--) {
-			if (button_pushed(Button::Rev) && button_pushed(Button::Bank))
+			if (button_pushed(Button::Rev) && button_pushed(Button::Hold))
 				button_debounce++;
 			else
 				button_debounce = 0;
@@ -107,7 +107,7 @@ struct AudioBootloader {
 		uint32_t button_exit_armed = 0;
 		uint32_t rev_but_armed = 0;
 
-		while (button_pushed(Button::Rev) || button_pushed(Button::Bank))
+		while (button_pushed(Button::Ping) || button_pushed(Button::Rev) || button_pushed(Button::Hold))
 			;
 
 		HAL_Delay(300);
@@ -175,7 +175,7 @@ struct AudioBootloader {
 						ui_state = UI_STATE_DONE;
 						copy_firmware();
 						// Console::write("Success!\n");
-						animate_until_button_pushed(Animation::SUCCESS, Button::Play);
+						animate_until_button_pushed(Animation::SUCCESS, Button::Ping);
 						animate(Animation::RESET);
 						HAL_Delay(100);
 						break;
@@ -186,7 +186,7 @@ struct AudioBootloader {
 			}
 			if (rcv_err) {
 				ui_state = UI_STATE_ERROR;
-				animate_until_button_pushed(Animation::FAIL_ERR, Button::Play);
+				animate_until_button_pushed(Animation::FAIL_ERR, Button::Rev);
 				animate(Animation::RESET);
 				HAL_Delay(100);
 				init_reception();
@@ -202,7 +202,7 @@ struct AudioBootloader {
 			} else
 				rev_but_armed = 1;
 
-			if (button_pushed(Button::Play)) {
+			if (button_pushed(Button::Hold)) {
 				if (button_exit_armed) {
 					if (ui_state == UI_STATE_WAITING) {
 						exit_updater = true;
@@ -213,7 +213,7 @@ struct AudioBootloader {
 				button_exit_armed = 1;
 		}
 		ui_state = UI_STATE_DONE;
-		while (button_pushed(Button::Play) || button_pushed(Button::Rev)) {
+		while (button_pushed(Button::Hold) || button_pushed(Button::Ping) || button_pushed(Button::Rev)) {
 			;
 		}
 	}
@@ -249,7 +249,7 @@ struct AudioBootloader {
 		}
 	}
 
-	void copy_firmware() {
+	static void copy_firmware() {
 		if (kStartReceiveAddress != AppFlashAddr) {
 			// Console::write("Copying from receive sectors to execution sectors\n");
 			uint32_t src_addr = kStartReceiveAddress;
@@ -300,7 +300,7 @@ struct AudioBootloader {
 #endif
 	}
 
-	void animate_until_button_pushed(Animation animation_type, Button button) {
+	static void animate_until_button_pushed(Animation animation_type, Button button) {
 		animate(Animation::RESET);
 
 		while (!button_pushed(button)) {
