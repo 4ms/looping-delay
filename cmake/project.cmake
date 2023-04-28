@@ -158,23 +158,27 @@ function(create_target target driver_arch)
 
 endfunction()
 
-function(create_bootloader_target target)
+function(create_bootloader_target target driver_arch)
   message("Creating bootloader for target ${target}")
 
   # Create bootloader elf file target
   add_executable(
     ${target}-bootloader.elf
-    ${root}/src/bootloader/bootloader.cc
-    # ${root}/src/bootloader/leds.cc
-    # ${root}/src/bootloader/animation.cc
-    # ${root}/src/bootloader/bl_utils.cc #
-    # ${root}/src/bootloader/stm_audio_bootloader/fsk/packet_decoder.cc
+    ${root}/src/bootloader/main.cc
+    ${root}/src/bootloader/animation.cc
+    ${root}/src/bootloader/stm_audio_bootloader/qpsk/packet_decoder.cc
+    ${root}/src/bootloader/stm_audio_bootloader/qpsk/demodulator.cc
     ${root}/src/libc_stub.c
     ${root}/src/libcpp_stub.cc
-    # ${root}/src/shareddrv/flash.cc
     ${root}/lib/mdrivlib/drivers/pin.cc
     ${root}/lib/mdrivlib/drivers/timekeeper.cc
     ${root}/lib/mdrivlib/drivers/tim.cc
+    ${root}/lib/mdrivlib/drivers/i2c.cc
+    ${root}/lib/mdrivlib/drivers/codec_PCM3060.cc
+    ${root}/lib/mdrivlib/target/${driver_arch}/drivers/sai_tdm.cc
+    ${root}/lib/mdrivlib/target/${driver_arch}/drivers/interrupt_handler.cc
+    ${root}/lib/mdrivlib/target/${driver_arch}/boot/startup.s
+    ${root}/lib/mdrivlib/target/${driver_arch}/boot/system_init.c
     ${TARGET_BOOTLOADER_SOURCES}
     ${BOOTLOADER_HAL_SOURCES}
   )
@@ -185,6 +189,7 @@ function(create_bootloader_target target)
             ${root}/src/bootloader
             ${root}/src/bootloader/stmlib
             ${root}/src
+            ${root}/lib/brainboard
             ${root}/lib/mdrivlib
             ${root}/lib/cpputil
             ${TARGET_BOOTLOADER_INCLUDES}
@@ -221,49 +226,4 @@ function(create_bootloader_target target)
     USES_TERMINAL
   )
 
-endfunction()
-
-function(
-  set_target_sources_includes
-  project_driver_dir
-  mdrivlib_target_dir
-  mdrivlib_target_dir_2
-  family_name
-)
-  # family_name is like stm32f7
-  string(TOLOWER ${family_name} family_name)
-  string(TOUPPER ${family_name} family_name_uc)
-
-  # Add target-specific project files and paths: set(TARGET_SOURCES ${TARGET_SOURCES} PARENT_SCOPE)
-
-  set(TARGET_INCLUDES
-      ${TARGET_INCLUDES}
-      ${project_driver_dir}
-      ${mdrivlib_target_dir}
-      ${mdrivlib_target_dir_2}
-      ${root}/lib/CMSIS/Device/ST/${family_name_uc}xx/Include
-      ${root}/lib/CMSIS/Core_A/Include
-      ${root}/lib/${family_name_uc}xx_HAL_Driver/Inc
-      ${root}/lib/brainboard
-      PARENT_SCOPE
-  )
-
-  set(TARGET_BOOTLOADER_SOURCES
-      ${TARGET_BOOTLOADER_SOURCES}
-      PARENT_SCOPE
-  )
-
-  # string(REGEX MATCH "^stm32([fghlmuw]p?[0-9bl])_?(m0plus|m4|m7)?" family_name ${family_name}) set(short_family_name
-  # ${CMAKE_MATCH_1})
-
-  set_hal_sources(HAL_SOURCES ${family_name})
-  set(HAL_SOURCES
-      ${HAL_SOURCES}
-      PARENT_SCOPE
-  )
-  set_bootloader_hal_sources(BOOTLOADER_HAL_SOURCES ${family_name})
-  set(BOOTLOADER_HAL_SOURCES
-      ${BOOTLOADER_HAL_SOURCES}
-      PARENT_SCOPE
-  )
 endfunction()
