@@ -1,0 +1,20 @@
+CompileFlags:
+	Remove: [
+		"-std=c++23",
+		"-ffold-simple-inlines",
+		"-mvectorize*",
+		"-mthumb*"
+	]
+	Add: [
+		"-std=c++20",
+        "-I../lib/mdrivlib",
+        "-I../lib/CMSIS/Device/ST/STM32MP1xx/Include",
+        "-I../lib/CMSIS/Include",
+        "-I../lib/CMSIS/Core_A/Include",
+        "-I../lib/STM32MP1xx_HAL_Driver/Inc",
+        "-I../src/mp153-drivers",
+
+        "-I../lib/CMSIS/Device/ST/STM32F7xx/Include",
+        "-I../lib/STM32F7xx_HAL_Driver/Inc",
+        "-I../src/f723-drivers"
+	]
