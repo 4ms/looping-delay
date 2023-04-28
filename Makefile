@@ -1,9 +1,7 @@
 BUILDDIR := build
 
 rebuild: | $(BUILDDIR)
-	cmake --build $(BUILDDIR) --config Debug 
 	cmake --build $(BUILDDIR) --config RelWithDebInfo
-	./uimg_header.py build/mp153/Debug/mp153.bin build/mp153/Debug/mp153.uimg
 	./uimg_header.py build/mp153/RelWithDebInfo/mp153.bin build/mp153/RelWithDebInfo/mp153.uimg
 
 debug:
