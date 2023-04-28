@@ -9,7 +9,7 @@
 #include "drivers/i2c.hh"
 #include <functional>
 
-namespace SamplerKit
+namespace LDKit
 {
 
 struct AudioStream {
@@ -60,4 +60,4 @@ private:
 	of simplifying the audio interrupt (SAI DMA IRQ).
 	In Cortex-M7, the generated assembly has 3 instructions before the actual body of the interrupt handler.
    */
-} // namespace SamplerKit
+} // namespace LDKit

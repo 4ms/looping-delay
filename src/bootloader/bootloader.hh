@@ -22,7 +22,7 @@
 #include "stm_audio_bootloader/fsk/packet_decoder.h"
 #endif
 
-namespace SamplerKit::Bootloader
+namespace LDKit::Bootloader
 {
 
 struct AudioBootloader {
@@ -313,4 +313,4 @@ struct AudioBootloader {
 	}
 };
 
-} // namespace SamplerKit::Bootloader
+} // namespace LDKit::Bootloader

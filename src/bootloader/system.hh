@@ -7,7 +7,7 @@
 #include "drivers/system_clocks.hh"
 // #include "system_target.hh"
 
-namespace SamplerKit::Bootloader
+namespace LDKit::Bootloader
 {
 
 struct System {
@@ -28,4 +28,4 @@ struct System {
 	}
 };
 
-} // namespace SamplerKit::Bootloader
+} // namespace LDKit::Bootloader

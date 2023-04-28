@@ -1,7 +1,7 @@
 #pragma once
 #include "../conf/board_conf.hh"
 
-namespace SamplerKit::Bootloader
+namespace LDKit::Bootloader
 {
 enum class RgbLeds {
 	Bank,
@@ -10,9 +10,9 @@ enum class RgbLeds {
 };
 
 class LEDs {
-	SamplerKit::Board::BankLED bank;
-	SamplerKit::Board::PlayLED play;
-	SamplerKit::Board::RevLED rev;
+	LDKit::Board::BankLED bank;
+	LDKit::Board::PlayLED play;
+	LDKit::Board::RevLED rev;
 
 public:
 	LEDs() {
@@ -34,4 +34,4 @@ public:
 		}
 	}
 };
-} // namespace SamplerKit::Bootloader
+} // namespace LDKit::Bootloader

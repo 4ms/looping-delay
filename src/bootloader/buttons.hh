@@ -2,7 +2,7 @@
 #include "../conf/board_conf.hh"
 #include "drivers/pin.hh"
 
-namespace SamplerKit::Bootloader
+namespace LDKit::Bootloader
 {
 
 static inline void init_buttons() {
@@ -21,4 +21,4 @@ static inline bool button_pushed(Button button) {
 	else
 		return Board::BankButton::PinT::read();
 }
-} // namespace SamplerKit::Bootloader
+} // namespace LDKit::Bootloader

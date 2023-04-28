@@ -1,7 +1,7 @@
 #pragma once
 #include "drivers/stm32xx.h"
 
-namespace SamplerKit::Bootloader
+namespace LDKit::Bootloader
 {
 
 // For 16MHz crystal
@@ -41,4 +41,4 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_conf = {
 	.Uart4ClockSelection = RCC_UART4CLKSOURCE_PCLK1,
 };
 
-} // namespace SamplerKit::Bootloader
+} // namespace LDKit::Bootloader

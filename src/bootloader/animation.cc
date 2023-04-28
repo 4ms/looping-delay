@@ -3,7 +3,7 @@
 #include "drivers/stm32xx.h"
 #include <cstdint>
 
-namespace SamplerKit::Bootloader
+namespace LDKit::Bootloader
 {
 
 namespace
@@ -134,4 +134,4 @@ void animate(Animation animation_type) {
 	}
 }
 
-} // namespace SamplerKit::Bootloader
+} // namespace LDKit::Bootloader

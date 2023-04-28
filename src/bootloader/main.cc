@@ -3,8 +3,8 @@
 void main() {
 
 	HAL_Init();
-	SamplerKit::Bootloader::System system_init;
-	SamplerKit::Bootloader::AudioBootloader bootloader;
+	LDKit::Bootloader::System system_init;
+	LDKit::Bootloader::AudioBootloader bootloader;
 
 	mdrivlib::Timekeeper update_task{{
 										 .TIMx = TIM7,
