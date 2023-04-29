@@ -1,5 +1,6 @@
 #pragma once
 #include "audio_stream_conf.hh"
+#include "calibration_storage.hh"
 #include "clock_mult_util.hh"
 #include "controls.hh"
 #include "epp_lut.hh"
@@ -35,10 +36,14 @@ struct Params {
 	Settings settings;
 	OperationMode op_mode = OperationMode::Normal;
 
+	CalibrationStorage cal_storage;
+	CalibrationData &calibration;
+
 	Params(Controls &controls, Flags &flags, Timer &timer)
 		: controls{controls}
 		, flags{flags}
-		, timer{timer} {}
+		, timer{timer}
+		, calibration{cal_storage.cal_data} {}
 
 	void update() {
 		controls.update();

@@ -22,8 +22,12 @@ set(TARGET_INCLUDES
     ${root}/lib/STM32F7xx_HAL_Driver/Inc
 )
 
-set(TARGET_SOURCES ${root}/src/f723-drivers/flash.cc ${root}/lib/mdrivlib/drivers/hal_handlers.cc
-                   ${root}/lib/mdrivlib/drivers/sdram.cc
+set(TARGET_SOURCES
+    ${root}/src/f723-drivers/flash.cc
+    ${root}/lib/mdrivlib/drivers/hal_handlers.cc
+    ${root}/lib/mdrivlib/drivers/sdram.cc
+    ${root}/lib/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_flash.c
+    ${root}/lib/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_flash_ex.c
 )
 
 set(WAV_ENCODE_PYTHON_CMD
