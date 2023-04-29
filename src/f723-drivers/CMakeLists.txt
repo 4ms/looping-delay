@@ -22,7 +22,9 @@ set(TARGET_INCLUDES
     ${root}/lib/STM32F7xx_HAL_Driver/Inc
 )
 
-set(TARGET_SOURCES ${root}/lib/mdrivlib/drivers/sdram.cc ${root}/lib/mdrivlib/drivers/hal_handlers.cc)
+set(TARGET_SOURCES ${root}/src/f723-drivers/flash.cc ${root}/lib/mdrivlib/drivers/hal_handlers.cc
+                   ${root}/lib/mdrivlib/drivers/sdram.cc
+)
 
 set(WAV_ENCODE_PYTHON_CMD
     # cmake-format: off

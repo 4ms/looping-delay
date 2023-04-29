@@ -31,8 +31,6 @@ function(set_hal_sources sources family_name)
       ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_ll_tim.c
       PARENT_SCOPE
   )
-  # ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_flash.c
-  # ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_flash_ex.c)
 endfunction()
 
 function(set_bootloader_hal_sources sources family_name)
@@ -53,8 +51,6 @@ function(set_bootloader_hal_sources sources family_name)
       ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_ll_tim.c
       PARENT_SCOPE
   )
-  # ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_flash.c
-  # ${root}/lib/${family_name_uc}xx_HAL_Driver/Src/${family_name}xx_hal_flash_ex.c)
 endfunction()
 
 # ############### Common commands #####################
@@ -129,7 +125,7 @@ function(create_target target driver_arch)
     ${root}/src/main.cc
     ${root}/src/console.cc
     ${root}/src/hardware_tests/hardware_tests.cc
-    # ${root}/src/calibration_storage.cc
+    ${root}/src/calibration_storage.cc
     # Printf:
     ${root}/lib/printf/printf.c
     ${TARGET_SOURCES}

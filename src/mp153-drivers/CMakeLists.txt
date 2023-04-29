@@ -35,6 +35,7 @@ set(TARGET_INCLUDES
 set(TARGET_SOURCES
     mmu_ca7.c
     aux_core_main.cc
+    flash.cc
     ${root}/lib/mdrivlib/target/stm32mp1_ca7/boot/irq_ctrl.c
     # ${root}/lib/mdrivlib/target/stm32mp1/drivers/sai_tdm.cc
     # ${root}/lib/mdrivlib/target/stm32mp1_ca7/drivers/interrupt_handler.cc
