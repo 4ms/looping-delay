@@ -66,8 +66,8 @@ void run(Controls &controls) {
 
 	//////////////////////////////
 	print_test_name("Audio and Gate Output Test");
-	SkewedTriOsc oscL{500, 0.3, 1, -1, 0, 48000};
-	SkewedTriOsc oscR{3700, 0.85, 1, -1, 0, 48000};
+	SinOsc oscL{440.f, 2, 0, 48000};
+	SinOsc oscR{2637.02f, 2, 0, 48000};
 	AudioStream audio([&oscL, &oscR](const AudioStreamConf::AudioInBlock &in, AudioStreamConf::AudioOutBlock &out) {
 		static uint32_t loopclk = 0;
 		static uint32_t clkout = 0;
@@ -82,28 +82,36 @@ void run(Controls &controls) {
 	});
 	audio.start();
 	printf_("Verify:\n");
-	printf_("  1) Out Left: 500Hz right-leaning triangle, -10V to +10V [+/- 0.3V]\n");
-	printf_("  2) Out Right: 3700Hz left-leaning triangle, -10V to +10V [+/- 0.3V]\n");
+	printf_("  1) Audio Out: 440Hz sine, -10V to +10V [+/- 0.3V]\n");
+	printf_("  2) Send: 2.7kHz sine, -10V to +10V [+/- 0.3V]\n");
 	printf_("  3) Loop Clk Out: 750Hz square wave, 0V to +8V [+/- 0.5V]\n");
 	printf_("  4) Clk Out: 375Hz pulse wave (High 25%, low 75%), 0V to +8V [+/- 0.5V]\n");
 
 	print_press_button();
+	Board::HoldLED{}.set(true);
 	Util::flash_mainbut_until_pressed();
+	Board::HoldLED{}.set(false);
 
 	//////////////////////////////
 	print_test_name("Audio Input Test");
-	audio.set_callback([&oscR](const AudioStreamConf::AudioInBlock &in, AudioStreamConf::AudioOutBlock &out) {
+	SinOsc osc3{377, 1.00f, 0.f, 48000};
+	audio.set_callback([&osc3](const AudioStreamConf::AudioInBlock &in, AudioStreamConf::AudioOutBlock &out) {
+		static uint32_t clkout = 0;
 		for (auto [i, o] : zip(in, out)) {
-			o.chan[0] = oscR.update() * 0x7FFFFF;
+			o.chan[0] = osc3.update() * 0x7FFFFF;
 			o.chan[1] = i.chan[0] - i.chan[1];
 		}
+		Board::ClkOut::set((clkout & 0b11) == 0b00);
+		clkout++;
 	});
-	printf_("  1) Patch Out L to scope, verify no signal\n");
-	printf_("  2) Patch Out R to In R, verify left-leaning 3.4kHz 20Vpp wave [+/- 0.3V] on Out L\n");
-	printf_("  3) Unpatch In R. Patch Out R to In L, verify right-leaning 3.4kHz 20Vpp wave [+/- 0.3V] on Out L\n");
+	printf_("  1) Patch Audio Out to scope, verify no signal\n");
+	printf_("  2) Patch Send to Return, verify 377Hz sine 8Vpp wave [+/- 0.4V] on Out L\n");
+	printf_("  3) Patch Clk Out to Audio In (keep other cable patched), verify beat freq 2Hz on Out L\n");
 
 	print_press_button();
+	Board::RevLED{}.set(true);
 	Util::flash_mainbut_until_pressed();
+	Board::RevLED{}.set(false);
 	controls.ping_button.clear_events();
 
 	//////////////////////////////
