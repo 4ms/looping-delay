@@ -11,10 +11,10 @@ const RCC_OscInitTypeDef osc_conf{
 		{
 			.PLLState = RCC_PLL_ON,
 			.PLLSource = RCC_PLLSOURCE_HSE,
-			.PLLM = 16,
-			.PLLN = 432,
+			.PLLM = 10,
+			.PLLN = 270,
 			.PLLP = RCC_PLLP_DIV2,
-			.PLLQ = 9,
+			.PLLQ = 9, // for USB48
 		},
 };
 
@@ -30,12 +30,12 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_conf = {
 	.PeriphClockSelection = RCC_PERIPHCLK_SAI1 | RCC_PERIPHCLK_UART4,
 	.PLLSAI =
 		{
-			.PLLSAIN = 197,
-			.PLLSAIQ = 8,
+			.PLLSAIN = 192,
+			.PLLSAIQ = 5,
 			.PLLSAIP = RCC_PLLSAIP_DIV2,
 		},
-	.PLLSAIDivQ = 2,
-	.Sai2ClockSelection = RCC_SAI1CLKSOURCE_PLLSAI,
+	.PLLSAIDivQ = 5,
+	.Sai1ClockSelection = RCC_SAI1CLKSOURCE_PLLSAI,
 	.Uart4ClockSelection = RCC_UART4CLKSOURCE_PCLK1,
 };
 
