@@ -2,10 +2,10 @@
 #include "audio_stream_conf.hh"
 #include <cstdint>
 
-enum class GateType { Gate, Trig };
+enum class GateType { Gate = 0, Trig = 1 };
 enum class InfState { Off, On, TransitioningOn, TransitioningOff };
-enum class PingMethod {
-	IGNORE_FLAT_DEVIATION_10,
+enum class PingMethod : uint8_t {
+	IGNORE_FLAT_DEVIATION_10 = 0,
 	IGNORE_PERCENT_DEVIATION,
 	ONE_TO_ONE,
 	MOVING_AVERAGE_2,
@@ -15,6 +15,8 @@ enum class PingMethod {
 	MOVING_AVERAGE_4,
 	EXPO_AVERAGE_4,
 	LINEAR_AVERAGE_8,
+
+	NUM_PING_METHODS,
 };
 
 struct ChannelMode {
@@ -41,7 +43,6 @@ struct Settings {
 	bool runaway_dc_block = true;
 	bool auto_unquantize_timejack = true;
 	bool send_return_before_loop = false;
-	uint32_t led_brightness = 4;
 
 	uint32_t crossfade_samples = 4800;									 // SLOW_FADE_SAMPLES
 	float crossfade_rate = calc_fade_increment(crossfade_samples);		 // SLOW_FADE_INCREMENT
