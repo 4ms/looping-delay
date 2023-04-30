@@ -18,3 +18,5 @@ $(BUILDDIR):
 clean:
 	rm -rf $(BUILDDIR)
 
+wav:
+	cmake --build build --target 723.wav
