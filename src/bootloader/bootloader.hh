@@ -175,7 +175,7 @@ struct AudioBootloader {
 						ui_state = UI_STATE_DONE;
 						copy_firmware();
 						// Console::write("Success!\n");
-						animate_until_button_pushed(Animation::SUCCESS, Button::Ping);
+						animate_until_button_pushed(Animation::SUCCESS, Button::Hold);
 						animate(Animation::RESET);
 						HAL_Delay(100);
 						break;
@@ -213,7 +213,7 @@ struct AudioBootloader {
 				button_exit_armed = 1;
 		}
 		ui_state = UI_STATE_DONE;
-		while (button_pushed(Button::Hold) || button_pushed(Button::Ping) || button_pushed(Button::Rev)) {
+		while (button_pushed(Button::Hold) || button_pushed(Button::Rev)) {
 			;
 		}
 	}
