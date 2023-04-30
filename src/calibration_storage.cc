@@ -13,11 +13,31 @@ void CalibrationStorage::set_default_cal() {
 	cal_data.cv_calibration_offset[1] = -Brain::CVAdcConf::uni_min_value;
 	cal_data.cv_calibration_offset[2] = -Brain::CVAdcConf::uni_min_value;
 	cal_data.cv_calibration_offset[3] = -Brain::CVAdcConf::uni_min_value;
+	cal_data.tracking_comp = 1.f;
 	cal_data.codec_adc_calibration_dcoffset[0] = 0;
 	cal_data.codec_adc_calibration_dcoffset[1] = 0;
 	cal_data.codec_dac_calibration_dcoffset[0] = 0;
 	cal_data.codec_dac_calibration_dcoffset[1] = 0;
-	cal_data.tracking_comp = 1.f;
+	cal_data.settings.auto_mute = true;
+	cal_data.settings.soft_clip = true;
+	cal_data.settings.dc_input = false;
+	cal_data.settings.ping_method = PingMethod::IGNORE_FLAT_DEVIATION_10;
+	cal_data.settings.rev_jack = GateType::Trig;
+	cal_data.settings.inf_jack = GateType::Trig;
+	cal_data.settings.loop_clock = GateType::Trig;
+	cal_data.settings.main_clock = GateType::Gate;
+	cal_data.settings.log_delay_feed = true;
+	cal_data.settings.runaway_dc_block = true;
+	cal_data.settings.auto_unquantize_timejack = true;
+	cal_data.settings.send_return_before_loop = false;
+
+	cal_data.settings.crossfade_samples = 4800;		  // SLOW_FADE_SAMPLES
+	cal_data.settings.write_crossfade_samples = 4800; // FAST_FADE_SAMPLES
+
+	cal_data.settings.crossfade_rate =
+		cal_data.settings.calc_fade_increment(cal_data.settings.crossfade_samples); // SLOW_FADE_INCREMENT
+	cal_data.settings.write_crossfade_rate =
+		cal_data.settings.calc_fade_increment(cal_data.settings.crossfade_samples); // FAST_FADE_INCREMENT
 }
 
 void CalibrationStorage::factory_reset() {

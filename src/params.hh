@@ -33,17 +33,16 @@ struct Params {
 	uint32_t locked_ping_time = 12000;
 
 	ChannelMode modes;
-	Settings settings;
 	OperationMode op_mode = OperationMode::Normal;
 
 	CalibrationStorage cal_storage;
-	CalibrationData &calibration;
+	CalibrationData &calibration = cal_storage.cal_data;
+	Settings &settings = calibration.settings;
 
 	Params(Controls &controls, Flags &flags, Timer &timer)
 		: controls{controls}
 		, flags{flags}
-		, timer{timer}
-		, calibration{cal_storage.cal_data} {}
+		, timer{timer} {}
 
 	void update() {
 		controls.update();

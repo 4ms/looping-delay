@@ -31,23 +31,23 @@ struct ChannelMode {
 
 // Settings cannot be changed in Normal operation mode
 struct Settings {
-	bool auto_mute = true;
-	bool soft_clip = true;
-	bool dc_input = false;
-	PingMethod ping_method = PingMethod::IGNORE_FLAT_DEVIATION_10;
-	GateType rev_jack = GateType::Trig;
-	GateType inf_jack = GateType::Trig;
-	GateType loop_clock = GateType::Trig;
-	GateType main_clock = GateType::Gate;
-	bool log_delay_feed = true;
-	bool runaway_dc_block = true;
-	bool auto_unquantize_timejack = true;
-	bool send_return_before_loop = false;
+	bool auto_mute;
+	bool soft_clip;
+	bool dc_input;
+	PingMethod ping_method;
+	GateType rev_jack;
+	GateType inf_jack;
+	GateType loop_clock;
+	GateType main_clock;
+	bool log_delay_feed;
+	bool runaway_dc_block;
+	bool auto_unquantize_timejack;
+	bool send_return_before_loop;
 
-	uint32_t crossfade_samples = 4800;									 // SLOW_FADE_SAMPLES
-	float crossfade_rate = calc_fade_increment(crossfade_samples);		 // SLOW_FADE_INCREMENT
-	uint32_t write_crossfade_samples = 4800;							 // FAST_FADE_SAMPLES
-	float write_crossfade_rate = calc_fade_increment(crossfade_samples); // FAST_FADE_INCREMENT
+	uint32_t crossfade_samples;		  // SLOW_FADE_SAMPLES
+	float crossfade_rate;			  // SLOW_FADE_INCREMENT
+	uint32_t write_crossfade_samples; // FAST_FADE_SAMPLES
+	float write_crossfade_rate;		  // FAST_FADE_INCREMENT
 
 	static constexpr float calc_fade_increment(uint32_t samples) {
 		return (1.f / (((float)samples / (float)AudioStreamConf::BlockSize) + 1.f));
