@@ -2,8 +2,9 @@
 #include "audio_stream_conf.hh"
 #include <cstdint>
 
-enum class GateType { Gate = 0, Trig = 1 };
 enum class InfState { Off, On, TransitioningOn, TransitioningOff };
+
+enum class GateType :uint8_t { Gate = 0, Trig = 1 };
 enum class PingMethod : uint8_t {
 	IGNORE_FLAT_DEVIATION_10 = 0,
 	IGNORE_PERCENT_DEVIATION,
