@@ -1,9 +1,7 @@
 BUILDDIR := build
 
 rebuild: | $(BUILDDIR)
-	cmake --build $(BUILDDIR) --config Debug 
 	cmake --build $(BUILDDIR) --config RelWithDebInfo
-	./uimg_header.py build/mp153/Debug/mp153.bin build/mp153/Debug/mp153.uimg
 	./uimg_header.py build/mp153/RelWithDebInfo/mp153.bin build/mp153/RelWithDebInfo/mp153.uimg
 
 debug:
@@ -20,3 +18,5 @@ $(BUILDDIR):
 clean:
 	rm -rf $(BUILDDIR)
 
+wav:
+	cmake --build build --target 723.wav

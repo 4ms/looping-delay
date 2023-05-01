@@ -4,6 +4,8 @@
 
 namespace LDKit
 {
+enum { FirmwareMajorVersion = 0 };
+enum { FirmwareMinorVersion = 1 };
 
 enum PotAdcElement : uint32_t {
 	TimePot,

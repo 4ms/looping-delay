@@ -1,5 +1,6 @@
 #pragma once
 #include "audio_stream_conf.hh"
+#include "calibration_storage.hh"
 #include "clock_mult_util.hh"
 #include "controls.hh"
 #include "epp_lut.hh"
@@ -32,8 +33,11 @@ struct Params {
 	uint32_t locked_ping_time = 12000;
 
 	ChannelMode modes;
-	Settings settings;
 	OperationMode op_mode = OperationMode::Normal;
+
+	CalibrationStorage cal_storage;
+	CalibrationData &calibration = cal_storage.cal_data;
+	Settings &settings = calibration.settings;
 
 	Params(Controls &controls, Flags &flags, Timer &timer)
 		: controls{controls}

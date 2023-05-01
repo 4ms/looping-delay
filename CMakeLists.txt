@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.15)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/cmake/arm-none-eabi-gcc.cmake)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;RelWithDebInfo")
+set(CMAKE_CONFIGURATION_TYPES "RelWithDebInfo")
 
 set(CMAKE_BUILD_TYPE
-    "Debug"
+    "RelWithDebInfo"
     CACHE STRING "Choose the type of build."
 )
 
