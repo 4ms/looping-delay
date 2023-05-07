@@ -66,8 +66,11 @@ public:
 		}
 
 		// was process_mode_flags():
-		if (flags.take_time_changed())
+		if (flags.take_time_changed()) {
+			// Debug::Pin1::high();
 			set_divmult_time();
+			// Debug::Pin1::low();
+		}
 
 		if (write_fade_state == FadeState::NotFading) {
 			if (flags.take_inf_changed())
@@ -93,8 +96,11 @@ public:
 			bool did_cross_start_fade_addr =
 				Memory::read(read_head, rd_buff, calc_start_fade_addr(), read_decrementing);
 
-			if (did_cross_start_fade_addr)
+			if (did_cross_start_fade_addr) {
+				// Debug::Pin1::high();
 				start_looping_crossfade();
+				// Debug::Pin1::low();
+		}
 		}
 
 		// Read into crossfading buffer (TODO: shouldn't this only happen if we're xfading?)
@@ -194,10 +200,14 @@ public:
 		// If we're not crossfading, check if the read head is inside the loop
 		if (!Util::in_between(read_head, loop_start, loop_end, params.modes.reverse)) {
 			if (is_crossfading()) {
+				// Debug::Pin2::high();
 				queued_read_fade_ending_addr = loop_start;
+				// Debug::Pin2::low();
 			} else {
+				Debug::Pin2::high();
 				start_crossfade(loop_start);
 				params.reset_loop();
+				Debug::Pin2::low();
 			}
 		}
 	}
@@ -311,9 +321,11 @@ public:
 	bool is_crossfading() { return read_fade_phase >= params.settings.crossfade_rate; }
 
 	void start_crossfade(uint32_t addr) {
+		// Debug::Pin0::high();
 		read_fade_phase = params.settings.crossfade_rate;
 		queued_divmult_time = 0; // means: no queued crossfade
 		read_fade_ending_addr = addr;
+		// Debug::Pin0::low();
 	}
 
 	void increment_crossfading() {
@@ -325,13 +337,20 @@ public:
 				read_head = read_fade_ending_addr;
 
 				if (queued_divmult_time) {
+					Debug::Pin1::high();
 					start_crossfade(calculate_read_addr(queued_divmult_time));
 					params.set_divmult(queued_divmult_time);
+					Debug::Pin1::high();
 				} else if (queued_read_fade_ending_addr) {
+					Debug::Pin2::high();
 					start_crossfade(queued_read_fade_ending_addr);
 					queued_read_fade_ending_addr = 0;
+					Debug::Pin2::low();
 				}
 			}
+			// } else {
+			// 	Debug::Pin1::high();
+			// 	Debug::Pin1::low();
 		}
 
 		if (write_fade_phase > 0.f) {
