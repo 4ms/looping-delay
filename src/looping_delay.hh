@@ -329,7 +329,7 @@ public:
 				doing_reverse_fade = false;
 				read_head = read_fade_ending_addr;
 
-				if (queued_divmult_time) {
+				if (queued_divmult_time > 0.f) {
 					Debug::Pin1::high();
 					params.set_divmult(queued_divmult_time);
 					start_crossfade(calculate_read_addr(queued_divmult_time));
