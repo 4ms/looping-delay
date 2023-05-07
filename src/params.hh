@@ -297,8 +297,8 @@ private:
 		}
 
 		if (settings.auto_unquantize_timejack) {
-			// Auto Unquantize mode: set jack to Quant when time is > 47Hz (48000 / 1024 = 47Hz)
-			modes.time_cv_quantized = (divmult_time >= 1024);
+			// Auto Unquantize mode: set jack to Quant when time is > 23Hz (48000 / 2048 = 23Hz)
+			modes.time_cv_quantized = (divmult_time >= 2048);
 		}
 	}
 
