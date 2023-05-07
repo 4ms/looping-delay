@@ -92,7 +92,13 @@ public:
 			check_read_write_head_spacing();
 			Memory::read(read_head, rd_buff, 0, read_decrementing);
 		} else {
-			check_read_head_in_loop();
+			if (!check_read_head_in_loop()) {
+				if (!is_crossfading()) {
+					start_crossfade(loop_start);
+					params.reset_loop();
+				}
+			}
+
 			bool did_cross_start_fade_addr =
 				Memory::read(read_head, rd_buff, calc_start_fade_addr(), read_decrementing);
 
@@ -100,7 +106,7 @@ public:
 				// Debug::Pin1::high();
 				start_looping_crossfade();
 				// Debug::Pin1::low();
-		}
+			}
 		}
 
 		// Read into crossfading buffer (TODO: shouldn't this only happen if we're xfading?)
@@ -196,20 +202,9 @@ public:
 		}
 	}
 
-	void check_read_head_in_loop() {
+	bool check_read_head_in_loop() {
 		// If we're not crossfading, check if the read head is inside the loop
-		if (!Util::in_between(read_head, loop_start, loop_end, params.modes.reverse)) {
-			if (is_crossfading()) {
-				// Debug::Pin2::high();
-				queued_read_fade_ending_addr = loop_start;
-				// Debug::Pin2::low();
-			} else {
-				Debug::Pin2::high();
-				start_crossfade(loop_start);
-				params.reset_loop();
-				Debug::Pin2::low();
-			}
-		}
+		return Util::in_between(read_head, loop_start, loop_end, params.modes.reverse);
 	}
 
 	void check_read_write_head_spacing() {
@@ -305,16 +300,14 @@ public:
 				loop_start = Util::offset_samples(loop_end, t_divmult_time, 1 - params.modes.reverse);
 
 			// If the read addr is not in between the loop start and end, then fade to the loop start
-			check_read_head_in_loop();
-			// TODO: this is almost the same as check_read_head_in_loop(), combine them?
-			// if (!Util::in_between(read_head, loop_start, loop_end, params.modes.reverse)) {
-			// 	if (is_crossfading()) {
-			// 		queued_read_fade_ending_addr = loop_start;
-			// 	} else {
-			// 		start_crossfade(loop_start);
-			// 		params.reset_loopled_tmr();
-			// 	}
-			// }
+			if (check_read_head_in_loop()) {
+				// if (is_crossfading()) {
+				// 	queued_read_fade_ending_addr = loop_start;
+				// } else {
+				// 	start_crossfade(loop_start);
+				// 	params.reset_loop();
+				// }
+			}
 		}
 	}
 
