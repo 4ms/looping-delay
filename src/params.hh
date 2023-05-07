@@ -123,7 +123,7 @@ private:
 
 			int16_t diff = pot.cur_val - pot.prev_val;
 			if (std::abs(diff) > Brain::MinPotChange)
-				pot.track_moving_ctr = 250;
+				pot.track_moving_ctr = 10; // track for at least 6ms
 
 			if (pot.track_moving_ctr) {
 				pot.track_moving_ctr--;
