@@ -331,8 +331,8 @@ public:
 
 				if (queued_divmult_time) {
 					Debug::Pin1::high();
-					start_crossfade(calculate_read_addr(queued_divmult_time));
 					params.set_divmult(queued_divmult_time);
+					start_crossfade(calculate_read_addr(queued_divmult_time));
 					Debug::Pin1::high();
 				} else if (queued_read_fade_ending_addr) {
 					Debug::Pin2::high();
