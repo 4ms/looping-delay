@@ -136,7 +136,7 @@ private:
 					ignore_rev_release = true; // if i==TimePot and in InfMode only?
 				}
 
-				if (controls.reverse_button.is_pressed()) {
+				if (controls.inf_button.is_pressed()) {
 					pot.moved_while_inf_down = true;
 					ignore_inf_release = true; // if i==TimePot || FeedbackPot in InfMode only?
 				}
