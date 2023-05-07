@@ -227,7 +227,7 @@ public:
 			return loop_end;
 		else
 			return Util::offset_samples(
-				loop_end, params.settings.crossfade_samples /* / Board::MemorySampleSize*/, !params.modes.reverse);
+				loop_end, params.settings.crossfade_samples /* / MemorySampleSize*/, !params.modes.reverse);
 		// FIXME: should that be / 2 (for 2 channels), not / sample size?
 		//  Or else crossfade_samples should be named crossfade_bytes
 	}
@@ -239,7 +239,7 @@ public:
 
 		if (params.divmult_time < params.settings.crossfade_samples) {
 			read_head = loop_start;
-			read_fade_phase = 0.0;
+			read_fade_phase = 0.f;
 
 			// Issue: is it necessary to set this below?
 			read_fade_ending_addr = Util::offset_samples(read_head, AudioStreamConf::BlockSize, !params.modes.reverse);
