@@ -61,8 +61,6 @@ public:
 		constexpr uint32_t sz = AudioStreamConf::BlockSize * 2;
 		constexpr uint32_t blksz = AudioStreamConf::BlockSize;
 
-		Debug::Pin3::high();
-
 		if (float amt = flags.take_scroll_amt(); amt != 0.f) {
 			scroll_loop(amt);
 		}
@@ -162,8 +160,6 @@ public:
 		write_block_to_memory(wr_buff);
 
 		increment_crossfading();
-
-		Debug::Pin3::low();
 	}
 
 	void write_block_to_memory(std::array<int16_t, AudioStreamConf::BlockSize> &wr_buff) {
