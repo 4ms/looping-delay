@@ -103,14 +103,16 @@ public:
 				Memory::read(read_head, rd_buff, calc_start_fade_addr(), read_decrementing);
 
 			if (did_cross_start_fade_addr) {
-				// Debug::Pin1::high();
 				start_looping_crossfade();
-				// Debug::Pin1::low();
 			}
 		}
 
 		// Read into crossfading buffer (TODO: shouldn't this only happen if we're xfading?)
 		Memory::read(read_fade_ending_addr, rd_buff_dest, 0, params.modes.reverse);
+		if (params.settings.stereo_mode) {
+			// read into rdaux_buff
+			// read into rdaux_buff_dest
+		}
 
 		for (auto [mem_wr, mem_rd, mem_rd_dest, out, in] : zip(wr_buff, rd_buff, rd_buff_dest, outblock, inblock)) {
 			auto auxin = AudioStreamConf::AudioInFrame::sign_extend(in.chan[0]);
@@ -136,10 +138,14 @@ public:
 			// Read from the loop and save this value so we can output it to the Delay Out jack
 			auto phase = (uint16_t)(4095.f * read_fade_phase);
 			phase = __USAT(phase, 12);
-			int32_t rd = ((float)mem_rd * epp_lut[phase]) + ((float)mem_rd_dest * epp_lut[4095 - phase]);
-			rd *= 256;
-
-			// rd = clip(rd);
+			int32_t rd;
+			if (params.settings.stereo_mode) {
+				rd = ((float)mem_rd * epp_lut[phase]) + ((float)mem_rd_dest * epp_lut[4095 - phase]);
+				rd *= 256;
+			} else {
+				rd = ((float)mem_rd * epp_lut[phase]) + ((float)mem_rd_dest * epp_lut[4095 - phase]);
+				rd *= 256;
+			}
 
 			// Attenuate the delayed signal with REGEN
 			int32_t regen = (float)rd * params.feedback;
@@ -149,7 +155,13 @@ public:
 
 			int32_t wr;
 			int32_t auxout;
-			if (params.settings.send_return_before_loop) {
+			if (params.settings.stereo_mode) {
+				int32_t auxin_atten = (float)auxin * params.delay_feed;
+				int32_t rd_aux;
+				int32_t regen_aux = (float)rd_aux * params.feedback;
+				wr = (int32_t)(regen + mainin_atten);
+				auxout = (int32_t)(regen_aux + auxin_atten);
+			} else if (params.settings.send_return_before_loop) {
 				wr = auxin;
 				auxout = (int32_t)(regen + mainin_atten);
 			} else {
