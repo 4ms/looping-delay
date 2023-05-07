@@ -26,7 +26,7 @@ class LoopingDelay {
 	uint32_t read_head; // read_addr
 	uint32_t write_head;
 
-	float read_fade_phase;				   // read_fade_pos
+	float read_fade_phase = 0;			   // read_fade_pos
 	uint32_t read_fade_ending_addr;		   // fade_dest_read_addr
 	uint32_t queued_divmult_time;		   // fade_queued_dest_divmult_time
 	uint32_t queued_read_fade_ending_addr; // fade_queued_dest_read_addr
