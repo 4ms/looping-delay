@@ -234,7 +234,7 @@ public:
 
 	// When we near the end of the loop, start a crossfade to the beginning
 	void start_looping_crossfade() {
-		constexpr uint32_t sz = AudioStreamConf::BlockSize * 2;
+		constexpr uint16_t sz = AudioStreamConf::BlockSize * 2;
 		params.reset_loop();
 
 		if (params.divmult_time < params.settings.crossfade_samples) {
