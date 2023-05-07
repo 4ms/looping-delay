@@ -16,6 +16,8 @@ class Timer {
 	uint32_t _pingled_tmr = 0;
 	uint32_t _loopled_tmr = 0;
 
+	bool _ping_tmr_needs_reset = false;
+
 public:
 	Timer() {
 		pin_change.init([this] { inc(); });
@@ -24,7 +26,12 @@ public:
 	void start() { pin_change.start(); }
 
 	void inc() {
-		_ping_tmr++;
+		if (_ping_tmr_needs_reset) {
+			_ping_tmr_needs_reset = false;
+			_ping_tmr = 0;
+		} else
+			_ping_tmr++;
+
 		// _clkout_tmr++;
 		_pingled_tmr++;
 		_loopled_tmr++;
@@ -60,7 +67,7 @@ public:
 	uint32_t get_ping_time() { return _ping_time; }
 
 	uint32_t get_ping_tmr() { return _ping_tmr; }
-	void reset_ping_tmr() { _ping_tmr = 0; }
+	void reset_ping_tmr() { _ping_tmr_needs_reset = true; }
 
 	// uint32_t get_clkout_tmr() { return _clkout_tmr; }
 	// void reset_clkout_tmr() { _clkout_tmr = 0; }
