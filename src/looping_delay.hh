@@ -301,12 +301,12 @@ public:
 
 			// If the read addr is not in between the loop start and end, then fade to the loop start
 			if (check_read_head_in_loop()) {
-				// if (is_crossfading()) {
-				// 	queued_read_fade_ending_addr = loop_start;
-				// } else {
-				// 	start_crossfade(loop_start);
-				// 	params.reset_loop();
-				// }
+				if (is_crossfading()) {
+					queued_read_fade_ending_addr = loop_start;
+				} else {
+					start_crossfade(loop_start);
+					params.reset_loop();
+				}
 			}
 		}
 	}
