@@ -28,8 +28,9 @@ void CalibrationStorage::set_default_cal() {
 	cal_data.settings.main_clock = GateType::Gate;
 	cal_data.settings.log_delay_feed = true;
 	cal_data.settings.runaway_dc_block = true;
-	cal_data.settings.auto_unquantize_timejack = true;
+	cal_data.settings.auto_unquantize_timejack = false;
 	cal_data.settings.send_return_before_loop = false;
+	cal_data.settings.stereo_mode = false;
 
 	cal_data.settings.crossfade_samples = 4800;		  // SLOW_FADE_SAMPLES
 	cal_data.settings.write_crossfade_samples = 4800; // FAST_FADE_SAMPLES

@@ -4,7 +4,7 @@
 
 enum class InfState { Off, On, TransitioningOn, TransitioningOff };
 
-enum class GateType :uint8_t { Gate = 0, Trig = 1 };
+enum class GateType : uint8_t { Gate = 0, Trig = 1 };
 enum class PingMethod : uint8_t {
 	IGNORE_FLAT_DEVIATION_10 = 0,
 	IGNORE_PERCENT_DEVIATION,
@@ -44,6 +44,7 @@ struct Settings {
 	bool runaway_dc_block;
 	bool auto_unquantize_timejack;
 	bool send_return_before_loop;
+	bool stereo_mode;
 
 	uint32_t crossfade_samples;		  // SLOW_FADE_SAMPLES
 	float crossfade_rate;			  // SLOW_FADE_INCREMENT
