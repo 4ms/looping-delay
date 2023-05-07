@@ -42,7 +42,7 @@ struct Memory {
 			addr = Util::offset_samples(addr, 1, reverse);
 
 			if (addr == loop_addr)
-				heads_crossed = 1;
+				heads_crossed = true;
 		}
 
 		return heads_crossed;

@@ -51,9 +51,9 @@ private:
 
 	template<uint32_t buffer_half>
 	void _process() {
-		Debug::Pin0::high();
+		// Debug::Pin0::high();
 		_process_func(audio_in_dma_buffer[1 - buffer_half], audio_out_dma_buffer[buffer_half]);
-		Debug::Pin0::low();
+		// Debug::Pin0::low();
 	}
 };
 
