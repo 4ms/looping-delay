@@ -140,6 +140,9 @@ private:
 					pot.moved_while_inf_down = true;
 					ignore_inf_release = true; // if i==TimePot || FeedbackPot in InfMode only?
 				}
+			} else {
+				pot.moved = false;
+				pot.delta = 0;
 			}
 		}
 	}
