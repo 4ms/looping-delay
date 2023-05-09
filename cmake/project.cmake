@@ -79,6 +79,7 @@ function(create_target target driver_arch)
               -nostdlib
               -Wdouble-promotion
               -Werror=return-type
+              -Wall
               $<$<COMPILE_LANGUAGE:CXX>:
               -std=c++23
               -ffold-simple-inlines

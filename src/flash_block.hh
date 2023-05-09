@@ -52,7 +52,7 @@ struct FlashBlock {
 
 		if (read(check_data, cell)) {
 			uint8_t *p = reinterpret_cast<uint8_t *>(&check_data);
-			for (int i = 0; i < data_size_; i++) {
+			for (unsigned i = 0; i < data_size_; i++) {
 				if (p[i] != 0xFF)
 					return false;
 			}
