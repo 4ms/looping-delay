@@ -1,3 +1,4 @@
+#include <cmath>
 #include <cstdint>
 
 // TODO: take an average of abs(cur)
@@ -28,7 +29,7 @@ public:
 				fade_amt -= DecayRate;
 				if (fade_amt <= 0.f) {
 					fade_amt = 0.f;
-					state == Muted;
+					state = Muted;
 				}
 				break;
 
@@ -40,7 +41,7 @@ public:
 				fade_amt += AttackRate;
 				if (fade_amt >= 1.f) {
 					fade_amt = 1.f;
-					state == Unmuted;
+					state = Unmuted;
 				}
 				break;
 		}
