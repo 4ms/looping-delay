@@ -39,7 +39,7 @@ MEMORY
 
 /* A7 stacks are at end of RAM */
 
-_shared_list = _A7_SHARED_LIST;
+_shared_list = LD_A7_SHARED_LIST;
 
 SECTIONS
 {
@@ -127,7 +127,7 @@ SECTIONS
 	{
 		. = ALIGN(8);
 		_sheap = .;
-		. += _A7_HEAP_SZ;
+		. += LD_A7_HEAP_SZ;
 		_eheap = .;
 	} > HEAP
 
