@@ -41,8 +41,8 @@ class LoopingDelay {
 
 	bool doing_reverse_fade = false;
 
-	AutoMute<0.0002f, 1000, 0.02f, 0.02f> main_automute;
-	AutoMute<0.0002f, 10, 0.02f, 0.02f> aux_automute;
+	AutoMute<0.0002f, 500, 0.02f, 0.02f> main_automute; // 1000 = audible tone
+	AutoMute<0.0002f, 1000, 0.02f, 0.02f> aux_automute;
 	DCBlock<1.f / 4800.f> dcblock;
 
 public:
