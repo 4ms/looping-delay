@@ -9,7 +9,7 @@ AlignAfterOpenBracket: "Align"
 AlignOperands : "AlignAfterOperator"
 AllowAllArgumentsOnNextLine : "true"
 AllowShortBlocksOnASingleLine : "true"
-AllowShortFunctionsOnASingleLine: "All"
+AllowShortFunctionsOnASingleLine: "None"
 AllowShortIfStatementsOnASingleLine : "Never"
 AlwaysBreakTemplateDeclarations : "true"
 BinPackArguments: false
