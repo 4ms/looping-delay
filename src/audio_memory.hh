@@ -69,7 +69,6 @@ struct Memory {
 						   float fade) {
 		int32_t rd;
 		int32_t mix;
-		constexpr uint32_t num_samples = AudioStreamConf::BlockSize;
 
 		addr = ensure_valid(addr);
 		for (auto s : wr_buff) {

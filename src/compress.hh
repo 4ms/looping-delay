@@ -38,7 +38,7 @@ constexpr inline int32_t compress_clang(int32_t val) {
 		return val;
 }
 
-static inline constexpr uint32_t thresh_top = 0x7FFFFF * 0.75f; // 0x5F'FFFF
+static inline constexpr int32_t thresh_top = 0x7FFFFF * 0.75f; // 0x5F'FFFF
 static_assert(compress_clang<0x7FFFFF, 75>(thresh_top) == thresh_top);
 
 static_assert(compress_clang<0x7FFFFF, 75>(thresh_top + 1) == thresh_top);
