@@ -9,7 +9,13 @@ include(${CMAKE_SOURCE_DIR}/cmake/project.cmake)
 set(root ${CMAKE_SOURCE_DIR})
 
 set(target mp153)
-set(TARGET_LINK_SCRIPT ${CMAKE_SOURCE_DIR}/linker/stm32mp15xx_ca7.ld)
+add_custom_target(
+  stm32mp15xx_ca7_processed.ld COMMAND cp ${CMAKE_SOURCE_DIR}/linker/stm32mp15xx_ca7.ld
+                                       ${CMAKE_CURRENT_BINARY_DIR}/stm32mp15xx_ca7_processed.ld
+)
+set(TARGET_LINK_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/stm32mp15xx_ca7_processed.ld)
+# set(TARGET_LINK_SCRIPT ${CMAKE_SOURCE_DIR}/linker/stm32mp15xx_ca7.ld)
+
 set(ARCH_DEFINES STM32MP157Cxx STM32MP1 CORE_CA7)
 set(ARCH_FLAGS
     -mcpu=cortex-a7
@@ -37,10 +43,6 @@ set(TARGET_SOURCES
     aux_core_main.cc
     flash.cc
     ${root}/lib/mdrivlib/target/stm32mp1_ca7/boot/irq_ctrl.c
-    # ${root}/lib/mdrivlib/target/stm32mp1/drivers/sai_tdm.cc
-    # ${root}/lib/mdrivlib/target/stm32mp1_ca7/drivers/interrupt_handler.cc
-    # ${root}/lib/mdrivlib/target/stm32mp1_ca7/boot/startup.s
-    # ${root}/lib/mdrivlib/target/stm32mp1_ca7/boot/system_init.c
 )
 
 set_hal_sources(HAL_SOURCES stm32mp1)

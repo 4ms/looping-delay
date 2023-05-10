@@ -2,53 +2,31 @@ OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(_Reset)
 
-/* INCLUDE ./memory.ld */
-
-/* Presume 256MB RAM */
-LD_A7_CODE 		= 0xC2000040;
-LD_A7_CODE_SZ  	= 16M - 0x40;/*0x00FFFFD8*/
-LD_A7_CODE_END 	= 0xC3000000;
-
-LD_A7_RAM 		= 0xC3000000;
-LD_A7_RAM_SZ 		= 16M;		/*0x09000000*/
-LD_A7_RAM_END 	= 0xC4000000;
-
-LD_A7_HEAP		= 0xC5000000;
-LD_A7_HEAP_SZ 	= 175M; 	/*0x0AF00000*/
-LD_A7_HEAP_END	= 0xCFF00000;
-
-LD_DMABUF			= 0xCFF00000;
-LD_DMABUF_SZ		= 1M;		/*0x00100000*/
-LD_DMABUF_END		= 0xD0000000;
-
-LD_M4_SHARED_LIST 	= 0x1005FF00;
-LD_A7_SHARED_LIST 	= 0x3005FF00;
-LD_SHARED_LIST_SZ 	= 256;
-LD_M4_SHARED_LIST_END = 0x10060000;
+#include "../src/mp153-drivers/ld.h"
 
 MEMORY
 {
-    ROM (rx)			: ORIGIN = LD_A7_CODE,		LENGTH = LD_A7_CODE_SZ
-    RAM (rw)			: ORIGIN = LD_A7_RAM,		LENGTH = LD_A7_RAM_SZ
-	HEAP (rw)			: ORIGIN = LD_A7_HEAP,		LENGTH = LD_A7_HEAP_SZ
-	DMABUF (rw)			: ORIGIN = LD_DMABUF,		LENGTH = LD_DMABUF_SZ 
+	ROM (rx)			: ORIGIN = A7_CODE,			LENGTH = A7_CODE_SZ
+	RAM (rw)			: ORIGIN = A7_RAM,			LENGTH = A7_RAM_SZ
+	HEAP (rw)			: ORIGIN = A7_HEAP,			LENGTH = A7_HEAP_SZ
+	DMABUFFER (rw)		: ORIGIN = DMABUF,			LENGTH = DMABUF_SZ
 
-	SHAREDMEMINDEX (rw) : ORIGIN = LD_A7_SHARED_LIST, LENGTH = LD_SHARED_LIST_SZ
+	SHAREDMEMINDEX (rw) : ORIGIN = A7_SHARED_LIST,	LENGTH = SHARED_LIST_SZ
 	SYSRAM (rw)			: ORIGIN = 0x2FFC0000,		LENGTH = 256K
 }
 
 /* A7 stacks are at end of RAM */
 
-_shared_list = LD_A7_SHARED_LIST;
+_shared_list = A7_SHARED_LIST;
 
 SECTIONS
 {
-    .text : {
-        *(.vector_table)
+	.text : {
+		*(.vector_table)
 		*(.resethandler)
 		*(.irqhandler)
-        *(.text)
-        *(.text*)
+		*(.text)
+		*(.text*)
 					/* Todo: check if we need the next 5 lines */
 		*(.glue_7)         /* glue arm to thumb code */
 		*(.glue_7t)        /* glue thumb to arm code */
@@ -56,8 +34,8 @@ SECTIONS
 		KEEP (*(.init))
 		KEEP (*(.fini))
 
-        . = ALIGN(8);
-     } > ROM
+		. = ALIGN(8);
+	 } > ROM
 
 	.rodata :
 	{
@@ -100,42 +78,42 @@ SECTIONS
 	} > ROM
 
 
-    _text_end = .;
+	_text_end = .;
 
-    .data : AT(_text_end)
-    {
-        . = ALIGN(8);
-        _data_start = .;
-        *(.data)
-        *(.data*)
-        . = ALIGN(8);
-        _data_end = .;
-    } > RAM
+	.data : AT(_text_end)
+	{
+		. = ALIGN(8);
+		_data_start = .;
+		*(.data)
+		*(.data*)
+		. = ALIGN(8);
+		_data_end = .;
+	} > RAM
 
-    .bss : {
-        _bss_start = .;
-        *(.bss)
-        *(.bss*)   /* required for some malloc calls */
+	.bss : {
+		_bss_start = .;
+		*(.bss)
+		*(.bss*)   /* required for some malloc calls */
 		*(COMMON)  /* required for libc, such as __lock___atexit_recursive_mutex */
-        . = ALIGN(8);
-        _bss_end = .;
+		. = ALIGN(8);
+		_bss_end = .;
 		. = ALIGN(256);
 		_ram_aligned_end = .;
-    } > RAM
+	} > RAM
 
 	.heap (NOLOAD):
 	{
 		. = ALIGN(8);
 		_sheap = .;
-		. += LD_A7_HEAP_SZ;
+		. += A7_HEAP_SZ;
 		_eheap = .;
 	} > HEAP
 
 	.ddma (NOLOAD):
 	{
 		. = ALIGN(8);
-        *(.ddma)
-	} > DMABUF
+		*(.ddma)
+	} > DMABUFFER
 
 	.sysram (NOLOAD):
 	{
@@ -147,20 +125,20 @@ SECTIONS
 	} > SYSRAM
 
 
-    _user_stack_start = _ram_aligned_end;
-    _user_stack_end = _user_stack_start + 0x100000; /* 1M */
+	_user_stack_start = _ram_aligned_end;
+	_user_stack_end = _user_stack_start + 0x100000; /* 1M */
 
-    _svc_stack_start = _user_stack_end;
-    _svc_stack_end = _svc_stack_start + 0x6000; /* 24k for ISRs*/
+	_svc_stack_start = _user_stack_end;
+	_svc_stack_end = _svc_stack_start + 0x6000; /* 24k for ISRs*/
 
-    _irq_stack_start = _svc_stack_end;
-    _irq_stack_end = _irq_stack_start + 0x100; 
+	_irq_stack_start = _svc_stack_end;
+	_irq_stack_end = _irq_stack_start + 0x100; 
 
-    _fiq_stack_start = _irq_stack_end;
-    _fiq_stack_end = _fiq_stack_start + 0x100;
+	_fiq_stack_start = _irq_stack_end;
+	_fiq_stack_end = _fiq_stack_start + 0x100;
 
-    _auxcore_user_stack_start = _fiq_stack_end;
-    _auxcore_user_stack_end = _auxcore_user_stack_start + 0x1000;
+	_auxcore_user_stack_start = _fiq_stack_end;
+	_auxcore_user_stack_end = _auxcore_user_stack_start + 0x1000;
 
 
 	.sharedmemindex (NOLOAD) :
@@ -175,9 +153,9 @@ SECTIONS
   /* Remove information from the compiler libraries */
   /DISCARD/ :
   {
-    libc.a ( * )
-    libm.a ( * )
-    libgcc.a ( * )
+	libc.a ( * )
+	libm.a ( * )
+	libgcc.a ( * )
   }
 
 	.ARM.attributes 0 : { *(.ARM.attributes) }
