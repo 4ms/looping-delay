@@ -21,7 +21,7 @@ namespace LDKit
 class LoopingDelay {
 	Params &params;
 	Flags &flags;
-	DelayBuffer &buf;
+	DelayBuffer &buf; // TODO: use this
 
 	uint32_t read_head; // read_addr
 	uint32_t write_head;
@@ -41,8 +41,12 @@ class LoopingDelay {
 
 	bool doing_reverse_fade = false;
 
-	AutoMute<0.0002f, 500, 0.02f, 0.02f> main_automute; // 1000 = audible tone
-	AutoMute<0.0002f, 1000, 0.02f, 0.02f> aux_automute;
+	static constexpr int32_t AutoMuteThreshold = 0.020 / 20. * 0x7F'FFFF; // 20mV of 20Vpp
+	static constexpr int32_t AutoMuteAttack = 0.020 * 48000;			  // 20ms
+	static constexpr int32_t AutoMuteDecay = 0.020 * 48000;				  // 20ms
+	AutoMute<500, AutoMuteThreshold, AutoMuteAttack, AutoMuteDecay> main_automute;
+	AutoMute<500, AutoMuteThreshold, AutoMuteAttack, AutoMuteDecay> aux_automute;
+
 	DCBlock<1.f / 4800.f> dcblock;
 
 public:
@@ -67,9 +71,7 @@ public:
 
 		// was process_mode_flags():
 		if (flags.take_time_changed()) {
-			// Debug::Pin1::high();
 			set_divmult_time();
-			// Debug::Pin1::low();
 		}
 
 		if (write_fade_state == FadeState::NotFading) {
@@ -117,10 +119,6 @@ public:
 		for (auto [mem_wr, mem_rd, mem_rd_dest, out, in] : zip(wr_buff, rd_buff, rd_buff_dest, outblock, inblock)) {
 			auto auxin = AudioStreamConf::AudioInFrame::sign_extend(in.chan[0]);
 			auto mainin = AudioStreamConf::AudioInFrame::sign_extend(in.chan[1]);
-
-			// Fix for noisy input on unmodded p3:
-			// auxin = 0;
-			//////////////////////////
 
 			if (flags.mute_on_boot_ctr) {
 				mainin = 0;
