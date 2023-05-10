@@ -31,7 +31,7 @@
 #include <optional>
 #include <span>
 
-static HAL_StatusTypeDef flash_erase(uint32_t address);
+// static HAL_StatusTypeDef flash_erase(uint32_t address);
 
 // template<std::integral T>
 bool flash_read(std::span<uint8_t> data, uint32_t address) {
@@ -109,23 +109,23 @@ bool flash_erase_and_write(std::span<const uint8_t> data, uint32_t dst_addr) {
 	return true;
 }
 
-static HAL_StatusTypeDef flash_erase(uint32_t address) {
-	return HAL_OK;
-	// auto sector_start = get_sector_num(address);
-	// if (!sector_start)
-	// 	return HAL_OK;
+// static HAL_StatusTypeDef flash_erase(uint32_t address) {
+// 	return HAL_OK;
+// auto sector_start = get_sector_num(address);
+// if (!sector_start)
+// 	return HAL_OK;
 
-	// uint32_t sector = sector_start.value();
-	// FLASH_EraseInitTypeDef eraseInit;
-	// eraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
-	// eraseInit.Sector = sector;
-	// eraseInit.NbSectors = 1;
-	// eraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
-	// uint32_t result = 0;
-	// HAL_StatusTypeDef status = HAL_FLASHEx_Erase(&eraseInit, &result);
-	// if (result != 0xFFFFFFFF)
-	// 	return HAL_ERROR;
-	// else {
-	// 	return status;
-	// }
-}
+// uint32_t sector = sector_start.value();
+// FLASH_EraseInitTypeDef eraseInit;
+// eraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
+// eraseInit.Sector = sector;
+// eraseInit.NbSectors = 1;
+// eraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
+// uint32_t result = 0;
+// HAL_StatusTypeDef status = HAL_FLASHEx_Erase(&eraseInit, &result);
+// if (result != 0xFFFFFFFF)
+// 	return HAL_ERROR;
+// else {
+// 	return status;
+// }
+// }
