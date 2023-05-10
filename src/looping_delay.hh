@@ -47,7 +47,7 @@ class LoopingDelay {
 	AutoMute<500, AutoMuteThreshold, AutoMuteAttack, AutoMuteDecay> main_automute;
 	AutoMute<500, AutoMuteThreshold, AutoMuteAttack, AutoMuteDecay> aux_automute;
 
-	DCBlock<1.f / 4800.f> dcblock;
+	DCBlock<4800, int32_t> dcblock;
 
 public:
 	LoopingDelay(Params &params, Flags &flags, DelayBuffer &delay_buffer)

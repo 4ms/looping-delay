@@ -1,14 +1,15 @@
-#include <cstdint>
 
-template<float Coef>
+template<unsigned CoefRecip, typename T>
 class DCBlock {
+	static constexpr float Coef = 1.f / CoefRecip;
 	float lpf = 0.f;
 
 public:
 	DCBlock() = default;
 
-	int32_t update(int32_t cur) {
-		lpf = (lpf * (1.f - Coef)) + (cur * Coef);
-		return cur - lpf;
+	T update(T cur) {
+		lpf += Coef * (cur - lpf);
+		T hpf = cur - lpf;
+		return hpf;
 	}
 };
