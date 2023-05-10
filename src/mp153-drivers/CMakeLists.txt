@@ -9,12 +9,20 @@ include(${CMAKE_SOURCE_DIR}/cmake/project.cmake)
 set(root ${CMAKE_SOURCE_DIR})
 
 set(target mp153)
-add_custom_target(
-  stm32mp15xx_ca7_processed.ld COMMAND cp ${CMAKE_SOURCE_DIR}/linker/stm32mp15xx_ca7.ld
-                                       ${CMAKE_CURRENT_BINARY_DIR}/stm32mp15xx_ca7_processed.ld
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/stm32mp15xx_ca7_processed.ld
+  COMMAND ${CMAKE_C_COMPILER} -E -P -x c ${CMAKE_SOURCE_DIR}/linker/stm32mp15xx_ca7.ld -o
+          ${CMAKE_CURRENT_BINARY_DIR}/stm32mp15xx_ca7_processed.ld
+  MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/linker/stm32mp15xx_ca7.ld
+  VERBATIM
 )
+add_custom_target(
+  ${target}-linkerscript
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/stm32mp15xx_ca7_processed.ld
+  VERBATIM
+)
+
 set(TARGET_LINK_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/stm32mp15xx_ca7_processed.ld)
-# set(TARGET_LINK_SCRIPT ${CMAKE_SOURCE_DIR}/linker/stm32mp15xx_ca7.ld)
 
 set(ARCH_DEFINES STM32MP157Cxx STM32MP1 CORE_CA7)
 set(ARCH_FLAGS
@@ -47,3 +55,4 @@ set(TARGET_SOURCES
 
 set_hal_sources(HAL_SOURCES stm32mp1)
 create_target(${target} stm32mp1_ca7)
+add_dependencies(${target}.elf ${target}-linkerscript)
