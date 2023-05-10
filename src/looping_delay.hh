@@ -269,7 +269,7 @@ public:
 	int32_t clip(int32_t val) {
 		constexpr size_t Max24bit = (1U << 23);
 		if (params.settings.soft_clip)
-			val = compress<Max24bit, 0.75f>(val);
+			val = compress<Max24bit, 75>(val);
 		else
 			val = __SSAT(val, 24);
 		return val;
