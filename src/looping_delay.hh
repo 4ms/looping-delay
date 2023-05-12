@@ -11,6 +11,7 @@
 #include "flags.hh"
 #include "loop_util.hh"
 #include "params.hh"
+#include "util/circular_buffer_ext.hh"
 #include "util/math.hh"
 #include "util/zip.hh"
 #include <algorithm>
@@ -21,25 +22,28 @@ namespace LDKit
 class LoopingDelay {
 	Params &params;
 	Flags &flags;
-	DelayBuffer &buf; // TODO: use this
 
-	uint32_t read_head; // read_addr
-	uint32_t write_head;
+	CircularBufferAccess<MonoBuffer> buf;
+	CircularBufferAccess<MonoBuffer> fade_buf;
+	// StereoHalfBuffer left_buf_span;
+	// CircularBufferAccess<StereoHalfBuffer> left_buf;
+	// StereoHalfBuffer right_buf_span;
+	// CircularBufferAccess<StereoHalfBuffer> right_buf;
 
-	float read_fade_phase = 0;			   // read_fade_pos
-	uint32_t read_fade_ending_addr;		   // fade_dest_read_addr
+	float read_fade_phase = 0; // read_fade_pos
+	// uint32_t read_fade_ending_addr;		   // fade_dest_read_addr
 	uint32_t queued_divmult_time;		   // fade_queued_dest_divmult_time
 	uint32_t queued_read_fade_ending_addr; // fade_queued_dest_read_addr
 
 	float write_fade_phase = 0.f; // write_fade_pos
 	enum class FadeState { NotFading, FadingDown, FadingUp, Crossfading };
 	FadeState write_fade_state = FadeState::NotFading; // write_fade_state
-	uint32_t write_fade_ending_addr;				   // fade_dest_write_addr
-
-	uint32_t loop_start;
-	uint32_t loop_end;
+	// uint32_t write_fade_ending_addr;				   // fade_dest_write_addr
 
 	bool doing_reverse_fade = false;
+
+	uint32_t loop_start = 0;
+	uint32_t loop_end = 0;
 
 	static constexpr int32_t AutoMuteThreshold = 0.020 / 20. * 0x7F'FFFF; // 20mV of 20Vpp
 	static constexpr int32_t AutoMuteAttack = 0.020 * 48000;			  // 20ms
@@ -50,12 +54,15 @@ class LoopingDelay {
 	DCBlock<4800, int32_t> dcblock;
 
 public:
-	LoopingDelay(Params &params, Flags &flags, DelayBuffer &delay_buffer)
+	LoopingDelay(Params &params, Flags &flags, DelayBufferSpan delay_buffer)
 		: params{params}
 		, flags{flags}
 		, buf{delay_buffer}
-		, read_head{Brain::MemoryStartAddr}
-		, write_head{Brain::MemoryStartAddr + 12000} {
+		, fade_buf{delay_buffer} // , left_buf_span{&delay_buffer[0], Brain::MemorySamplesNum / 2}
+								 // , left_buf{left_buf_span}
+								 // , right_buf_span{&delay_buffer[Brain::MemorySamplesNum / 2], Brain::MemorySamplesNum
+								 // / 2} , right_buf{right_buf_span}
+	{
 		Memory::clear();
 	}
 
@@ -84,15 +91,15 @@ public:
 				toggle_rev();
 		}
 
-		std::array<int16_t, AudioStreamConf::BlockSize> rd_buff; // on DLD this is 2x size.. bug?
+		std::array<int16_t, AudioStreamConf::BlockSize> rd_buff;
 		std::array<int16_t, AudioStreamConf::BlockSize> rd_buff_dest;
 		std::array<int16_t, AudioStreamConf::BlockSize> wr_buff;
 
 		// Read into rd_buff:
-		bool read_decrementing = doing_reverse_fade != params.modes.reverse;
+		bool read_reverse = doing_reverse_fade != params.modes.reverse;
 		if (params.modes.inf == InfState::Off) {
 			check_read_write_head_spacing();
-			Memory::read(read_head, rd_buff, 0, read_decrementing);
+			read_reverse ? buf.read_reverse(rd_buff) : buf.read(rd_buff);
 		} else {
 			if (!check_read_head_in_loop()) {
 				if (!is_crossfading()) {
@@ -101,20 +108,23 @@ public:
 				}
 			}
 
-			bool did_cross_start_fade_addr =
-				Memory::read(read_head, rd_buff, calc_start_fade_addr(), read_decrementing);
+			auto marker = calc_start_fade_addr();
+			bool did_cross_start_fade = read_reverse ? buf.read_reverse_check_crossed(rd_buff, marker) :
+													   buf.read_check_crossed(rd_buff, marker);
 
-			if (did_cross_start_fade_addr) {
+			if (did_cross_start_fade) {
 				start_looping_crossfade();
 			}
 		}
 
 		// Read into crossfading buffer (TODO: shouldn't this only happen if we're xfading?)
-		Memory::read(read_fade_ending_addr, rd_buff_dest, 0, params.modes.reverse);
-		if (params.settings.stereo_mode) {
-			// read into rdaux_buff
-			// read into rdaux_buff_dest
-		}
+		params.modes.reverse ? fade_buf.read_reverse(rd_buff_dest) : fade_buf.read(rd_buff_dest);
+		// Memory::read(read_fade_ending_addr, rd_buff_dest, 0, params.modes.reverse);
+
+		// if (params.settings.stereo_mode) {
+		// read into rdaux_buff
+		// read into rdaux_buff_dest
+		// }
 
 		for (auto [mem_wr, mem_rd, mem_rd_dest, out, in] : zip(wr_buff, rd_buff, rd_buff_dest, outblock, inblock)) {
 			auto auxin = AudioStreamConf::AudioInFrame::sign_extend(in.chan[0]);
@@ -135,6 +145,7 @@ public:
 			phase = __USAT(phase, 12);
 			int32_t rd;
 			if (params.settings.stereo_mode) {
+				// TODO: rd = equal_power_crossfade(mem_rd, mem_rd_dest, phase);
 				rd = ((float)mem_rd * epp_lut[phase]) + ((float)mem_rd_dest * epp_lut[4095 - phase]);
 				rd *= 256;
 			} else {
@@ -189,16 +200,23 @@ public:
 
 		if (params.modes.inf == InfState::TransitioningOn) {
 			if (write_fade_state == FadeState::FadingDown) {
-				Memory::fade_write(write_fade_ending_addr, wr_buff, rev, 1.f - write_fade_phase);
-				write_head = write_fade_ending_addr;
+				float phase = 1.f - write_fade_phase;
+				rev ? fade_buf.write_reverse(wr_buff, phase) : fade_buf.write(wr_buff, phase);
+				// Memory::fade_write(write_fade_ending_addr, wr_buff, rev, 1.f - write_fade_phase);
+				// write_head = write_fade_ending_addr;
+				buf.wr_pos(fade_buf.wr_pos());
 			}
 		}
 
 		if (params.modes.inf == InfState::TransitioningOff || params.modes.inf == InfState::Off) {
 			if (write_fade_state == FadeState::Crossfading) {
-				Memory::fade_write(write_fade_ending_addr, wr_buff, rev, write_fade_phase);
-				// write in the opposite direction of [REV]
-				Memory::fade_write(write_head, wr_buff, !rev, 1.f - write_fade_phase);
+				// Memory::fade_write(write_fade_ending_addr, wr_buff, rev, write_fade_phase);
+				rev ? fade_buf.write_reverse(wr_buff, write_fade_phase) : fade_buf.write(wr_buff, write_fade_phase);
+
+				// write in the opposite direction of rev
+				// Memory::fade_write(write_head, wr_buff, !rev, 1.f - write_fade_phase);
+				rev ? fade_buf.write(wr_buff, 1.f - write_fade_phase) :
+					  fade_buf.write_reverse(wr_buff, 1.f - write_fade_phase);
 			} else if (write_fade_state == FadeState::FadingUp) {
 				Memory::fade_write(write_fade_ending_addr, wr_buff, rev, write_fade_phase);
 				write_head = write_fade_ending_addr;
