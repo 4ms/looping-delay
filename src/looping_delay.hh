@@ -31,14 +31,17 @@ class LoopingDelay {
 	// CircularBufferAccess<StereoHalfBuffer> right_buf;
 
 	float read_fade_phase = 0; // read_fade_pos
-	// uint32_t read_fade_ending_addr;		   // fade_dest_read_addr
+	// uint32_t read_fade_ending_addr;		   // fade_dest_read_addr  ==> fade_buf.rd_pos()
 	uint32_t queued_divmult_time;		   // fade_queued_dest_divmult_time
 	uint32_t queued_read_fade_ending_addr; // fade_queued_dest_read_addr
 
 	float write_fade_phase = 0.f; // write_fade_pos
 	enum class FadeState { NotFading, FadingDown, FadingUp, Crossfading };
 	FadeState write_fade_state = FadeState::NotFading; // write_fade_state
-	// uint32_t write_fade_ending_addr;				   // fade_dest_write_addr
+	// uint32_t write_fade_ending_addr;				   // fade_dest_write_addr ==> fade_buf.wr_pos()
+
+	// read_head => buf.rd_pos()
+	// write_head => buf.wr_pos()
 
 	bool doing_reverse_fade = false;
 
@@ -218,24 +221,28 @@ public:
 				rev ? fade_buf.write(wr_buff, 1.f - write_fade_phase) :
 					  fade_buf.write_reverse(wr_buff, 1.f - write_fade_phase);
 			} else if (write_fade_state == FadeState::FadingUp) {
-				Memory::fade_write(write_fade_ending_addr, wr_buff, rev, write_fade_phase);
-				write_head = write_fade_ending_addr;
+				// Memory::fade_write(write_fade_ending_addr, wr_buff, rev, write_fade_phase);
+				// write_head = write_fade_ending_addr;
+				rev ? fade_buf.write_reverse(wr_buff, write_fade_phase) : fade_buf.write(wr_buff, write_fade_phase);
+				buf.wr_pos(fade_buf.wr_pos());
 			} else {
-				Memory::write(write_head, wr_buff, rev);
-				write_fade_ending_addr = write_head;
+				// Memory::write(write_head, wr_buff, rev);
+				// write_fade_ending_addr = write_head;
+				rev ? buf.write_reverse(wr_buff) : buf.write(wr_buff);
+				fade_buf.wr_pos(buf.wr_pos());
 			}
 		}
 	}
 
 	bool check_read_head_in_loop() {
 		// If we're not crossfading, check if the read head is inside the loop
-		return Util::in_between(read_head, loop_start, loop_end, params.modes.reverse);
+		return Util::in_between(buf.rd_pos(), loop_start, loop_end, params.modes.reverse);
 	}
 
 	void check_read_write_head_spacing() {
 		if (!is_crossfading()) {
 			auto t = calculate_read_addr(params.divmult_time);
-			if (t != read_head)
+			if (t != buf.rd_pos())
 				set_divmult_time();
 		}
 	}
@@ -258,11 +265,12 @@ public:
 		params.reset_loop();
 
 		if (params.divmult_time < params.settings.crossfade_samples) {
-			read_head = loop_start;
+			// read_head = loop_start;
+			buf.rd_pos(loop_start);
 			read_fade_phase = 0.f;
 
 			// Issue: is it necessary to set this below?
-			read_fade_ending_addr = Util::offset_samples(read_head, AudioStreamConf::BlockSize, !params.modes.reverse);
+			fade_buf.rd_pos(Util::offset_samples(buf.rd_pos(), AudioStreamConf::BlockSize, !params.modes.reverse));
 		} else {
 			// Start fading from before the loop
 			// We have to add in sz because read_addr has already
@@ -272,7 +280,7 @@ public:
 				loop_size = -loop_size;
 
 			uint32_t f_addr =
-				Util::offset_samples(read_head, (loop_size + sz) / MemorySampleSize, !params.modes.reverse);
+				Util::offset_samples(buf.rd_pos(), (loop_size + sz) / MemorySampleSize, !params.modes.reverse);
 
 			// From DLD code : "Issue: clearing a queued divmult time"
 			start_crossfade(f_addr);
@@ -294,7 +302,7 @@ public:
 	}
 
 	uint32_t calculate_read_addr(uint32_t new_divmult_time) {
-		return Util::offset_samples(write_head, new_divmult_time, !params.modes.reverse);
+		return Util::offset_samples(buf.wr_pos(), new_divmult_time, !params.modes.reverse);
 	}
 
 	void set_divmult_time() {
@@ -313,7 +321,7 @@ public:
 			} else {
 				params.set_divmult(t_divmult_time);
 				uint32_t t_read_addr = calculate_read_addr(params.divmult_time);
-				if (t_read_addr != read_head)
+				if (t_read_addr != buf.rd_pos())
 					start_crossfade(t_read_addr);
 			}
 		} else {
@@ -343,7 +351,7 @@ public:
 	void start_crossfade(uint32_t addr) {
 		read_fade_phase = params.settings.crossfade_rate;
 		queued_divmult_time = 0; // means: no queued crossfade
-		read_fade_ending_addr = addr;
+		fade_buf.rd_pos(addr);
 	}
 
 	void increment_crossfading() {
@@ -352,7 +360,8 @@ public:
 			if (read_fade_phase > 1.f) {
 				read_fade_phase = 0.f;
 				doing_reverse_fade = false;
-				read_head = read_fade_ending_addr;
+				buf.rd_pos(fade_buf.rd_pos());
+				// read_head = read_fade_ending_addr;
 
 				if (queued_divmult_time > 0.f) {
 					params.set_divmult(queued_divmult_time);
@@ -377,7 +386,8 @@ public:
 			if (write_fade_phase > 1.f) {
 				write_fade_phase = 0.f;
 				write_fade_state = FadeState::NotFading;
-				write_head = write_fade_ending_addr;
+				buf.wr_pos(fade_buf.wr_pos());
+				// write_head = write_fade_ending_addr;
 				if (params.modes.inf == InfState::TransitioningOn)
 					params.set_inf_state(InfState::On);
 			}
@@ -405,13 +415,13 @@ public:
 		loop_end = Util::offset_samples(t, padding, params.modes.reverse);
 
 		// (Old TODO ToDo: ??? Add a crossfade for read head reversing direction here
-		start_crossfade(read_head);
+		start_crossfade(buf.rd_pos());
 	}
 
 	// When starting a reverse, crossfade a swap of the read/write heads
 	void swap_read_write() {
-		start_crossfade(write_fade_ending_addr);
-		write_fade_ending_addr = read_head;
+		start_crossfade(fade_buf.wr_pos());
+		fade_buf.wr_pos(buf.rd_pos());
 		write_fade_phase = params.settings.write_crossfade_rate;
 		write_fade_state = FadeState::Crossfading;
 	}
@@ -422,7 +432,8 @@ public:
 
 			write_fade_phase = params.settings.write_crossfade_rate;
 			write_fade_state = FadeState::FadingUp;
-			write_fade_ending_addr = read_head;
+			fade_buf.wr_pos(buf.rd_pos());
+			// write_fade_ending_addr = read_head;
 		} else {
 			// Don't change the loop start/end if we hit INF off recently
 			// (recent enough that we're still TransitioningOff)
@@ -430,7 +441,7 @@ public:
 			if (params.modes.inf != InfState::TransitioningOff) {
 				params.reset_loop();
 
-				loop_start = read_fade_ending_addr;
+				loop_start = fade_buf.rd_pos(); // read_fade_ending_addr;
 				// set loop_start to the fade ending addr because if we happen to
 				// be fading the read head when we hit inf (e.g. changing divmult time)
 				// then we should loop between the new points since divmult_time
@@ -440,7 +451,8 @@ public:
 			}
 			write_fade_phase = params.settings.crossfade_rate;
 			write_fade_state = FadeState::FadingDown;
-			write_fade_ending_addr = write_head;
+			// write_fade_ending_addr = write_head;
+			fade_buf.wr_pos(buf.wr_pos());
 
 			params.set_inf_state(InfState::TransitioningOn);
 		}
