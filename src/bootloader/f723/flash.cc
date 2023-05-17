@@ -38,7 +38,6 @@ static void flash_end_open_program(void);
 static HAL_StatusTypeDef flash_open_erase_page(uint32_t address);
 static HAL_StatusTypeDef flash_open_program_word(uint32_t word, uint32_t address);
 static HAL_StatusTypeDef flash_open_program_word_array(uint32_t *arr, uint32_t address, uint32_t num_bytes);
-static HAL_StatusTypeDef flash_erase_page(uint32_t address);
 
 HAL_StatusTypeDef _flash_erase(uint32_t address) {
 	auto sector_start = get_sector_num(address);
@@ -60,19 +59,16 @@ HAL_StatusTypeDef _flash_erase(uint32_t address) {
 	}
 }
 
-void flash_begin_open_program(void) { HAL_FLASH_Unlock(); }
-void flash_end_open_program(void) { HAL_FLASH_Lock(); }
-
-HAL_StatusTypeDef flash_erase_page(uint32_t address) {
-	HAL_StatusTypeDef status;
-
+void flash_begin_open_program(void) {
 	HAL_FLASH_Unlock();
-	status = _flash_erase(address);
+}
+void flash_end_open_program(void) {
 	HAL_FLASH_Lock();
-	return status;
 }
 
-HAL_StatusTypeDef flash_open_erase_page(uint32_t address) { return _flash_erase(address); }
+HAL_StatusTypeDef flash_open_erase_page(uint32_t address) {
+	return _flash_erase(address);
+}
 
 HAL_StatusTypeDef flash_open_program_word(uint32_t word, uint32_t address) {
 	if (address & 0b11)

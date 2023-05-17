@@ -58,7 +58,7 @@ static_assert(compress_clang<0x7FFFFF, 75>(thresh_top + 10) == thresh_top + 3);
 static_assert(compress_clang<0x7FFFFF, 75>(0x7FFFFF) == thresh_top + 0x80000);
 static_assert(compress_clang<0x7FFFFF, 75>(0x7FFFFF) == 0x67FFFF);
 
-static inline constexpr uint32_t thresh_bot = thresh_top * -1;
+static inline constexpr int32_t thresh_bot = thresh_top * -1;
 static_assert(compress_clang<0x7FFFFF, 75>(thresh_bot) == thresh_bot);
 
 static_assert(compress_clang<0x7FFFFF, 75>(thresh_bot - 1) == thresh_bot);

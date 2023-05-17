@@ -130,10 +130,7 @@ public:
 				auxin = aux_automute.update(auxin);
 			}
 
-			// The Dry signal is just the clean signal, without any attenuation from LEVEL
-			int32_t dry = mainin;
-
-			// Read from the loop and save this value so we can output it to the Delay Out jack
+			// Crossfade the two read head positions
 			auto phase = (uint16_t)(4095.f * read_fade_phase);
 			phase = __USAT(phase, 12);
 			int32_t rd = ((float)mem_rd * epp_lut[phase]) + ((float)mem_rd_dest * epp_lut[4095 - phase]);
@@ -158,7 +155,7 @@ public:
 			}
 
 			// Wet/dry mix, as determined by the MIX parameter
-			int32_t mix = ((float)dry * params.mix_dry) + ((float)rd * params.mix_wet);
+			int32_t mix = ((float)mainin * params.mix_dry) + ((float)rd * params.mix_wet);
 
 			out.chan[0] = clip(auxout);
 			out.chan[1] = clip(mix); // TODO: + CODEC_DAC_CALIBRATION_DCOFFSET
