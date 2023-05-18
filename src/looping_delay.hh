@@ -26,9 +26,6 @@ class LoopingDelay {
 	CircularBufferAccess<DelayBuffer::span> buf;
 	CircularBufferAccess<DelayBuffer::span> fade_buf;
 
-	// CircularBufferAccess<DelayBufferHalf::span> left_buf;
-	// CircularBufferAccess<DelayBufferHalf::span> right_buf;
-
 	float read_fade_phase = 0;
 	uint32_t queued_divmult_time;
 	uint32_t queued_read_fade_ending_addr;
@@ -54,14 +51,13 @@ public:
 	LoopingDelay(Params &params, Flags &flags)
 		: params{params}
 		, flags{flags}
-		, buf{DelayBuffer::get()}
-		, fade_buf{DelayBuffer::get()} // , left_buf{DelayBufferHalf::get(DelayBufferHalf::Left)}
-									   // , right_buf{DelayBufferHalf::get(DelayBufferHalf::Right)}
-	{
+		, buf{DelayBuffer::get(), static_cast<size_t>(params.divmult_time)}
+		, fade_buf{DelayBuffer::get(), static_cast<size_t>(params.divmult_time)} {
 		Memory::clear();
 	}
 
 	// TODO: when global_mode[CALIBRATE] is set, we should change the audio callback
+	// GCC_OPTIMIZE_OFF
 	void update(const AudioStreamConf::AudioInBlock &inblock, AudioStreamConf::AudioOutBlock &outblock) {
 		if (float amt = flags.take_scroll_amt(); amt != 0.f) {
 			scroll_loop(amt);
