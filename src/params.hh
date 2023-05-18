@@ -173,42 +173,6 @@ private:
 
 	void update_button_modes() {
 		if (controls.ping_button.just_went_low()) {
-			// TODO: handle entering modes: QMC, Ping Locked
-			// if (!INF1BUT && !INF2BUT && REV1BUT && REV2BUT) {
-			// 	flag_acknowlegde_qcm = (6 << 8);
-
-			// 	if (global_mode[QUANTIZE_MODE_CHANGES] == 0)
-			// 		global_mode[QUANTIZE_MODE_CHANGES] = 1;
-			// 	else
-			// 		global_mode[QUANTIZE_MODE_CHANGES] = 0;
-
-			// 	flag_ignore_revdown[0] = 1;
-			// 	flag_ignore_revdown[1] = 1;
-			// } else if (REV1BUT && !INF1BUT && !INF2BUT && !REV2BUT) {
-			// 	flag_ignore_revdown[0] = 1;
-			// } else if (REV2BUT && !INF1BUT && !INF2BUT && !REV1BUT) {
-			// 	flag_ignore_revdown[1] = 1;
-			// }
-
-			// else if (INF1BUT && !INF2BUT && !REV1BUT && !REV2BUT)
-			// {
-			// 	if (mode[0][PING_LOCKED] == 0) {
-			// 		locked_ping_time[0] = ping_time;
-			// 		mode[0][PING_LOCKED] = 1;
-			// 	} else {
-			// 		mode[0][PING_LOCKED] = 0;
-			// 		set_divmult_time(0);
-			// 	}
-
-			// 	flag_ignore_infdown[0] = 1;
-
-			// } else if (INF2BUT && INF1BUT && REV1BUT && REV2BUT) {
-			// 	flag_ignore_revdown[0] = 1;
-			// 	flag_ignore_revdown[1] = 1;
-			// 	flag_ignore_infdown[0] = 1;
-			// 	flag_ignore_infdown[1] = 1;
-
-			// } else if (!INF2BUT && !INF1BUT && !REV1BUT && !REV2BUT) {
 			ping_time = timer.get_ping_tmr();
 			controls.clk_out.high();
 			controls.bus_clk_out.high();
@@ -334,7 +298,7 @@ private:
 			return;
 		}
 
-		uint16_t df = __USAT(pot_state[DelayFeedPot].cur_val + cv_state[DelayFeedCV].cur_val, 12);
+		uint16_t df = __USAT(pot_state[DelayFeedPot].prev_val + cv_state[DelayFeedCV].prev_val, 12);
 
 		if (settings.log_delay_feed)
 			delay_feed = log_taper[df];
@@ -348,7 +312,7 @@ private:
 			return;
 		}
 
-		float fb_pot = pot_state[FeedbackPot].cur_val;
+		float fb_pot = pot_state[FeedbackPot].prev_val;
 		float fb;
 		if (fb_pot < 3500.f)
 			fb = fb_pot / 3500.f;
@@ -357,7 +321,7 @@ private:
 		else
 			fb = (fb_pot - 3050.f) / 950.f; //(4095-3050)/950 = 110% ... (4000-3050)/950 = 100%
 
-		float fb_cv = cv_state[FeedbackCV].cur_val;
+		float fb_cv = cv_state[FeedbackCV].prev_val;
 		// FIXME: DLD firmware has bug that prevents the fb += 1.f branch
 		if (fb_cv > 4080.f)
 			fb += 1.f;
@@ -393,7 +357,7 @@ private:
 	}
 
 	void calc_mix() {
-		uint16_t mx = __USAT(cv_state[MixCV].cur_val + pot_state[MixPot].cur_val, 12);
+		uint16_t mx = __USAT(cv_state[MixCV].prev_val + pot_state[MixPot].prev_val, 12);
 
 		mix_dry = epp_lut[mx];
 		mix_wet = epp_lut[4095 - mx];
