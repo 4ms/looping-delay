@@ -26,8 +26,8 @@ class LoopingDelay {
 	CircularBufferAccess<DelayBuffer::span> buf;
 	CircularBufferAccess<DelayBuffer::span> fade_buf;
 
-	CircularBufferAccess<DelayBufferHalf::span> left_buf;
-	CircularBufferAccess<DelayBufferHalf::span> right_buf;
+	// CircularBufferAccess<DelayBufferHalf::span> left_buf;
+	// CircularBufferAccess<DelayBufferHalf::span> right_buf;
 
 	float read_fade_phase = 0;
 	uint32_t queued_divmult_time;
@@ -55,9 +55,9 @@ public:
 		: params{params}
 		, flags{flags}
 		, buf{DelayBuffer::get()}
-		, fade_buf{DelayBuffer::get()}
-		, left_buf{DelayBufferHalf::get(DelayBufferHalf::Left)}
-		, right_buf{DelayBufferHalf::get(DelayBufferHalf::Right)} {
+		, fade_buf{DelayBuffer::get()} // , left_buf{DelayBufferHalf::get(DelayBufferHalf::Left)}
+									   // , right_buf{DelayBufferHalf::get(DelayBufferHalf::Right)}
+	{
 		Memory::clear();
 	}
 
@@ -82,9 +82,22 @@ public:
 				toggle_rev();
 		}
 
-		std::array<int16_t, AudioStreamConf::BlockSize> rd_buff;
-		std::array<int16_t, AudioStreamConf::BlockSize> rd_buff_dest;
-		std::array<int16_t, AudioStreamConf::BlockSize> wr_buff;
+		// Buffers for R/W this block
+		std::array<int16_t, AudioStreamConf::BlockSize * 2> full_rd_buff;
+		std::array<int16_t, AudioStreamConf::BlockSize * 2> full_rd_buff_dest;
+		std::array<int16_t, AudioStreamConf::BlockSize * 2> full_wr_buff;
+
+		// Stereo mode: use BlockSize*2 elements (interleaved channels)
+		std::span<int16_t> rd_buff{full_rd_buff};
+		std::span<int16_t> rd_buff_dest{full_rd_buff_dest};
+		std::span<int16_t> wr_buff{full_wr_buff};
+
+		// Mono mode: use BlockSize elements
+		if (!params.settings.stereo_mode) {
+			rd_buff = rd_buff.first(AudioStreamConf::BlockSize);
+			wr_buff = wr_buff.first(AudioStreamConf::BlockSize);
+			rd_buff_dest = rd_buff_dest.first(AudioStreamConf::BlockSize);
+		}
 
 		// Read into rd_buff:
 		bool read_reverse = doing_reverse_fade != params.modes.reverse;
@@ -111,7 +124,13 @@ public:
 		// Read into crossfading buffer (TODO: shouldn't this only happen if we're xfading?)
 		params.modes.reverse ? fade_buf.read_reverse(rd_buff_dest) : fade_buf.read(rd_buff_dest);
 
-		for (auto [mem_wr, mem_rd, mem_rd_dest, out, in] : zip(wr_buff, rd_buff, rd_buff_dest, outblock, inblock)) {
+		// for (auto [mem_wr, mem_rd, mem_rd_dest, out, in] : zip(wr_buff, rd_buff, rd_buff_dest, outblock, inblock)) {
+		for (unsigned i = 0; i < AudioStreamConf::BlockSize; i++) {
+			auto &mem_wr = wr_buff[i];
+			auto &mem_rd = rd_buff[i];
+			auto &mem_rd_dest = rd_buff_dest[i];
+			auto &out = outblock[i];
+			auto &in = inblock[i];
 			auto auxin = AudioStreamConf::AudioInFrame::sign_extend(in.chan[0]);
 			auto mainin = AudioStreamConf::AudioInFrame::sign_extend(in.chan[1]);
 
@@ -177,7 +196,7 @@ public:
 		increment_crossfading();
 	}
 
-	void write_block_to_memory(std::array<int16_t, AudioStreamConf::BlockSize> &wr_buff) {
+	void write_block_to_memory(std::span<int16_t> &wr_buff) {
 		if (params.modes.inf == InfState::On)
 			return;
 
