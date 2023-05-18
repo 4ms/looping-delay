@@ -55,4 +55,6 @@ void main() {
 	}
 }
 
-void recover_from_task_fault() { LDKit::SystemTarget::restart(); }
+void recover_from_task_fault() {
+	LDKit::SystemTarget::restart();
+}
