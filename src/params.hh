@@ -18,7 +18,7 @@ namespace LDKit
 struct Params {
 	Controls &controls;
 	Flags &flags;
-	Timer &timer;
+	Timer timer;
 
 	// TODO: double-buffer Params:
 	// put just these into its own struct
@@ -39,10 +39,14 @@ struct Params {
 	CalibrationData &calibration = cal_storage.cal_data;
 	Settings &settings = calibration.settings;
 
-	Params(Controls &controls, Flags &flags, Timer &timer)
+	Params(Controls &controls, Flags &flags)
 		: controls{controls}
-		, flags{flags}
-		, timer{timer} {}
+		, flags{flags} {
+	}
+
+	void start() {
+		timer.start();
+	}
 
 	void update() {
 		controls.update();
@@ -94,9 +98,15 @@ struct Params {
 	// TODO: to use a double-buffer params, then
 	// looping delay should set a flag that tells params to set a
 	// new state for these
-	void set_inf_state(InfState newstate) { modes.inf = newstate; }
-	void toggle_reverse() { modes.reverse = !modes.reverse; }
-	void set_divmult(float new_divmult) { divmult_time = new_divmult; }
+	void set_inf_state(InfState newstate) {
+		modes.inf = newstate;
+	}
+	void toggle_reverse() {
+		modes.reverse = !modes.reverse;
+	}
+	void set_divmult(float new_divmult) {
+		divmult_time = new_divmult;
+	}
 
 private:
 	void update_trig_jacks() {
