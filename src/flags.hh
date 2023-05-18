@@ -40,12 +40,26 @@ public:
 		return amt;
 	}
 
-	void set_time_changed() { _time_changed = true; }
-	void set_inf_changed() { _inf_changed = true; }
-	void set_rev_changed() { _rev_changed = true; }
-	void disable_mode_changes() { _disable_mode_changes = true; }
-	void enable_mode_changes() { _disable_mode_changes = false; }
-	void set_scroll_amt(float amt) { _scroll_loop_amt = amt; }
-	void add_scroll_amt(float amt) { _scroll_loop_amt += amt; }
+	void set_time_changed() {
+		_time_changed = true;
+	}
+	void set_inf_changed() {
+		_inf_changed = true;
+	}
+	void set_rev_changed() {
+		_rev_changed = true;
+	}
+	void disable_mode_changes() {
+		_disable_mode_changes = true;
+	}
+	void enable_mode_changes() {
+		_disable_mode_changes = false;
+	}
+	void set_scroll_amt(float amt) {
+		_scroll_loop_amt = amt;
+	}
+	void add_scroll_amt(float amt) {
+		_scroll_loop_amt += amt;
+	}
 };
 } // namespace LDKit
