@@ -32,8 +32,7 @@ void main() {
 	Flags flags;
 	Timer timer;
 	Params params{controls, flags, timer};
-	auto audio_buffer = DelayBuffer::get();
-	LoopingDelay looping_delay{params, flags, audio_buffer};
+	LoopingDelay looping_delay{params, flags};
 	AudioStream audio([&looping_delay, &params](const AudioInBlock &in, AudioOutBlock &out) {
 		params.update();
 		looping_delay.update(in, out);
