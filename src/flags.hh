@@ -13,7 +13,7 @@ private:
 	float _scroll_loop_amt = 0.f;
 
 public:
-	uint32_t mute_on_boot_ctr = 12000;
+	uint32_t mute_on_boot_ctr = 375; // 0.250s * 48000 / 32 block-size
 
 	bool take_time_changed() {
 		auto t = _time_changed;
