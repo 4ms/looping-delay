@@ -57,7 +57,8 @@ class LoopingDelay {
 	DCBlock<4800, int32_t> dcblock;
 
 public:
-	LoopingDelay(Params &params, Flags &flags, DelayBufferSpan delay_buffer)
+	GCC_OPTIMIZE_OFF
+	LoopingDelay(Params &params, Flags &flags, DelayBuffer &delay_buffer)
 		: params{params}
 		, flags{flags}
 		, buf{delay_buffer}
@@ -66,6 +67,7 @@ public:
 								 // , right_buf_span{&delay_buffer[Brain::MemorySamplesNum / 2], Brain::MemorySamplesNum
 								 // / 2} , right_buf{right_buf_span}
 	{
+		// DelayBuffer &audio_buffer = get_delay_buffer();
 		Memory::clear();
 	}
 

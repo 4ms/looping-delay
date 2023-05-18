@@ -10,7 +10,7 @@ namespace LDKit
 using DelayBuffer = std::array<int16_t, Brain::MemorySizeBytes / sizeof(int16_t)>;
 using DelayBufferSpan = std::span<int16_t, Brain::MemorySizeBytes / sizeof(int16_t)>;
 
-using MonoBuffer = DelayBufferSpan;
+using MonoBuffer = DelayBuffer;
 using StereoHalfBuffer = std::span<int16_t, Brain::MemorySizeBytes / sizeof(int16_t) / 2>;
 
 static inline DelayBuffer &get_delay_buffer() {
