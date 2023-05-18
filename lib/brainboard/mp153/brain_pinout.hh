@@ -3,8 +3,10 @@
 #include "drivers/pin.hh"
 #include "drivers/tim_pwm.hh"
 
-namespace Brain {
-namespace Pin {
+namespace Brain
+{
+namespace Pin
+{
 using PinDef = mdrivlib::PinDef;
 using GPIO = mdrivlib::GPIO;
 using PinNum = mdrivlib::PinNum;
@@ -12,10 +14,10 @@ using PinAF = mdrivlib::PinAF;
 using AdcChanNum = mdrivlib::AdcChanNum;
 using TimChannelNum = mdrivlib::TimChannelNum;
 
-constexpr inline PinDef A0{GPIO::A, PinNum::_2};
-constexpr inline PinDef A1{GPIO::A, PinNum::_6};
-constexpr inline PinDef A2{GPIO::A, PinNum::_4};
-constexpr inline PinDef A3{GPIO::A, PinNum::_5};
+constexpr inline PinDef A0{GPIO::A, PinNum::_4};
+constexpr inline PinDef A1{GPIO::A, PinNum::_5};
+constexpr inline PinDef A2{GPIO::A, PinNum::_2};
+constexpr inline PinDef A3{GPIO::A, PinNum::_6};
 constexpr inline PinDef A4{GPIO::A, PinNum::_3};
 constexpr inline PinDef A5{GPIO::A, PinNum::_7};
 constexpr inline PinDef A6{GPIO::B, PinNum::_0};
@@ -23,10 +25,10 @@ constexpr inline PinDef A7{GPIO::C, PinNum::_5};
 constexpr inline PinDef A8{GPIO::C, PinNum::_3};
 constexpr inline PinDef A9{GPIO::C, PinNum::_0};
 
-constexpr inline AdcChanNum A0AdcChan{AdcChanNum::_14};
-constexpr inline AdcChanNum A1AdcChan{AdcChanNum::_3};
-constexpr inline AdcChanNum A2AdcChan{AdcChanNum::_18};
-constexpr inline AdcChanNum A3AdcChan{AdcChanNum::_19};
+constexpr inline AdcChanNum A0AdcChan{AdcChanNum::_18};
+constexpr inline AdcChanNum A1AdcChan{AdcChanNum::_19};
+constexpr inline AdcChanNum A2AdcChan{AdcChanNum::_14};
+constexpr inline AdcChanNum A3AdcChan{AdcChanNum::_3};
 constexpr inline AdcChanNum A4AdcChan{AdcChanNum::_15};
 constexpr inline AdcChanNum A5AdcChan{AdcChanNum::_7};
 constexpr inline AdcChanNum A6AdcChan{AdcChanNum::_9};
@@ -70,28 +72,28 @@ constexpr inline PinDef D9SdmmcClkAF = {D9.gpio, D9.pin, PinAF::AltFunc12};
 constexpr inline PinDef D4SdmmcCmdAF = {D4.gpio, D4.pin, PinAF::AltFunc12};
 
 constexpr inline mdrivlib::TimChanConf D0PwmConf{
-    .pin = {D0.gpio, D0.pin, PinAF::AltFunc1},
-    .TIM = TIM1_BASE,
-    .channum = TimChannelNum::_2,
+	.pin = {D0.gpio, D0.pin, PinAF::AltFunc1},
+	.TIM = TIM1_BASE,
+	.channum = TimChannelNum::_2,
 };
 
 constexpr inline mdrivlib::TimChanConf D1PwmConf{
-    .pin = {D1.gpio, D1.pin, PinAF::AltFunc1},
-    .TIM = TIM1_BASE,
-    .channum = TimChannelNum::_3,
+	.pin = {D1.gpio, D1.pin, PinAF::AltFunc1},
+	.TIM = TIM1_BASE,
+	.channum = TimChannelNum::_3,
 };
 
 // p4 only: (p3 has no PWM)
 constexpr inline mdrivlib::TimChanConf D5PwmConf{
-    .pin = {D5.gpio, D5.pin, PinAF::AltFunc1},
-    .TIM = TIM1_BASE,
-    .channum = TimChannelNum::_4,
+	.pin = {D5.gpio, D5.pin, PinAF::AltFunc1},
+	.TIM = TIM1_BASE,
+	.channum = TimChannelNum::_4,
 };
 
 constexpr inline mdrivlib::TimChanConf D3PwmConf{
-    .pin = {D3.gpio, D3.pin, PinAF::AltFunc2},
-    .TIM = TIM3_BASE,
-    .channum = TimChannelNum::_1,
+	.pin = {D3.gpio, D3.pin, PinAF::AltFunc2},
+	.TIM = TIM3_BASE,
+	.channum = TimChannelNum::_1,
 };
 
 // No D7 PWM on mp153 (PC2)
@@ -99,21 +101,21 @@ constexpr inline mdrivlib::TimChanConf D3PwmConf{
 // No D8 PWM on mp1 (PC1)
 
 constexpr inline mdrivlib::TimChanConf D10PwmConf{
-    .pin = {D10.gpio, D10.pin, PinAF::AltFunc1},
-    .TIM = TIM1_BASE,
-    .channum = TimChannelNum::_1,
+	.pin = {D10.gpio, D10.pin, PinAF::AltFunc1},
+	.TIM = TIM1_BASE,
+	.channum = TimChannelNum::_1,
 };
 
 constexpr inline mdrivlib::TimChanConf D11PwmConf{
-    .pin = {D11.gpio, D11.pin, PinAF::AltFunc2},
-    .TIM = TIM3_BASE,
-    .channum = TimChannelNum::_4,
+	.pin = {D11.gpio, D11.pin, PinAF::AltFunc2},
+	.TIM = TIM3_BASE,
+	.channum = TimChannelNum::_4,
 };
 
 constexpr inline mdrivlib::TimChanConf D14PwmConf{
-    .pin = {D14.gpio, D14.pin, PinAF::AltFunc1},
-    .TIM = TIM2_BASE,
-    .channum = TimChannelNum::_2,
+	.pin = {D14.gpio, D14.pin, PinAF::AltFunc1},
+	.TIM = TIM2_BASE,
+	.channum = TimChannelNum::_2,
 };
 
 //
