@@ -20,8 +20,8 @@ class Controls {
 	mdrivlib::AdcDmaPeriph<Brain::PotAdcConf> pot_adcs{pot_adc_buffer, Board::PotAdcChans};
 
 	static constexpr bool hardware_oversampling = Brain::PotAdcConf::oversample;
-	std::array<Oversampler<128, uint16_t>, NumPots> pots;
-	std::array<Oversampler<32, uint16_t>, NumCVs> cvs;
+	std::array<Oversampler<256, uint16_t>, NumPots> pots;
+	std::array<Oversampler<64, uint16_t>, NumCVs> cvs;
 
 public:
 	Controls() = default;
@@ -63,7 +63,9 @@ public:
 			return cvs[adcnum].val();
 	}
 
-	SwitchPos read_time_switch() { return static_cast<SwitchPos>(time_switch.read()); }
+	SwitchPos read_time_switch() {
+		return static_cast<SwitchPos>(time_switch.read());
+	}
 
 	void start() {
 		if constexpr (!hardware_oversampling) {
