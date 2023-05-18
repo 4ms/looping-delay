@@ -23,25 +23,19 @@ class LoopingDelay {
 	Params &params;
 	Flags &flags;
 
-	CircularBufferAccess<MonoBuffer> buf;
-	CircularBufferAccess<MonoBuffer> fade_buf;
-	// StereoHalfBuffer left_buf_span;
-	// CircularBufferAccess<StereoHalfBuffer> left_buf;
-	// StereoHalfBuffer right_buf_span;
-	// CircularBufferAccess<StereoHalfBuffer> right_buf;
+	CircularBufferAccess<DelayBuffer::span> buf;
+	CircularBufferAccess<DelayBuffer::span> fade_buf;
 
-	float read_fade_phase = 0; // read_fade_pos
-	// uint32_t read_fade_ending_addr;		   // fade_dest_read_addr  ==> fade_buf.rd_pos()
-	uint32_t queued_divmult_time;		   // fade_queued_dest_divmult_time
-	uint32_t queued_read_fade_ending_addr; // fade_queued_dest_read_addr
+	CircularBufferAccess<DelayBufferHalf::span> left_buf;
+	CircularBufferAccess<DelayBufferHalf::span> right_buf;
 
-	float write_fade_phase = 0.f; // write_fade_pos
+	float read_fade_phase = 0;
+	uint32_t queued_divmult_time;
+	uint32_t queued_read_fade_ending_addr;
+
+	float write_fade_phase = 0.f;
 	enum class FadeState { NotFading, FadingDown, FadingUp, Crossfading };
 	FadeState write_fade_state = FadeState::NotFading; // write_fade_state
-	// uint32_t write_fade_ending_addr;				   // fade_dest_write_addr ==> fade_buf.wr_pos()
-
-	// read_head => buf.rd_pos()
-	// write_head => buf.wr_pos()
 
 	bool doing_reverse_fade = false;
 
@@ -57,15 +51,13 @@ class LoopingDelay {
 	DCBlock<4800, int32_t> dcblock;
 
 public:
-	LoopingDelay(Params &params, Flags &flags, DelayBuffer &delay_buffer)
+	LoopingDelay(Params &params, Flags &flags)
 		: params{params}
 		, flags{flags}
-		, buf{delay_buffer}
-		, fade_buf{delay_buffer} // , left_buf_span{&delay_buffer[0], Brain::MemorySamplesNum / 2}
-								 // , left_buf{left_buf_span}
-								 // , right_buf_span{&delay_buffer[Brain::MemorySamplesNum / 2], Brain::MemorySamplesNum
-								 // / 2} , right_buf{right_buf_span}
-	{
+		, buf{DelayBuffer::get()}
+		, fade_buf{DelayBuffer::get()}
+		, left_buf{DelayBufferHalf::get(DelayBufferHalf::Left)}
+		, right_buf{DelayBufferHalf::get(DelayBufferHalf::Right)} {
 		Memory::clear();
 	}
 

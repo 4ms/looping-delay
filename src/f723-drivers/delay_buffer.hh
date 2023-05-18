@@ -7,17 +7,37 @@
 namespace LDKit
 {
 
-using DelayBuffer = std::array<int16_t, Brain::MemorySizeBytes / sizeof(int16_t)>;
-using DelayBufferSpan = std::span<int16_t, Brain::MemorySizeBytes / sizeof(int16_t)>;
+struct DelayBuffer {
+	static constexpr uint32_t size = Brain::MemorySizeBytes / sizeof(int16_t);
+	using array = std::array<int16_t, size>;
+	using span = std::span<int16_t, size>;
 
-using MonoBuffer = DelayBuffer;
-using StereoHalfBuffer = std::span<int16_t, Brain::MemorySizeBytes / sizeof(int16_t) / 2>;
+	static auto &get() {
+		auto *start = reinterpret_cast<array::value_type *>(Brain::MemoryStartAddr);
+		static auto buf = span{start, size};
+		return buf;
+	}
+};
+// using MonoBuffer = DelayBuffer::span;
 
-static inline DelayBuffer &get_delay_buffer() {
-	// Use placement new to construct an array in Brainboard's external memory
-	DelayBuffer::value_type *p = reinterpret_cast<DelayBuffer::value_type *>(Brain::MemoryStartAddr);
-	DelayBuffer *arr = new (p) DelayBuffer;
-	return (*arr);
-}
+struct DelayBufferHalf {
+	static constexpr uint32_t size = Brain::MemorySizeBytes / sizeof(int16_t) / 2;
+	using array = std::array<int16_t, size>;
+	using span = std::span<int16_t, size>;
+
+	enum Channel { Left, Right };
+
+	static DelayBufferHalf::span &get(Channel chan) {
+		auto *startL = reinterpret_cast<array::value_type *>(Brain::MemoryStartAddr);
+		static auto bufL = span{startL, size};
+
+		auto *startR = reinterpret_cast<array::value_type *>(Brain::MemoryStartAddr + size);
+		static auto bufR = span{startR, size};
+
+		return chan == Channel::Left ? bufL : bufR;
+	}
+};
+
+// using StereoHalfBuffer = DelayBufferHalf::span;
 
 } // namespace LDKit
