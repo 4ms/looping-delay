@@ -78,21 +78,21 @@ public:
 				toggle_rev();
 		}
 
-		// Buffers for R/W this block
+		// Buffers for R/W this block (backing data)
 		std::array<int16_t, AudioStreamConf::BlockSize * 2> full_rd_buff;
-		std::array<int16_t, AudioStreamConf::BlockSize * 2> full_rd_buff_dest;
+		std::array<int16_t, AudioStreamConf::BlockSize * 2> full_rd_fade_buff;
 		std::array<int16_t, AudioStreamConf::BlockSize * 2> full_wr_buff;
 
 		// Stereo mode: use BlockSize*2 elements (interleaved channels)
 		std::span<int16_t> rd_buff{full_rd_buff};
-		std::span<int16_t> rd_buff_dest{full_rd_buff_dest};
+		std::span<int16_t> rd_fade_buff{full_rd_fade_buff};
 		std::span<int16_t> wr_buff{full_wr_buff};
 
 		// Mono mode: use BlockSize elements
 		if (!params.settings.stereo_mode) {
 			rd_buff = rd_buff.first(AudioStreamConf::BlockSize);
 			wr_buff = wr_buff.first(AudioStreamConf::BlockSize);
-			rd_buff_dest = rd_buff_dest.first(AudioStreamConf::BlockSize);
+			rd_fade_buff = rd_fade_buff.first(AudioStreamConf::BlockSize);
 		}
 
 		// Read into rd_buff:
@@ -118,22 +118,24 @@ public:
 		}
 
 		// Read into crossfading buffer (TODO: shouldn't this only happen if we're xfading?)
-		params.modes.reverse ? fade_buf.read_reverse(rd_buff_dest) : fade_buf.read(rd_buff_dest);
+		params.modes.reverse ? fade_buf.read_reverse(rd_fade_buff) : fade_buf.read(rd_fade_buff);
 
-		// for (auto [mem_wr, mem_rd, mem_rd_dest, out, in] : zip(wr_buff, rd_buff, rd_buff_dest, outblock, inblock)) {
 		for (unsigned i = 0; i < AudioStreamConf::BlockSize; i++) {
-			auto &mem_wr = wr_buff[i];
-			auto &mem_rd = rd_buff[i];
-			auto &mem_rd_dest = rd_buff_dest[i];
-			auto &out = outblock[i];
-			auto &in = inblock[i];
-			auto auxin = AudioStreamConf::AudioInFrame::sign_extend(in.chan[0]);
-			auto mainin = AudioStreamConf::AudioInFrame::sign_extend(in.chan[1]);
+			bool mono = !params.settings.stereo_mode;
 
-			if (flags.mute_on_boot_ctr) {
-				mainin = 0;
-				auxin = 0;
-			}
+			// Inputs
+			const int16_t mem_rd = mono ? rd_buff[i] : rd_buff[i * 2];
+			// const int16_t mem_rd_r = mono ? 0 : rd_buff[i * 2 + 1];
+
+			const int16_t mem_rd_fade = mono ? rd_fade_buff[i] : rd_fade_buff[i * 2];
+			// const int16_t mem_rd_fade_r = mono ? 0 : rd_fade_buff[i * 2 + 1];
+
+			auto auxin = flags.mute_on_boot_ctr ? 0 : AudioStreamConf::AudioInFrame::sign_extend(inblock[i].chan[0]);
+			auto mainin = flags.mute_on_boot_ctr ? 0 : AudioStreamConf::AudioInFrame::sign_extend(inblock[i].chan[1]);
+
+			// Outputs
+			auto &mem_wr = wr_buff[i];
+			auto &out = outblock[i];
 
 			if (params.settings.auto_mute) {
 				mainin = main_automute.update(mainin);
@@ -141,17 +143,10 @@ public:
 			}
 
 			// Crossfade the two read head positions
-			auto phase = (uint16_t)(4095.f * read_fade_phase);
-			phase = __USAT(phase, 12);
-			int32_t rd;
-			if (params.settings.stereo_mode) {
-				// TODO: rd = equal_power_crossfade(mem_rd, mem_rd_dest, phase);
-				rd = ((float)mem_rd * epp_lut[phase]) + ((float)mem_rd_dest * epp_lut[4095 - phase]);
-				rd *= 256;
-			} else {
-				rd = ((float)mem_rd * epp_lut[phase]) + ((float)mem_rd_dest * epp_lut[4095 - phase]);
-				rd *= 256;
-			}
+			int32_t rd = epp_crossfade(mem_rd, mem_rd_fade, read_fade_phase);
+
+			// 16 bit => 24 bit
+			rd *= 256;
 
 			// Attenuate the delayed signal with REGEN
 			int32_t regen = (float)rd * params.feedback;
@@ -179,7 +174,7 @@ public:
 			int32_t mix = ((float)mainin * params.mix_dry) + ((float)rd * params.mix_wet);
 
 			out.chan[0] = clip(auxout);
-			out.chan[1] = clip(mix); // TODO: + CODEC_DAC_CALIBRATION_DCOFFSET
+			out.chan[1] = clip(mix);
 
 			// High-pass filter before writing to memory
 			if (params.settings.runaway_dc_block)
