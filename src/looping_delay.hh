@@ -125,16 +125,18 @@ public:
 
 			// Inputs
 			const int16_t mem_rd = mono ? rd_buff[i] : rd_buff[i * 2];
-			// const int16_t mem_rd_r = mono ? 0 : rd_buff[i * 2 + 1];
+			const int16_t mem_rd_r = mono ? 0 : rd_buff[i * 2 + 1];
 
 			const int16_t mem_rd_fade = mono ? rd_fade_buff[i] : rd_fade_buff[i * 2];
-			// const int16_t mem_rd_fade_r = mono ? 0 : rd_fade_buff[i * 2 + 1];
+			const int16_t mem_rd_fade_r = mono ? 0 : rd_fade_buff[i * 2 + 1];
 
 			auto auxin = flags.mute_on_boot_ctr ? 0 : AudioStreamConf::AudioInFrame::sign_extend(inblock[i].chan[0]);
 			auto mainin = flags.mute_on_boot_ctr ? 0 : AudioStreamConf::AudioInFrame::sign_extend(inblock[i].chan[1]);
 
 			// Outputs
-			auto &mem_wr = wr_buff[i];
+			int16_t nul;
+			auto &mem_wr = mono ? wr_buff[i] : wr_buff[i * 2 + 1];
+			auto &mem_wr_r = mono ? nul : wr_buff[i * 2];
 			auto &out = outblock[i];
 
 			if (params.settings.auto_mute) {
@@ -144,42 +146,48 @@ public:
 
 			// Crossfade the two read head positions
 			int32_t rd = epp_crossfade(mem_rd, mem_rd_fade, read_fade_phase);
+			int32_t rd_r = epp_crossfade(mem_rd_r, mem_rd_fade_r, read_fade_phase);
 
 			// 16 bit => 24 bit
 			rd *= 256;
+			rd_r *= 256;
 
 			// Attenuate the delayed signal with REGEN
 			int32_t regen = (float)rd * params.feedback;
+			int32_t regen_r = (float)rd_r * params.feedback;
 
 			// Attenuate the clean signal by the LEVEL parameter
 			int32_t mainin_atten = (float)mainin * params.delay_feed;
+			int32_t mainin_atten_r = (float)auxin * params.delay_feed;
 
 			int32_t wr;
-			int32_t auxout;
+			int32_t wr_r;
 			if (params.settings.stereo_mode) {
-				int32_t auxin_atten = (float)auxin * params.delay_feed;
-				int32_t rd_aux = 0; // Set to memory rd
-				int32_t regen_aux = (float)rd_aux * params.feedback;
 				wr = (int32_t)(regen + mainin_atten);
-				auxout = (int32_t)(regen_aux + auxin_atten);
-			} else if (params.settings.send_return_before_loop) {
-				wr = auxin;
-				auxout = (int32_t)(regen + mainin_atten);
+				wr_r = (int32_t)(regen_r + mainin_atten_r);
+				// } else if (params.settings.send_return_before_loop) {
+				// 	wr = auxin;
+				// 	auxout = (int32_t)(regen + mainin_atten);
 			} else {
 				wr = (int32_t)(regen + mainin_atten + (float)auxin);
-				auxout = rd;
+				wr_r = 0;
 			}
 
 			// Wet/dry mix, as determined by the MIX parameter
 			int32_t mix = ((float)mainin * params.mix_dry) + ((float)rd * params.mix_wet);
+			int32_t mix_r = ((float)auxin * params.mix_dry) + ((float)rd_r * params.mix_wet);
 
-			out.chan[0] = clip(auxout);
+			out.chan[0] = mono ? clip(rd) : clip(mix_r);
 			out.chan[1] = clip(mix);
 
 			// High-pass filter before writing to memory
-			if (params.settings.runaway_dc_block)
+			if (params.settings.runaway_dc_block) {
 				wr = dcblock.update(wr);
+				wr_r = dcblock.update(wr_r);
+			}
 			mem_wr = clip(wr) / 256;
+			if (!mono)
+				mem_wr_r = clip(wr_r) / 256;
 		}
 
 		write_block_to_memory(wr_buff);
@@ -187,7 +195,7 @@ public:
 		increment_crossfading();
 	}
 
-	void write_block_to_memory(std::span<int16_t> &wr_buff) {
+	void write_block_to_memory(std::span<int16_t> wr_buff) {
 		if (params.modes.inf == InfState::On)
 			return;
 
@@ -197,8 +205,6 @@ public:
 			if (write_fade_state == FadeState::FadingDown) {
 				float phase = 1.f - write_fade_phase;
 				rev ? fade_buf.write_reverse(wr_buff, phase) : fade_buf.write(wr_buff, phase);
-				// Memory::fade_write(write_fade_ending_addr, wr_buff, rev, 1.f - write_fade_phase);
-				// write_head = write_fade_ending_addr;
 				buf.wr_pos(fade_buf.wr_pos());
 			}
 		}
