@@ -245,11 +245,12 @@ public:
 		// For short periods (audio rate), disble crossfading before the end of the loop
 		if (params.divmult_time < params.settings.crossfade_samples)
 			return loop_end;
-		else
-			return Util::offset_samples(
-				loop_end, params.settings.crossfade_samples /* / MemorySampleSize*/, !params.modes.reverse);
-		// FIXME: should that be / 2 (for 2 channels), not / sample size?
-		//  Or else crossfade_samples should be named crossfade_bytes
+		else {
+			auto offset = params.settings.crossfade_samples;
+			if (params.settings.stereo_mode)
+				offset *= 2;
+			return Util::offset_samples(loop_end, offset, !params.modes.reverse) & mask;
+		}
 	}
 
 	// When we near the end of the loop, start a crossfade to the beginning
@@ -263,7 +264,8 @@ public:
 			read_fade_phase = 0.f;
 
 			// Issue: is it necessary to set this below?
-			fade_buf.rd_pos(Util::offset_samples(buf.rd_pos(), AudioStreamConf::BlockSize, !params.modes.reverse));
+			fade_buf.rd_pos(Util::offset_samples(buf.rd_pos(), AudioStreamConf::BlockSize, !params.modes.reverse) &
+							mask);
 		} else {
 			// Start fading from before the loop
 			// We have to add in sz because read_addr has already
@@ -272,7 +274,7 @@ public:
 			if (params.modes.reverse)
 				loop_size = -loop_size;
 
-			uint32_t f_addr = Util::offset_samples(buf.rd_pos(), (loop_size + sz), !params.modes.reverse);
+			uint32_t f_addr = Util::offset_samples(buf.rd_pos(), (loop_size + sz), !params.modes.reverse) & mask;
 
 			// From DLD code : "Issue: clearing a queued divmult time"
 			start_crossfade(f_addr);
@@ -296,6 +298,8 @@ public:
 	static constexpr uint32_t mask = ~3UL;
 
 	uint32_t calculate_read_addr(uint32_t divmult_time) {
+		if (params.settings.stereo_mode)
+			divmult_time <<= 1;
 		return Util::offset_samples(buf.wr_pos(), divmult_time, !params.modes.reverse) & mask;
 	}
 
@@ -319,6 +323,8 @@ public:
 			}
 		} else {
 			params.set_divmult(t_divmult_time);
+			if (params.settings.stereo_mode)
+				t_divmult_time <<= 1;
 
 			if (params.modes.adjust_loop_end)
 				loop_end = Util::offset_samples(loop_start, t_divmult_time, params.modes.reverse) & mask;
@@ -402,9 +408,11 @@ public:
 	void reverse_loop() {
 		uint32_t t = loop_start;
 		uint32_t padding = params.settings.crossfade_samples;
+		if (params.settings.stereo_mode)
+			padding *= 2;
 
-		loop_start = Util::offset_samples(loop_end, padding, params.modes.reverse);
-		loop_end = Util::offset_samples(t, padding, params.modes.reverse);
+		loop_start = Util::offset_samples(loop_end, padding, params.modes.reverse) & mask;
+		loop_end = Util::offset_samples(t, padding, params.modes.reverse) & mask;
 
 		// (Old TODO ToDo: ??? Add a crossfade for read head reversing direction here
 		start_crossfade(buf.rd_pos());
@@ -439,7 +447,10 @@ public:
 				// then we should loop between the new points since divmult_time
 				// (used in the next line) corresponds with the fade ending addr
 
-				loop_end = Util::offset_samples(loop_start, params.divmult_time, params.modes.reverse);
+				auto offset = params.divmult_time;
+				if (params.settings.stereo_mode)
+					offset *= 2;
+				loop_end = Util::offset_samples(loop_start, offset, params.modes.reverse) & mask;
 			}
 			write_fade_phase = params.settings.crossfade_rate;
 			write_fade_state = FadeState::FadingDown;
