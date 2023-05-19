@@ -253,22 +253,6 @@ private:
 	}
 
 	void update_leds() {
-
-		// if (flag_acknowlegde_qcm) {
-		// 	flag_acknowlegde_qcm--;
-		// 	if ((flag_acknowlegde_qcm & (1 << 8)) || (!global_mode[QUANTIZE_MODE_CHANGES] && (flag_acknowlegde_qcm & (1
-		// << 6))))
-		// 	{
-		// 		LED_PINGBUT_ON;
-		// 		LED_REV1_ON;
-		// 		LED_REV2_ON;
-		// 	} else {
-		// 		LED_PINGBUT_OFF;
-		// 		LED_REV1_OFF;
-		// 		LED_REV2_OFF;
-		// 	}
-		// }
-
 		if (controls.ping_button.is_pressed()) {
 			controls.ping_led.high();
 		}
@@ -304,7 +288,8 @@ private:
 				controls.reverse_led.high();
 				controls.inf_led.low();
 			}
-		} else if (flag_animate_mono) {
+		}
+		if (flag_animate_mono) {
 			flag_animate_mono--;
 			if ((flag_animate_mono & 0x1FF) == 0x100) {
 				controls.reverse_led.high();
@@ -314,11 +299,13 @@ private:
 				controls.reverse_led.low();
 				controls.inf_led.low();
 			}
-		} else {
+		}
+
+		if (!flag_animate_mono && !flag_animate_stereo) {
 			controls.reverse_led.set(modes.reverse);
-			if (modes.inf == InfState::TransitioningOn)
+			if (modes.inf == InfState::TransitioningOn || modes.inf == InfState::On)
 				controls.inf_led.high();
-			else if (modes.inf == InfState::TransitioningOff)
+			else if (modes.inf == InfState::TransitioningOff || modes.inf == InfState::Off)
 				controls.inf_led.low();
 		}
 	}
