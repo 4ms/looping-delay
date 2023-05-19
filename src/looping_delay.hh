@@ -135,8 +135,8 @@ public:
 
 			// Outputs
 			int16_t nul;
-			auto &mem_wr = mono ? wr_buff[i] : wr_buff[i * 2 + 1];
-			auto &mem_wr_r = mono ? nul : wr_buff[i * 2];
+			auto &mem_wr = mono ? wr_buff[i] : wr_buff[i * 2];
+			auto &mem_wr_r = mono ? nul : wr_buff[i * 2 + 1];
 			auto &out = outblock[i];
 
 			if (params.settings.auto_mute) {
@@ -293,15 +293,16 @@ public:
 		return val;
 	}
 
-	uint32_t calculate_read_addr(uint32_t new_divmult_time) {
-		return Util::offset_samples(buf.wr_pos(), new_divmult_time, !params.modes.reverse);
+	static constexpr uint32_t mask = ~3UL;
+
+	uint32_t calculate_read_addr(uint32_t divmult_time) {
+		return Util::offset_samples(buf.wr_pos(), divmult_time, !params.modes.reverse) & mask;
 	}
 
 	void set_divmult_time() {
 		uint32_t use_ping_time = params.modes.ping_locked ? params.locked_ping_time : params.ping_time;
 		uint32_t t_divmult_time = use_ping_time * params.time;
-		// t_divmult_time = t_divmult_time & 0xFFFFFFFC; //force it to be a multiple of 4
-
+		t_divmult_time = t_divmult_time & 0xFFFFFFFC; // force it to be a multiple of 4
 		std::clamp(t_divmult_time, (uint32_t)0, MemorySamplesNum);
 
 		if (params.divmult_time == t_divmult_time)
@@ -320,9 +321,9 @@ public:
 			params.set_divmult(t_divmult_time);
 
 			if (params.modes.adjust_loop_end)
-				loop_end = Util::offset_samples(loop_start, t_divmult_time, params.modes.reverse);
+				loop_end = Util::offset_samples(loop_start, t_divmult_time, params.modes.reverse) & mask;
 			else
-				loop_start = Util::offset_samples(loop_end, t_divmult_time, 1 - params.modes.reverse);
+				loop_start = Util::offset_samples(loop_end, t_divmult_time, !params.modes.reverse) & mask;
 
 			// If the read addr is not in between the loop start and end, then fade to the loop start
 			if (check_read_head_in_loop()) {
