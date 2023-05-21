@@ -20,23 +20,23 @@ struct DelayBuffer {
 };
 // using MonoBuffer = DelayBuffer::span;
 
-struct DelayBufferHalf {
-	static constexpr uint32_t size = Brain::MemorySizeBytes / sizeof(int16_t) / 2;
-	using array = std::array<int16_t, size>;
-	using span = std::span<int16_t, size>;
+// struct DelayBufferHalf {
+// 	static constexpr uint32_t size = Brain::MemorySizeBytes / sizeof(int16_t) / 2;
+// 	using array = std::array<int16_t, size>;
+// 	using span = std::span<int16_t, size>;
 
-	enum Channel { Left, Right };
+// 	enum Channel { Left, Right };
 
-	static DelayBufferHalf::span &get(Channel chan) {
-		auto *startL = reinterpret_cast<array::value_type *>(Brain::MemoryStartAddr);
-		static auto bufL = span{startL, size};
+// 	static DelayBufferHalf::span &get(Channel chan) {
+// 		auto *startL = reinterpret_cast<array::value_type *>(Brain::MemoryStartAddr);
+// 		static auto bufL = span{startL, size};
 
-		auto *startR = reinterpret_cast<array::value_type *>(Brain::MemoryStartAddr + size);
-		static auto bufR = span{startR, size};
+// 		auto *startR = reinterpret_cast<array::value_type *>(Brain::MemoryStartAddr + size);
+// 		static auto bufR = span{startR, size};
 
-		return chan == Channel::Left ? bufL : bufR;
-	}
-};
+// 		return chan == Channel::Left ? bufL : bufR;
+// 	}
+// };
 
 // using StereoHalfBuffer = DelayBufferHalf::span;
 

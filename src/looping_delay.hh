@@ -26,9 +26,6 @@ class LoopingDelay {
 	CircularBufferAccess<DelayBuffer::span> buf;
 	CircularBufferAccess<DelayBuffer::span> fade_buf;
 
-	// CircularBufferAccess<DelayBufferHalf::span> left_buf;
-	// CircularBufferAccess<DelayBufferHalf::span> right_buf;
-
 	float read_fade_phase = 0;
 	uint32_t queued_divmult_time;
 	uint32_t queued_read_fade_ending_addr;
@@ -54,14 +51,13 @@ public:
 	LoopingDelay(Params &params, Flags &flags)
 		: params{params}
 		, flags{flags}
-		, buf{DelayBuffer::get()}
-		, fade_buf{DelayBuffer::get()} // , left_buf{DelayBufferHalf::get(DelayBufferHalf::Left)}
-									   // , right_buf{DelayBufferHalf::get(DelayBufferHalf::Right)}
-	{
+		, buf{DelayBuffer::get(), static_cast<size_t>(params.divmult_time)}
+		, fade_buf{DelayBuffer::get(), static_cast<size_t>(params.divmult_time)} {
 		Memory::clear();
 	}
 
 	// TODO: when global_mode[CALIBRATE] is set, we should change the audio callback
+	// GCC_OPTIMIZE_OFF
 	void update(const AudioStreamConf::AudioInBlock &inblock, AudioStreamConf::AudioOutBlock &outblock) {
 		if (float amt = flags.take_scroll_amt(); amt != 0.f) {
 			scroll_loop(amt);
@@ -82,21 +78,21 @@ public:
 				toggle_rev();
 		}
 
-		// Buffers for R/W this block
+		// Buffers for R/W this block (backing data)
 		std::array<int16_t, AudioStreamConf::BlockSize * 2> full_rd_buff;
-		std::array<int16_t, AudioStreamConf::BlockSize * 2> full_rd_buff_dest;
+		std::array<int16_t, AudioStreamConf::BlockSize * 2> full_rd_fade_buff;
 		std::array<int16_t, AudioStreamConf::BlockSize * 2> full_wr_buff;
 
 		// Stereo mode: use BlockSize*2 elements (interleaved channels)
 		std::span<int16_t> rd_buff{full_rd_buff};
-		std::span<int16_t> rd_buff_dest{full_rd_buff_dest};
+		std::span<int16_t> rd_fade_buff{full_rd_fade_buff};
 		std::span<int16_t> wr_buff{full_wr_buff};
 
 		// Mono mode: use BlockSize elements
 		if (!params.settings.stereo_mode) {
 			rd_buff = rd_buff.first(AudioStreamConf::BlockSize);
 			wr_buff = wr_buff.first(AudioStreamConf::BlockSize);
-			rd_buff_dest = rd_buff_dest.first(AudioStreamConf::BlockSize);
+			rd_fade_buff = rd_fade_buff.first(AudioStreamConf::BlockSize);
 		}
 
 		// Read into rd_buff:
@@ -122,22 +118,26 @@ public:
 		}
 
 		// Read into crossfading buffer (TODO: shouldn't this only happen if we're xfading?)
-		params.modes.reverse ? fade_buf.read_reverse(rd_buff_dest) : fade_buf.read(rd_buff_dest);
+		params.modes.reverse ? fade_buf.read_reverse(rd_fade_buff) : fade_buf.read(rd_fade_buff);
 
-		// for (auto [mem_wr, mem_rd, mem_rd_dest, out, in] : zip(wr_buff, rd_buff, rd_buff_dest, outblock, inblock)) {
 		for (unsigned i = 0; i < AudioStreamConf::BlockSize; i++) {
-			auto &mem_wr = wr_buff[i];
-			auto &mem_rd = rd_buff[i];
-			auto &mem_rd_dest = rd_buff_dest[i];
-			auto &out = outblock[i];
-			auto &in = inblock[i];
-			auto auxin = AudioStreamConf::AudioInFrame::sign_extend(in.chan[0]);
-			auto mainin = AudioStreamConf::AudioInFrame::sign_extend(in.chan[1]);
+			bool mono = !params.settings.stereo_mode;
 
-			if (flags.mute_on_boot_ctr) {
-				mainin = 0;
-				auxin = 0;
-			}
+			// Inputs
+			const int16_t mem_rd = mono ? rd_buff[i] : rd_buff[i * 2];
+			const int16_t mem_rd_r = mono ? 0 : rd_buff[i * 2 + 1];
+
+			const int16_t mem_rd_fade = mono ? rd_fade_buff[i] : rd_fade_buff[i * 2];
+			const int16_t mem_rd_fade_r = mono ? 0 : rd_fade_buff[i * 2 + 1];
+
+			auto auxin = flags.mute_on_boot_ctr ? 0 : AudioStreamConf::AudioInFrame::sign_extend(inblock[i].chan[0]);
+			auto mainin = flags.mute_on_boot_ctr ? 0 : AudioStreamConf::AudioInFrame::sign_extend(inblock[i].chan[1]);
+
+			// Outputs
+			int16_t nul;
+			auto &mem_wr = mono ? wr_buff[i] : wr_buff[i * 2];
+			auto &mem_wr_r = mono ? nul : wr_buff[i * 2 + 1];
+			auto &out = outblock[i];
 
 			if (params.settings.auto_mute) {
 				mainin = main_automute.update(mainin);
@@ -145,50 +145,49 @@ public:
 			}
 
 			// Crossfade the two read head positions
-			auto phase = (uint16_t)(4095.f * read_fade_phase);
-			phase = __USAT(phase, 12);
-			int32_t rd;
-			if (params.settings.stereo_mode) {
-				// TODO: rd = equal_power_crossfade(mem_rd, mem_rd_dest, phase);
-				rd = ((float)mem_rd * epp_lut[phase]) + ((float)mem_rd_dest * epp_lut[4095 - phase]);
-				rd *= 256;
-			} else {
-				rd = ((float)mem_rd * epp_lut[phase]) + ((float)mem_rd_dest * epp_lut[4095 - phase]);
-				rd *= 256;
-			}
+			int32_t rd = epp_crossfade(mem_rd, mem_rd_fade, read_fade_phase);
+			int32_t rd_r = epp_crossfade(mem_rd_r, mem_rd_fade_r, read_fade_phase);
+
+			// 16 bit => 24 bit
+			rd *= 256;
+			rd_r *= 256;
 
 			// Attenuate the delayed signal with REGEN
 			int32_t regen = (float)rd * params.feedback;
+			int32_t regen_r = (float)rd_r * params.feedback;
 
 			// Attenuate the clean signal by the LEVEL parameter
 			int32_t mainin_atten = (float)mainin * params.delay_feed;
+			int32_t mainin_atten_r = (float)auxin * params.delay_feed;
 
 			int32_t wr;
-			int32_t auxout;
+			int32_t wr_r;
 			if (params.settings.stereo_mode) {
-				int32_t auxin_atten = (float)auxin * params.delay_feed;
-				int32_t rd_aux = 0; // Set to memory rd
-				int32_t regen_aux = (float)rd_aux * params.feedback;
 				wr = (int32_t)(regen + mainin_atten);
-				auxout = (int32_t)(regen_aux + auxin_atten);
-			} else if (params.settings.send_return_before_loop) {
-				wr = auxin;
-				auxout = (int32_t)(regen + mainin_atten);
+				wr_r = (int32_t)(regen_r + mainin_atten_r);
+				// } else if (params.settings.send_return_before_loop) {
+				// 	wr = auxin;
+				// 	auxout = (int32_t)(regen + mainin_atten);
 			} else {
 				wr = (int32_t)(regen + mainin_atten + (float)auxin);
-				auxout = rd;
+				wr_r = 0;
 			}
 
 			// Wet/dry mix, as determined by the MIX parameter
 			int32_t mix = ((float)mainin * params.mix_dry) + ((float)rd * params.mix_wet);
+			int32_t mix_r = ((float)auxin * params.mix_dry) + ((float)rd_r * params.mix_wet);
 
-			out.chan[0] = clip(auxout);
-			out.chan[1] = clip(mix); // TODO: + CODEC_DAC_CALIBRATION_DCOFFSET
+			out.chan[0] = mono ? clip(rd) : clip(mix_r);
+			out.chan[1] = clip(mix);
 
 			// High-pass filter before writing to memory
-			if (params.settings.runaway_dc_block)
+			if (params.settings.runaway_dc_block) {
 				wr = dcblock.update(wr);
+				wr_r = dcblock.update(wr_r);
+			}
 			mem_wr = clip(wr) / 256;
+			if (!mono)
+				mem_wr_r = clip(wr_r) / 256;
 		}
 
 		write_block_to_memory(wr_buff);
@@ -196,7 +195,7 @@ public:
 		increment_crossfading();
 	}
 
-	void write_block_to_memory(std::span<int16_t> &wr_buff) {
+	void write_block_to_memory(std::span<int16_t> wr_buff) {
 		if (params.modes.inf == InfState::On)
 			return;
 
@@ -206,8 +205,6 @@ public:
 			if (write_fade_state == FadeState::FadingDown) {
 				float phase = 1.f - write_fade_phase;
 				rev ? fade_buf.write_reverse(wr_buff, phase) : fade_buf.write(wr_buff, phase);
-				// Memory::fade_write(write_fade_ending_addr, wr_buff, rev, 1.f - write_fade_phase);
-				// write_head = write_fade_ending_addr;
 				buf.wr_pos(fade_buf.wr_pos());
 			}
 		}
@@ -248,11 +245,12 @@ public:
 		// For short periods (audio rate), disble crossfading before the end of the loop
 		if (params.divmult_time < params.settings.crossfade_samples)
 			return loop_end;
-		else
-			return Util::offset_samples(
-				loop_end, params.settings.crossfade_samples /* / MemorySampleSize*/, !params.modes.reverse);
-		// FIXME: should that be / 2 (for 2 channels), not / sample size?
-		//  Or else crossfade_samples should be named crossfade_bytes
+		else {
+			auto offset = params.settings.crossfade_samples;
+			if (params.settings.stereo_mode)
+				offset *= 2;
+			return Util::offset_samples(loop_end, offset, !params.modes.reverse) & mask;
+		}
 	}
 
 	// When we near the end of the loop, start a crossfade to the beginning
@@ -266,7 +264,8 @@ public:
 			read_fade_phase = 0.f;
 
 			// Issue: is it necessary to set this below?
-			fade_buf.rd_pos(Util::offset_samples(buf.rd_pos(), AudioStreamConf::BlockSize, !params.modes.reverse));
+			fade_buf.rd_pos(Util::offset_samples(buf.rd_pos(), AudioStreamConf::BlockSize, !params.modes.reverse) &
+							mask);
 		} else {
 			// Start fading from before the loop
 			// We have to add in sz because read_addr has already
@@ -275,7 +274,7 @@ public:
 			if (params.modes.reverse)
 				loop_size = -loop_size;
 
-			uint32_t f_addr = Util::offset_samples(buf.rd_pos(), (loop_size + sz), !params.modes.reverse);
+			uint32_t f_addr = Util::offset_samples(buf.rd_pos(), (loop_size + sz), !params.modes.reverse) & mask;
 
 			// From DLD code : "Issue: clearing a queued divmult time"
 			start_crossfade(f_addr);
@@ -296,15 +295,18 @@ public:
 		return val;
 	}
 
-	uint32_t calculate_read_addr(uint32_t new_divmult_time) {
-		return Util::offset_samples(buf.wr_pos(), new_divmult_time, !params.modes.reverse);
+	static constexpr uint32_t mask = ~3UL;
+
+	uint32_t calculate_read_addr(uint32_t divmult_time) {
+		if (params.settings.stereo_mode)
+			divmult_time <<= 1;
+		return Util::offset_samples(buf.wr_pos(), divmult_time, !params.modes.reverse) & mask;
 	}
 
 	void set_divmult_time() {
 		uint32_t use_ping_time = params.modes.ping_locked ? params.locked_ping_time : params.ping_time;
 		uint32_t t_divmult_time = use_ping_time * params.time;
-		// t_divmult_time = t_divmult_time & 0xFFFFFFFC; //force it to be a multiple of 4
-
+		t_divmult_time = t_divmult_time & 0xFFFFFFFC; // force it to be a multiple of 4
 		std::clamp(t_divmult_time, (uint32_t)0, MemorySamplesNum);
 
 		if (params.divmult_time == t_divmult_time)
@@ -321,11 +323,13 @@ public:
 			}
 		} else {
 			params.set_divmult(t_divmult_time);
+			if (params.settings.stereo_mode)
+				t_divmult_time <<= 1;
 
 			if (params.modes.adjust_loop_end)
-				loop_end = Util::offset_samples(loop_start, t_divmult_time, params.modes.reverse);
+				loop_end = Util::offset_samples(loop_start, t_divmult_time, params.modes.reverse) & mask;
 			else
-				loop_start = Util::offset_samples(loop_end, t_divmult_time, 1 - params.modes.reverse);
+				loop_start = Util::offset_samples(loop_end, t_divmult_time, !params.modes.reverse) & mask;
 
 			// If the read addr is not in between the loop start and end, then fade to the loop start
 			if (check_read_head_in_loop()) {
@@ -404,9 +408,11 @@ public:
 	void reverse_loop() {
 		uint32_t t = loop_start;
 		uint32_t padding = params.settings.crossfade_samples;
+		if (params.settings.stereo_mode)
+			padding *= 2;
 
-		loop_start = Util::offset_samples(loop_end, padding, params.modes.reverse);
-		loop_end = Util::offset_samples(t, padding, params.modes.reverse);
+		loop_start = Util::offset_samples(loop_end, padding, params.modes.reverse) & mask;
+		loop_end = Util::offset_samples(t, padding, params.modes.reverse) & mask;
 
 		// (Old TODO ToDo: ??? Add a crossfade for read head reversing direction here
 		start_crossfade(buf.rd_pos());
@@ -441,7 +447,10 @@ public:
 				// then we should loop between the new points since divmult_time
 				// (used in the next line) corresponds with the fade ending addr
 
-				loop_end = Util::offset_samples(loop_start, params.divmult_time, params.modes.reverse);
+				auto offset = params.divmult_time;
+				if (params.settings.stereo_mode)
+					offset *= 2;
+				loop_end = Util::offset_samples(loop_start, offset, params.modes.reverse) & mask;
 			}
 			write_fade_phase = params.settings.crossfade_rate;
 			write_fade_state = FadeState::FadingDown;

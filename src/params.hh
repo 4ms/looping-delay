@@ -207,31 +207,19 @@ private:
 			for (auto &pot : pot_state)
 				pot.moved_while_rev_down = false;
 		}
+
+		if (!ignore_inf_release && controls.inf_button.how_long_held_pressed() > 1500) {
+			if (!ignore_rev_release && controls.reverse_button.how_long_held_pressed() > 1500) {
+				settings.stereo_mode = !settings.stereo_mode;
+				ignore_inf_release = true;
+				ignore_rev_release = true;
+				flag_animate_stereo = settings.stereo_mode ? 1500 : 0;
+				flag_animate_mono = settings.stereo_mode ? 0 : 1500;
+			}
+		}
 	}
 
 	void update_leds() {
-		if (modes.inf == InfState::TransitioningOn)
-			controls.inf_led.high();
-		else if (modes.inf == InfState::TransitioningOff)
-			controls.inf_led.low();
-
-		controls.reverse_led.set(modes.reverse);
-
-		// if (flag_acknowlegde_qcm) {
-		// 	flag_acknowlegde_qcm--;
-		// 	if ((flag_acknowlegde_qcm & (1 << 8)) || (!global_mode[QUANTIZE_MODE_CHANGES] && (flag_acknowlegde_qcm & (1
-		// << 6))))
-		// 	{
-		// 		LED_PINGBUT_ON;
-		// 		LED_REV1_ON;
-		// 		LED_REV2_ON;
-		// 	} else {
-		// 		LED_PINGBUT_OFF;
-		// 		LED_REV1_OFF;
-		// 		LED_REV2_OFF;
-		// 	}
-		// }
-
 		if (controls.ping_button.is_pressed()) {
 			controls.ping_led.high();
 		}
@@ -255,6 +243,37 @@ private:
 		} else if (loopled_tmr >= (divmult_time / 2)) {
 			controls.loop_led.low();
 			controls.loop_out.low();
+		}
+
+		if (flag_animate_stereo) {
+			flag_animate_stereo--;
+			if ((flag_animate_stereo & 0xFF) == 0x80) {
+				controls.reverse_led.low();
+				controls.inf_led.high();
+			}
+			if ((flag_animate_stereo & 0xFF) == 0x00) {
+				controls.reverse_led.high();
+				controls.inf_led.low();
+			}
+		}
+		if (flag_animate_mono) {
+			flag_animate_mono--;
+			if ((flag_animate_mono & 0x1FF) == 0x100) {
+				controls.reverse_led.high();
+				controls.inf_led.high();
+			}
+			if ((flag_animate_mono & 0x1FF) == 0x000) {
+				controls.reverse_led.low();
+				controls.inf_led.low();
+			}
+		}
+
+		if (!flag_animate_mono && !flag_animate_stereo) {
+			controls.reverse_led.set(modes.reverse);
+			if (modes.inf == InfState::TransitioningOn || modes.inf == InfState::On)
+				controls.inf_led.high();
+			else if (modes.inf == InfState::TransitioningOff || modes.inf == InfState::Off)
+				controls.inf_led.low();
 		}
 	}
 
@@ -395,6 +414,9 @@ private:
 
 	bool ignore_inf_release = false;
 	bool ignore_rev_release = false;
+
+	uint32_t flag_animate_mono = 0;
+	uint32_t flag_animate_stereo = 0;
 };
 
 constexpr auto ParamsSize = sizeof(Params);
