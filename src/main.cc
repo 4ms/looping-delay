@@ -2,7 +2,6 @@
 #include "conf/board_conf.hh"
 #include "controls.hh"
 #include "debug.hh"
-#include "delay_buffer.hh"
 #include "drivers/timekeeper.hh"
 #include "hardware_tests.hh"
 #include "looping_delay.hh"
@@ -30,24 +29,15 @@ void main() {
 	}
 
 	Flags flags;
-	Timer timer;
-	Params params{controls, flags, timer};
-	DelayBuffer &audio_buffer = get_delay_buffer();
-	LoopingDelay looping_delay{params, flags, audio_buffer};
+	Params params{controls, flags};
+	LoopingDelay looping_delay{params, flags};
 	AudioStream audio([&looping_delay, &params](const AudioInBlock &in, AudioOutBlock &out) {
 		params.update();
 		looping_delay.update(in, out);
 	});
 
-	// mdrivlib::Timekeeper params_update_task(Brain::param_update_task_conf, [&params]() { params.update(); });
-
-	// TODO: Make Params thread-safe:
-	// Use double-buffering (two Params structs), and LoopingDelay is constructed with a Params*
-	// And right before looping_delay.update(), call params.load_updated_values()
-
-	timer.start();
+	params.start();
 	controls.start();
-	// params_update_task.start();
 	audio.start();
 
 	while (true) {
@@ -55,4 +45,6 @@ void main() {
 	}
 }
 
-void recover_from_task_fault() { LDKit::SystemTarget::restart(); }
+void recover_from_task_fault() {
+	LDKit::SystemTarget::restart();
+}

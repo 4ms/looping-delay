@@ -30,28 +30,27 @@ struct Util {
 	//     .....   === loop
 	//     |   |   === memory boundaries
 
+	// Adds or subtracts offset to/from base_addr, wrapping at [0, Brain::MemorySizeBytes)
 	constexpr static uint32_t offset_samples(uint32_t base_addr, int32_t offset, bool subtract = false) {
-		uint32_t t_addr;
-
-		// convert samples to addresses
-		offset *= MemorySampleSize;
+		constexpr uint32_t Size = Brain::MemorySizeBytes / MemorySampleSize;
+		constexpr uint32_t Mask = ~1UL;
 
 		if (subtract)
 			offset = -offset;
-		t_addr = base_addr + offset;
 
-		while (t_addr >= Brain::MemoryEndAddr)
-			t_addr = t_addr - Brain::MemorySizeBytes;
-		while (t_addr < Brain::MemoryStartAddr)
-			t_addr = t_addr + Brain::MemorySizeBytes;
+		// Check for underflow, i.e. if base_addr = 0 and offset is negative
+		if (offset < 0) {
+			while (base_addr < (uint32_t)(-offset))
+				base_addr += Size;
+		}
 
-		// std::clamp(t_addr, Board::MemoryStartAddr, Board::MemoryEndAddr);
+		// TODO: Check this doesn't wrap!
+		base_addr += offset;
 
-		// addresses must be aligned
-		constexpr uint32_t mask = (UINT32_MAX - MemorySampleSize) + 1; // 0xFFFFFFFE;
-		t_addr = t_addr & mask;
+		while (base_addr >= Size)
+			base_addr -= Size;
 
-		return t_addr;
+		return base_addr & Mask;
 	}
 };
 
@@ -70,18 +69,15 @@ static_assert(Util::in_between(3, 3, 3, 0), "zero length, not reverse, mid equal
 static_assert(!Util::in_between(2, 3, 3, 1), "zero length, reverse, mid not equal");
 static_assert(!Util::in_between(2, 3, 3, 0), "zero length, not reverse, mid not equal");
 
-static_assert(Util::offset_samples(Brain::MemoryStartAddr, 8) == Brain::MemoryStartAddr + 0x10, "add");
-static_assert(Util::offset_samples(Brain::MemoryStartAddr, -8) == Brain::MemoryEndAddr - 0x10,
-			  "subtract across loop boundary");
-static_assert(Util::offset_samples(Brain::MemoryStartAddr, 8, 1) == Brain::MemoryEndAddr - 0x10,
-			  "subtract across loop boundary");
-static_assert(Util::offset_samples(Brain::MemoryEndAddr - 0x8, 8) == Brain::MemoryStartAddr + 0x8,
-			  "add across loop boundary");
-static_assert(Util::offset_samples(Brain::MemoryEndAddr - 0x8, -8) == (Brain::MemoryEndAddr - 0x18), "subtract");
-
-static_assert(Util::offset_samples(Brain::MemoryStartAddr + 2, Brain::MemorySizeBytes) == Brain::MemoryStartAddr + 2,
-			  "integer overflow");
-static_assert(Util::offset_samples(Brain::MemoryStartAddr + 2, Brain::MemorySizeBytes * 2) ==
-				  Brain::MemoryStartAddr + 2,
-			  "integer overflow");
+constexpr static uint32_t Size = Brain::MemorySizeBytes / MemorySampleSize;
+static_assert(Util::offset_samples(12, 8) == 12 + 8, "add");
+static_assert(Util::offset_samples(0, -8) == Size - 8, "subtract across lower loop boundary");
+static_assert(Util::offset_samples(0, 8, true) == Size - 8, "subtract across loop boundary");
+static_assert(Util::offset_samples(2, -8) == Size - 6, "subtract across lower loop boundary");
+static_assert(Util::offset_samples(Size - 4, 8) == 4, "add across loop boundary");
+static_assert(Util::offset_samples(Size + 4, -8) == (Size - 4), "subtract across upper loop boundary");
+static_assert(Util::offset_samples(320, Size) == 320, "integer overflow");
+static_assert(Util::offset_samples(0xAB00, Size * 2) == 0xAB00, "integer overflow");
+static_assert(Util::offset_samples(0xAB00, Size, true) == 0xAB00, "integer underflow");
+static_assert(Util::offset_samples(0xAB00, Size * 2, true) == 0xAB00, "integer underflow");
 } // namespace LDKit

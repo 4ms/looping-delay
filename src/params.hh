@@ -18,7 +18,7 @@ namespace LDKit
 struct Params {
 	Controls &controls;
 	Flags &flags;
-	Timer &timer;
+	Timer timer;
 
 	// TODO: double-buffer Params:
 	// put just these into its own struct
@@ -39,10 +39,14 @@ struct Params {
 	CalibrationData &calibration = cal_storage.cal_data;
 	Settings &settings = calibration.settings;
 
-	Params(Controls &controls, Flags &flags, Timer &timer)
+	Params(Controls &controls, Flags &flags)
 		: controls{controls}
-		, flags{flags}
-		, timer{timer} {}
+		, flags{flags} {
+	}
+
+	void start() {
+		timer.start();
+	}
 
 	void update() {
 		controls.update();
@@ -94,9 +98,15 @@ struct Params {
 	// TODO: to use a double-buffer params, then
 	// looping delay should set a flag that tells params to set a
 	// new state for these
-	void set_inf_state(InfState newstate) { modes.inf = newstate; }
-	void toggle_reverse() { modes.reverse = !modes.reverse; }
-	void set_divmult(float new_divmult) { divmult_time = new_divmult; }
+	void set_inf_state(InfState newstate) {
+		modes.inf = newstate;
+	}
+	void toggle_reverse() {
+		modes.reverse = !modes.reverse;
+	}
+	void set_divmult(float new_divmult) {
+		divmult_time = new_divmult;
+	}
 
 private:
 	void update_trig_jacks() {
@@ -107,6 +117,7 @@ private:
 			ping_time = timer.get_ping_time();
 			if (!modes.ping_locked)
 				flags.set_time_changed();
+			handle_quantized_mode_changes();
 		}
 
 		if (controls.reverse_jack.is_just_pressed()) {
@@ -131,7 +142,7 @@ private:
 				pot.delta = diff;
 				pot.moved = true;
 
-				if (controls.reverse_button.is_pressed()) {
+				if (controls.rev_button.is_pressed()) {
 					pot.moved_while_rev_down = true;
 					ignore_rev_release = true; // if i==TimePot and in InfMode only?
 				}
@@ -162,61 +173,29 @@ private:
 	}
 
 	void update_button_modes() {
-		if (controls.ping_button.just_went_low()) {
-			// TODO: handle entering modes: QMC, Ping Locked
-			// if (!INF1BUT && !INF2BUT && REV1BUT && REV2BUT) {
-			// 	flag_acknowlegde_qcm = (6 << 8);
+		// Press ping (and no other buttons)
+		if (!controls.rev_button.is_pressed() && !controls.inf_button.is_pressed()) {
+			if (controls.ping_button.is_just_pressed()) {
+				ping_time = timer.get_ping_tmr();
+				controls.clk_out.high();
+				controls.bus_clk_out.high();
+				timer.reset_ping_tmr();
+				timer.reset_pingled_tmr();
+				handle_quantized_mode_changes();
+				// timer.reset_clkout_tmr();
 
-			// 	if (global_mode[QUANTIZE_MODE_CHANGES] == 0)
-			// 		global_mode[QUANTIZE_MODE_CHANGES] = 1;
-			// 	else
-			// 		global_mode[QUANTIZE_MODE_CHANGES] = 0;
-
-			// 	flag_ignore_revdown[0] = 1;
-			// 	flag_ignore_revdown[1] = 1;
-			// } else if (REV1BUT && !INF1BUT && !INF2BUT && !REV2BUT) {
-			// 	flag_ignore_revdown[0] = 1;
-			// } else if (REV2BUT && !INF1BUT && !INF2BUT && !REV1BUT) {
-			// 	flag_ignore_revdown[1] = 1;
-			// }
-
-			// else if (INF1BUT && !INF2BUT && !REV1BUT && !REV2BUT)
-			// {
-			// 	if (mode[0][PING_LOCKED] == 0) {
-			// 		locked_ping_time[0] = ping_time;
-			// 		mode[0][PING_LOCKED] = 1;
-			// 	} else {
-			// 		mode[0][PING_LOCKED] = 0;
-			// 		set_divmult_time(0);
-			// 	}
-
-			// 	flag_ignore_infdown[0] = 1;
-
-			// } else if (INF2BUT && INF1BUT && REV1BUT && REV2BUT) {
-			// 	flag_ignore_revdown[0] = 1;
-			// 	flag_ignore_revdown[1] = 1;
-			// 	flag_ignore_infdown[0] = 1;
-			// 	flag_ignore_infdown[1] = 1;
-
-			// } else if (!INF2BUT && !INF1BUT && !REV1BUT && !REV2BUT) {
-			ping_time = timer.get_ping_tmr();
-			controls.clk_out.high();
-			controls.bus_clk_out.high();
-			timer.reset_ping_tmr();
-			timer.reset_pingled_tmr();
-			// timer.reset_clkout_tmr();
-
-			// TODO: this is handled automatically now, right?
-			if (modes.quantize_mode_changes) {
-				// 	process_mode_flags();
+				if (!modes.ping_locked) {
+					flags.set_time_changed();
+				}
 			}
-			if (!modes.ping_locked)
-				flags.set_time_changed();
 		}
 
 		if (controls.inf_button.is_just_released()) {
 			if (!ignore_inf_release) {
-				flags.set_inf_changed();
+				if (modes.quantize_mode_changes)
+					flags.set_inf_quantized_changed();
+				else
+					flags.set_inf_changed();
 			}
 
 			ignore_inf_release = false;
@@ -224,40 +203,63 @@ private:
 				pot.moved_while_inf_down = false;
 		}
 
-		if (controls.reverse_button.is_just_released()) {
+		if (controls.rev_button.is_just_released()) {
 			if (!ignore_rev_release) {
-				flags.set_rev_changed();
+				if (modes.quantize_mode_changes)
+					flags.set_rev_quantized_changed();
+				else
+					flags.set_rev_changed();
 			}
 
 			ignore_rev_release = false;
 			for (auto &pot : pot_state)
 				pot.moved_while_rev_down = false;
 		}
+
+		// Stereo mode
+		if (!ignore_inf_release && controls.inf_button.how_long_held_pressed() > 1500) {
+			if (!ignore_rev_release && controls.rev_button.how_long_held_pressed() > 1500) {
+				if (!controls.ping_button.is_pressed()) {
+					settings.stereo_mode = !settings.stereo_mode;
+					ignore_inf_release = true;
+					ignore_rev_release = true;
+					flag_animate_stereo = settings.stereo_mode ? 1500 : 0;
+					flag_animate_mono = settings.stereo_mode ? 0 : 1500;
+					flags.set_time_changed();
+				}
+			}
+		}
+
+		// quantized change mode:
+		switch (qcm_state) {
+			case QcmState::Idle:
+				if (controls.rev_button.is_just_pressed() && !controls.inf_button.is_pressed() &&
+					!controls.ping_button.is_pressed())
+					qcm_state = QcmState::RevPressed;
+				break;
+			case QcmState::RevPressed:
+				if (controls.rev_button.is_pressed() && !controls.inf_button.is_pressed() &&
+					controls.ping_button.is_just_pressed())
+					qcm_state = QcmState::RevPingPressed;
+				break;
+			case QcmState::RevPingPressed:
+				if (controls.rev_button.is_pressed() && !controls.inf_button.is_pressed() &&
+					controls.ping_button.is_just_released())
+				{
+					qcm_state = QcmState::Idle;
+					modes.quantize_mode_changes = !modes.quantize_mode_changes;
+					ignore_rev_release = true;
+				}
+				break;
+		}
+
+		// Reset to idle if all buttons released
+		if (!controls.rev_button.is_pressed() && !controls.inf_button.is_pressed() &&
+			!controls.ping_button.is_pressed())
+			qcm_state = QcmState::Idle;
 	}
 
 	void update_leds() {
-		if (modes.inf == InfState::TransitioningOn)
-			controls.inf_led.high();
-		else if (modes.inf == InfState::TransitioningOff)
-			controls.inf_led.low();
-
-		controls.reverse_led.set(modes.reverse);
-
-		// if (flag_acknowlegde_qcm) {
-		// 	flag_acknowlegde_qcm--;
-		// 	if ((flag_acknowlegde_qcm & (1 << 8)) || (!global_mode[QUANTIZE_MODE_CHANGES] && (flag_acknowlegde_qcm & (1
-		// << 6))))
-		// 	{
-		// 		LED_PINGBUT_ON;
-		// 		LED_REV1_ON;
-		// 		LED_REV2_ON;
-		// 	} else {
-		// 		LED_PINGBUT_OFF;
-		// 		LED_REV1_OFF;
-		// 		LED_REV2_OFF;
-		// 	}
-		// }
-
 		if (controls.ping_button.is_pressed()) {
 			controls.ping_led.high();
 		}
@@ -268,6 +270,7 @@ private:
 			timer.reset_pingled_tmr();
 			controls.clk_out.high();
 			controls.bus_clk_out.high();
+			handle_quantized_mode_changes();
 		} else if (ping_ledbut_tmr >= (ping_time / 2)) {
 			if (!controls.ping_button.is_pressed())
 				controls.ping_led.low();
@@ -282,6 +285,45 @@ private:
 			controls.loop_led.low();
 			controls.loop_out.low();
 		}
+
+		if (flag_animate_stereo) {
+			flag_animate_stereo--;
+			if ((flag_animate_stereo & 0xFF) == 0x80) {
+				controls.reverse_led.low();
+				controls.inf_led.high();
+			}
+			if ((flag_animate_stereo & 0xFF) == 0x00) {
+				controls.reverse_led.high();
+				controls.inf_led.low();
+			}
+		}
+		if (flag_animate_mono) {
+			flag_animate_mono--;
+			if ((flag_animate_mono & 0x1FF) == 0x100) {
+				controls.reverse_led.high();
+				controls.inf_led.high();
+			}
+			if ((flag_animate_mono & 0x1FF) == 0x000) {
+				controls.reverse_led.low();
+				controls.inf_led.low();
+			}
+		}
+
+		if (!flag_animate_mono && !flag_animate_stereo) {
+			controls.reverse_led.set(modes.reverse);
+			if (modes.inf == InfState::TransitioningOn || modes.inf == InfState::On)
+				controls.inf_led.high();
+			else if (modes.inf == InfState::TransitioningOff || modes.inf == InfState::Off)
+				controls.inf_led.low();
+		}
+	}
+
+	void handle_quantized_mode_changes() {
+		// Handle staged inf/rev changes due to quantize_mode_changes==true
+		if (flags.take_inf_quantized_changed())
+			flags.set_inf_changed();
+		if (flags.take_rev_quantized_changed())
+			flags.set_rev_changed();
 	}
 
 	void update_time_quant_mode() {
@@ -324,7 +366,7 @@ private:
 			return;
 		}
 
-		uint16_t df = __USAT(pot_state[DelayFeedPot].cur_val + cv_state[DelayFeedCV].cur_val, 12);
+		uint16_t df = __USAT(pot_state[DelayFeedPot].prev_val + cv_state[DelayFeedCV].prev_val, 12);
 
 		if (settings.log_delay_feed)
 			delay_feed = log_taper[df];
@@ -338,7 +380,7 @@ private:
 			return;
 		}
 
-		float fb_pot = pot_state[FeedbackPot].cur_val;
+		float fb_pot = pot_state[FeedbackPot].prev_val;
 		float fb;
 		if (fb_pot < 3500.f)
 			fb = fb_pot / 3500.f;
@@ -347,7 +389,7 @@ private:
 		else
 			fb = (fb_pot - 3050.f) / 950.f; //(4095-3050)/950 = 110% ... (4000-3050)/950 = 100%
 
-		float fb_cv = cv_state[FeedbackCV].cur_val;
+		float fb_cv = cv_state[FeedbackCV].prev_val;
 		// FIXME: DLD firmware has bug that prevents the fb += 1.f branch
 		if (fb_cv > 4080.f)
 			fb += 1.f;
@@ -383,7 +425,7 @@ private:
 	}
 
 	void calc_mix() {
-		uint16_t mx = __USAT(cv_state[MixCV].cur_val + pot_state[MixPot].cur_val, 12);
+		uint16_t mx = __USAT(cv_state[MixCV].prev_val + pot_state[MixPot].prev_val, 12);
 
 		mix_dry = epp_lut[mx];
 		mix_wet = epp_lut[4095 - mx];
@@ -421,6 +463,11 @@ private:
 
 	bool ignore_inf_release = false;
 	bool ignore_rev_release = false;
+
+	uint32_t flag_animate_mono = 0;
+	uint32_t flag_animate_stereo = 0;
+
+	enum class QcmState { Idle, RevPressed, RevPingPressed } qcm_state;
 };
 
 constexpr auto ParamsSize = sizeof(Params);

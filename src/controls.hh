@@ -20,15 +20,15 @@ class Controls {
 	mdrivlib::AdcDmaPeriph<Brain::PotAdcConf> pot_adcs{pot_adc_buffer, Board::PotAdcChans};
 
 	static constexpr bool hardware_oversampling = Brain::PotAdcConf::oversample;
-	std::array<Oversampler<128, uint16_t>, NumPots> pots;
-	std::array<Oversampler<32, uint16_t>, NumCVs> cvs;
+	std::array<Oversampler<256, uint16_t>, NumPots> pots;
+	std::array<Oversampler<64, uint16_t>, NumCVs> cvs;
 
 public:
 	Controls() = default;
 
 	// Buttons/Switches:
 	Board::PingButton ping_button;
-	Board::RevButton reverse_button;
+	Board::RevButton rev_button;
 	Board::HoldButton inf_button;
 	Board::TimeSwitch time_switch;
 
@@ -63,7 +63,9 @@ public:
 			return cvs[adcnum].val();
 	}
 
-	SwitchPos read_time_switch() { return static_cast<SwitchPos>(time_switch.read()); }
+	SwitchPos read_time_switch() {
+		return static_cast<SwitchPos>(time_switch.read());
+	}
 
 	void start() {
 		if constexpr (!hardware_oversampling) {
@@ -89,7 +91,7 @@ public:
 
 	void update() {
 		ping_button.update();
-		reverse_button.update();
+		rev_button.update();
 		inf_button.update();
 
 		// ping_jack.update();

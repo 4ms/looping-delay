@@ -1,4 +1,7 @@
 #pragma once
+#include "cmsis_gcc.h"
+#include <concepts>
+#include <cstdint>
 
 inline constexpr float epp_lut[4096] = {
 	1.0,		  1.0,			1.0,		  1.0,			1.0,		  1.0,			1.0,		  1.0,
@@ -513,3 +516,10 @@ inline constexpr float epp_lut[4096] = {
 	0.0,		  0.0,			0.0,		  0.0,			0.0,		  0.0,			0.0,		  0.0,
 	0.0,		  0.0,			0.0,		  0.0,			0.0,		  0.0,			0.0,		  0.0,
 	0.0,		  0.0,			0.0,		  0.0,			0.0,		  0.0,			0.0,		  0.0};
+
+template<std::integral T>
+constexpr T epp_crossfade(T a, T b, float phase) {
+	auto p = (uint16_t)(4095.f * phase);
+	phase = __USAT(phase, 12);
+	return static_cast<T>(((float)a * epp_lut[p]) + ((float)b * epp_lut[4095 - p]));
+}
