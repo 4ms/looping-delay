@@ -117,6 +117,7 @@ private:
 			ping_time = timer.get_ping_time();
 			if (!modes.ping_locked)
 				flags.set_time_changed();
+			handle_quantized_mode_changes();
 		}
 
 		if (controls.reverse_jack.is_just_pressed()) {
@@ -178,19 +179,20 @@ private:
 			controls.bus_clk_out.high();
 			timer.reset_ping_tmr();
 			timer.reset_pingled_tmr();
+			handle_quantized_mode_changes();
 			// timer.reset_clkout_tmr();
 
-			// TODO: this is handled automatically now, right?
-			if (modes.quantize_mode_changes) {
-				// 	process_mode_flags();
-			}
-			if (!modes.ping_locked)
+			if (!modes.ping_locked) {
 				flags.set_time_changed();
+			}
 		}
 
 		if (controls.inf_button.is_just_released()) {
 			if (!ignore_inf_release) {
-				flags.set_inf_changed();
+				if (modes.quantize_mode_changes)
+					flags.set_inf_quantized_changed();
+				else
+					flags.set_inf_changed();
 			}
 
 			ignore_inf_release = false;
@@ -200,7 +202,10 @@ private:
 
 		if (controls.reverse_button.is_just_released()) {
 			if (!ignore_rev_release) {
-				flags.set_rev_changed();
+				if (modes.quantize_mode_changes)
+					flags.set_rev_quantized_changed();
+				else
+					flags.set_rev_changed();
 			}
 
 			ignore_rev_release = false;
@@ -208,13 +213,27 @@ private:
 				pot.moved_while_rev_down = false;
 		}
 
+		// Stereo mode
 		if (!ignore_inf_release && controls.inf_button.how_long_held_pressed() > 1500) {
 			if (!ignore_rev_release && controls.reverse_button.how_long_held_pressed() > 1500) {
-				settings.stereo_mode = !settings.stereo_mode;
-				ignore_inf_release = true;
-				ignore_rev_release = true;
-				flag_animate_stereo = settings.stereo_mode ? 1500 : 0;
-				flag_animate_mono = settings.stereo_mode ? 0 : 1500;
+				if (!controls.ping_button.is_pressed()) {
+					settings.stereo_mode = !settings.stereo_mode;
+					ignore_inf_release = true;
+					ignore_rev_release = true;
+					flag_animate_stereo = settings.stereo_mode ? 1500 : 0;
+					flag_animate_mono = settings.stereo_mode ? 0 : 1500;
+				}
+			}
+		}
+
+		// quantized change mode:
+		// rev pressed and ping not pressed -> rev pressed and ping pressed -> rev pressed and ping not pressed
+		if (!ignore_rev_release && controls.reverse_button.how_long_held_pressed() > 1500) {
+			if (!controls.inf_button.is_pressed()) {
+				if (!controls.ping_button.is_pressed()) {
+					modes.quantize_mode_changes = !modes.quantize_mode_changes;
+					ignore_rev_release = true;
+				}
 			}
 		}
 	}
@@ -230,6 +249,7 @@ private:
 			timer.reset_pingled_tmr();
 			controls.clk_out.high();
 			controls.bus_clk_out.high();
+			handle_quantized_mode_changes();
 		} else if (ping_ledbut_tmr >= (ping_time / 2)) {
 			if (!controls.ping_button.is_pressed())
 				controls.ping_led.low();
@@ -275,6 +295,14 @@ private:
 			else if (modes.inf == InfState::TransitioningOff || modes.inf == InfState::Off)
 				controls.inf_led.low();
 		}
+	}
+
+	void handle_quantized_mode_changes() {
+		// Handle staged inf/rev changes due to quantize_mode_changes==true
+		if (flags.take_inf_quantized_changed())
+			flags.set_inf_changed();
+		if (flags.take_rev_quantized_changed())
+			flags.set_rev_changed();
 	}
 
 	void update_time_quant_mode() {

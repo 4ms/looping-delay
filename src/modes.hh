@@ -26,8 +26,8 @@ struct ChannelMode {
 	bool time_pot_quantized = true;
 	bool time_cv_quantized = true;
 	bool ping_locked = false;
-	bool quantize_mode_changes = true;
-	bool adjust_loop_end = false; // flag_pot_changed_revdown[TIME]
+	bool quantize_mode_changes = false;
+	bool adjust_loop_end = false;
 };
 
 // Settings cannot be changed in Normal operation mode
