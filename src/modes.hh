@@ -1,24 +1,11 @@
 #pragma once
 #include "audio_stream_conf.hh"
+#include "ping_methods.hh"
 #include <cstdint>
 
 enum class InfState { Off, On, TransitioningOn, TransitioningOff };
 
 enum class GateType : uint8_t { Gate = 0, Trig = 1 };
-enum class PingMethod : uint8_t {
-	IGNORE_FLAT_DEVIATION_10 = 0,
-	IGNORE_PERCENT_DEVIATION,
-	ONE_TO_ONE,
-	MOVING_AVERAGE_2,
-	LINEAR_AVERAGE_4,
-	EXPO_AVERAGE_8,
-	IGNORE_FLAT_DEVIATION_5,
-	MOVING_AVERAGE_4,
-	EXPO_AVERAGE_4,
-	LINEAR_AVERAGE_8,
-
-	NUM_PING_METHODS,
-};
 
 struct ChannelMode {
 	InfState inf = InfState::Off;

@@ -18,7 +18,6 @@ namespace LDKit
 struct Params {
 	Controls &controls;
 	Flags &flags;
-	Timer timer;
 
 	// TODO: double-buffer Params:
 	// put just these into its own struct
@@ -38,6 +37,7 @@ struct Params {
 	CalibrationStorage cal_storage;
 	CalibrationData &calibration = cal_storage.cal_data;
 	Settings &settings = calibration.settings;
+	Timer timer{settings.ping_method};
 
 	Params(Controls &controls, Flags &flags)
 		: controls{controls}

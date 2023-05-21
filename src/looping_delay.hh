@@ -63,7 +63,6 @@ public:
 			scroll_loop(amt);
 		}
 
-		// was process_mode_flags():
 		if (flags.take_time_changed()) {
 			set_divmult_time();
 		}
