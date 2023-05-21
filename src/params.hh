@@ -225,6 +225,7 @@ private:
 					ignore_rev_release = true;
 					flag_animate_stereo = settings.stereo_mode ? 1500 : 0;
 					flag_animate_mono = settings.stereo_mode ? 0 : 1500;
+					flags.set_time_changed();
 				}
 			}
 		}

@@ -306,12 +306,11 @@ public:
 		t_divmult_time = t_divmult_time & 0xFFFFFFFC; // force it to be a multiple of 4
 		std::clamp(t_divmult_time, (uint32_t)0, MemorySamplesNum);
 
-		if (params.divmult_time == t_divmult_time)
-			return;
-
+		// Crossfade to new read head position (or queue it if we're already crossfading)
 		if (params.modes.inf == InfState::Off) {
 			if (is_crossfading()) {
-				queued_divmult_time = t_divmult_time;
+				if (params.divmult_time != t_divmult_time)
+					queued_divmult_time = t_divmult_time;
 			} else {
 				params.set_divmult(t_divmult_time);
 				uint32_t t_read_addr = calculate_read_addr(params.divmult_time);
