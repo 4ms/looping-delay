@@ -90,8 +90,8 @@ struct Params {
 	}
 
 	void reset_loop() {
-		controls.loop_led.high();
-		controls.loop_out.high();
+		// controls.loop_led.high();
+		// controls.loop_out.high();
 		timer.reset_loopled_tmr();
 	}
 
@@ -111,8 +111,6 @@ struct Params {
 private:
 	void update_trig_jacks() {
 		if (timer.take_ping_changed()) {
-			controls.clk_out.high();
-			controls.bus_clk_out.high();
 			controls.ping_led.high();
 			ping_time = timer.get_ping_time();
 			if (!modes.ping_locked)
@@ -177,12 +175,9 @@ private:
 		if (!controls.rev_button.is_pressed() && !controls.inf_button.is_pressed()) {
 			if (controls.ping_button.is_just_pressed()) {
 				ping_time = timer.get_ping_tmr();
-				controls.clk_out.high();
-				controls.bus_clk_out.high();
 				timer.reset_ping_tmr();
 				timer.reset_pingled_tmr();
 				handle_quantized_mode_changes();
-				// timer.reset_clkout_tmr();
 
 				if (!modes.ping_locked) {
 					flags.set_time_changed();
@@ -260,31 +255,16 @@ private:
 	}
 
 	void update_leds() {
+		timer.set_divmult_time(divmult_time);
+
 		if (controls.ping_button.is_pressed()) {
 			controls.ping_led.high();
 		}
 
-		auto ping_ledbut_tmr = timer.get_pingled_tmr();
-		if (ping_ledbut_tmr >= ping_time) {
+		if (timer.ping_led_high())
 			controls.ping_led.high();
-			timer.reset_pingled_tmr();
-			controls.clk_out.high();
-			controls.bus_clk_out.high();
-			handle_quantized_mode_changes();
-		} else if (ping_ledbut_tmr >= (ping_time / 2)) {
-			if (!controls.ping_button.is_pressed())
-				controls.ping_led.low();
-			controls.clk_out.low();
-			controls.bus_clk_out.low();
-		}
-
-		auto loopled_tmr = timer.get_loopled_tmr();
-		if (loopled_tmr >= divmult_time && modes.inf == InfState::Off) {
-			reset_loop();
-		} else if (loopled_tmr >= (divmult_time / 2)) {
-			controls.loop_led.low();
-			controls.loop_out.low();
-		}
+		else
+			controls.ping_led.low();
 
 		if (flag_animate_stereo) {
 			flag_animate_stereo--;

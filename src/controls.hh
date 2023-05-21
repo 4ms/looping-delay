@@ -37,16 +37,10 @@ public:
 	Board::RevJack reverse_jack;
 	Board::HoldJack inf_jack;
 
-	Board::ClkOut clk_out;
-	Board::LoopClkOut loop_out;
-	Board::LoopClkPassiveIn loop_passive;
-	Board::BusClkOut bus_clk_out;
-
 	// LEDs:
 	Board::PingLED ping_led;
 	Board::HoldLED inf_led;
 	Board::RevLED reverse_led;
-	Board::LoopLED loop_led;
 
 	using SwitchPos = mdrivlib::SwitchPos;
 

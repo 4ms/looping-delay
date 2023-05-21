@@ -14,9 +14,18 @@ class Timer {
 	Board::PingJack ping_jack;
 	mdrivlib::PinChangeInt<Brain::LRClkPinChangeConf> pin_change;
 
+	Board::LoopClkOut loop_out;
+	Board::LoopClkPassiveIn loop_passive;
+	Board::ClkOut clk_out;
+	Board::BusClkOut bus_clk_out;
+	Board::LoopLED loop_led;
+	bool _ping_led_high = false;
+
 	// uint32_t _clkout_tmr = 0;
 	uint32_t _pingled_tmr = 0;
 	uint32_t _loopled_tmr = 0;
+
+	uint32_t _loopled_time = 0;
 
 	bool _ping_tmr_needs_reset = false;
 	PingMethod &ping_method;
@@ -43,14 +52,15 @@ public:
 
 		ping_jack.update();
 		if (ping_jack.just_went_high()) {
-			Debug::Pin0::high();
 			// TODO: if ping_method != last_ping_method PingMethodAlgorithm::reset();
 			auto newtime = PingMethodAlgorithm::filter(_ping_time, _ping_tmr, ping_method);
 			if (newtime.has_value()) {
-				Debug::Pin1::high();
 				_ping_time = newtime.value();
 				_pingled_tmr = 0;
+
 				_ping_changed = true;
+				clk_out.high();
+				bus_clk_out.high();
 
 				// TODO: see if this reduces jitter by much:
 				// controls.clk_out.high();
@@ -59,9 +69,34 @@ public:
 				// 	flags.set_time_changed();
 			}
 			_ping_tmr = 0;
-			Debug::Pin0::low();
-			Debug::Pin1::low();
+			// Debug::Pin1::high();
+			// Debug::Pin1::low();
 		}
+
+		auto ping_ledbut_tmr = get_pingled_tmr();
+		if (ping_ledbut_tmr >= _ping_time) {
+			_ping_led_high = true;
+			reset_pingled_tmr();
+			_ping_changed = true;
+			clk_out.high();
+			bus_clk_out.high();
+		} else if (ping_ledbut_tmr >= (_ping_time / 2)) {
+			_ping_led_high = false;
+			clk_out.low();
+			bus_clk_out.low();
+		}
+
+		auto loopled_tmr = get_loopled_tmr();
+		if (loopled_tmr >= _loopled_time) { // && modes.inf == InfState::Off) {
+			reset_loopled_tmr();
+		} else if (loopled_tmr >= (_loopled_time / 2)) {
+			loop_led.low();
+			loop_out.low();
+		}
+	}
+
+	void set_divmult_time(uint32_t time) {
+		_loopled_time = time;
 	}
 
 	bool take_ping_changed() {
@@ -81,10 +116,9 @@ public:
 	}
 	void reset_ping_tmr() {
 		_ping_tmr_needs_reset = true;
+		clk_out.high();
+		bus_clk_out.high();
 	}
-
-	// uint32_t get_clkout_tmr() { return _clkout_tmr; }
-	// void reset_clkout_tmr() { _clkout_tmr = 0; }
 
 	uint32_t get_pingled_tmr() {
 		return _pingled_tmr;
@@ -97,7 +131,13 @@ public:
 		return _loopled_tmr;
 	}
 	void reset_loopled_tmr() {
+		loop_led.high();
+		loop_out.high();
 		_loopled_tmr = 0;
+	}
+
+	bool ping_led_high() {
+		return _ping_led_high;
 	}
 };
 
