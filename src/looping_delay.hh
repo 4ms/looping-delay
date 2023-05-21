@@ -96,7 +96,7 @@ public:
 		}
 
 		// Read into rd_buff:
-		bool read_reverse = doing_reverse_fade != params.modes.reverse;
+		bool read_reverse = doing_reverse_fade ^ params.modes.reverse;
 		if (params.modes.inf == InfState::Off) {
 			check_read_write_head_spacing();
 			read_reverse ? buf.read_reverse(rd_buff) : buf.read(rd_buff);

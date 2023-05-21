@@ -142,7 +142,7 @@ private:
 				pot.delta = diff;
 				pot.moved = true;
 
-				if (controls.reverse_button.is_pressed()) {
+				if (controls.rev_button.is_pressed()) {
 					pot.moved_while_rev_down = true;
 					ignore_rev_release = true; // if i==TimePot and in InfMode only?
 				}
@@ -173,17 +173,20 @@ private:
 	}
 
 	void update_button_modes() {
-		if (controls.ping_button.just_went_low()) {
-			ping_time = timer.get_ping_tmr();
-			controls.clk_out.high();
-			controls.bus_clk_out.high();
-			timer.reset_ping_tmr();
-			timer.reset_pingled_tmr();
-			handle_quantized_mode_changes();
-			// timer.reset_clkout_tmr();
+		// Press ping (and no other buttons)
+		if (!controls.rev_button.is_pressed() && !controls.inf_button.is_pressed()) {
+			if (controls.ping_button.is_just_pressed()) {
+				ping_time = timer.get_ping_tmr();
+				controls.clk_out.high();
+				controls.bus_clk_out.high();
+				timer.reset_ping_tmr();
+				timer.reset_pingled_tmr();
+				handle_quantized_mode_changes();
+				// timer.reset_clkout_tmr();
 
-			if (!modes.ping_locked) {
-				flags.set_time_changed();
+				if (!modes.ping_locked) {
+					flags.set_time_changed();
+				}
 			}
 		}
 
@@ -200,7 +203,7 @@ private:
 				pot.moved_while_inf_down = false;
 		}
 
-		if (controls.reverse_button.is_just_released()) {
+		if (controls.rev_button.is_just_released()) {
 			if (!ignore_rev_release) {
 				if (modes.quantize_mode_changes)
 					flags.set_rev_quantized_changed();
@@ -215,7 +218,7 @@ private:
 
 		// Stereo mode
 		if (!ignore_inf_release && controls.inf_button.how_long_held_pressed() > 1500) {
-			if (!ignore_rev_release && controls.reverse_button.how_long_held_pressed() > 1500) {
+			if (!ignore_rev_release && controls.rev_button.how_long_held_pressed() > 1500) {
 				if (!controls.ping_button.is_pressed()) {
 					settings.stereo_mode = !settings.stereo_mode;
 					ignore_inf_release = true;
@@ -227,15 +230,32 @@ private:
 		}
 
 		// quantized change mode:
-		// rev pressed and ping not pressed -> rev pressed and ping pressed -> rev pressed and ping not pressed
-		if (!ignore_rev_release && controls.reverse_button.how_long_held_pressed() > 1500) {
-			if (!controls.inf_button.is_pressed()) {
-				if (!controls.ping_button.is_pressed()) {
+		switch (qcm_state) {
+			case QcmState::Idle:
+				if (controls.rev_button.is_just_pressed() && !controls.inf_button.is_pressed() &&
+					!controls.ping_button.is_pressed())
+					qcm_state = QcmState::RevPressed;
+				break;
+			case QcmState::RevPressed:
+				if (controls.rev_button.is_pressed() && !controls.inf_button.is_pressed() &&
+					controls.ping_button.is_just_pressed())
+					qcm_state = QcmState::RevPingPressed;
+				break;
+			case QcmState::RevPingPressed:
+				if (controls.rev_button.is_pressed() && !controls.inf_button.is_pressed() &&
+					controls.ping_button.is_just_released())
+				{
+					qcm_state = QcmState::Idle;
 					modes.quantize_mode_changes = !modes.quantize_mode_changes;
 					ignore_rev_release = true;
 				}
-			}
+				break;
 		}
+
+		// Reset to idle if all buttons released
+		if (!controls.rev_button.is_pressed() && !controls.inf_button.is_pressed() &&
+			!controls.ping_button.is_pressed())
+			qcm_state = QcmState::Idle;
 	}
 
 	void update_leds() {
@@ -445,6 +465,8 @@ private:
 
 	uint32_t flag_animate_mono = 0;
 	uint32_t flag_animate_stereo = 0;
+
+	enum class QcmState { Idle, RevPressed, RevPingPressed } qcm_state;
 };
 
 constexpr auto ParamsSize = sizeof(Params);

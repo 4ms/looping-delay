@@ -28,7 +28,7 @@ public:
 
 	// Buttons/Switches:
 	Board::PingButton ping_button;
-	Board::RevButton reverse_button;
+	Board::RevButton rev_button;
 	Board::HoldButton inf_button;
 	Board::TimeSwitch time_switch;
 
@@ -91,7 +91,7 @@ public:
 
 	void update() {
 		ping_button.update();
-		reverse_button.update();
+		rev_button.update();
 		inf_button.update();
 
 		// ping_jack.update();
