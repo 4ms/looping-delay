@@ -104,6 +104,7 @@ struct Params {
 	}
 	void set_divmult(float new_divmult) {
 		divmult_time = new_divmult;
+		timer.set_divmult_time(divmult_time);
 	}
 
 private:
@@ -251,8 +252,6 @@ private:
 	}
 
 	void update_leds() {
-		timer.set_divmult_time(divmult_time);
-
 		if (controls.ping_button.is_pressed()) {
 			controls.ping_led.high();
 		}
