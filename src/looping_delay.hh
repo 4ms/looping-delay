@@ -27,8 +27,8 @@ class LoopingDelay {
 	CircularBufferAccess<DelayBuffer::span> fade_buf;
 
 	float read_fade_phase = 0;
-	uint32_t queued_divmult_time;
-	uint32_t queued_read_fade_ending_addr;
+	uint32_t queued_divmult_time = 0;
+	uint32_t queued_read_fade_ending_addr = 0;
 
 	float write_fade_phase = 0.f;
 	enum class FadeState { NotFading, FadingDown, FadingUp, Crossfading };
