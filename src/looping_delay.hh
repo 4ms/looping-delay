@@ -103,9 +103,6 @@ public:
 			if (!check_read_head_in_loop()) {
 				if (!is_crossfading()) {
 					start_crossfade(loop_start);
-					// Debug::Pin0::high();
-					// params.reset_loop();
-					// Debug::Pin0::low();
 				}
 			}
 
@@ -256,8 +253,6 @@ public:
 
 	//  When we near the end of the loop, start a crossfade to the beginning
 	void start_looping_crossfade() {
-		constexpr uint16_t sz = AudioStreamConf::BlockSize * 2;
-
 		if (params.divmult_time < params.settings.crossfade_samples) {
 			buf.rd_pos(loop_start);
 			read_fade_phase = 0.f;
@@ -275,7 +270,8 @@ public:
 			if (params.modes.reverse)
 				loop_size = -loop_size;
 
-			uint32_t f_addr = Util::offset_samples(buf.rd_pos(), (loop_size + sz), !params.modes.reverse);
+			uint32_t f_addr =
+				Util::offset_samples(buf.rd_pos(), loop_size + AudioStreamConf::BlockSize, !params.modes.reverse);
 
 			// From DLD code : "Issue: clearing a queued divmult time"
 			start_crossfade(f_addr);
