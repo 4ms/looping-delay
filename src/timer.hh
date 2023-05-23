@@ -115,13 +115,6 @@ public:
 		return _ping_time;
 	}
 
-	// uint32_t get_pingled_tmr() {
-	// 	return _pingled_tmr;
-	// }
-	// void reset_pingled_tmr() {
-	// 	_pingled_tmr = 0;
-	// }
-
 	void reset_loopled_tmr() {
 		loop_led.high();
 		loop_out.high();
