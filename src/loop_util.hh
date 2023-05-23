@@ -33,7 +33,6 @@ struct Util {
 	// Adds or subtracts offset to/from base_addr, wrapping at [0, Brain::MemorySizeBytes)
 	constexpr static uint32_t offset_samples(uint32_t base_addr, int32_t offset, bool subtract = false) {
 		constexpr uint32_t Size = Brain::MemorySizeBytes / MemorySampleSize;
-		constexpr uint32_t Mask = ~1UL;
 
 		if (subtract)
 			offset = -offset;
@@ -50,7 +49,7 @@ struct Util {
 		while (base_addr >= Size)
 			base_addr -= Size;
 
-		return base_addr & Mask;
+		return base_addr;
 	}
 };
 

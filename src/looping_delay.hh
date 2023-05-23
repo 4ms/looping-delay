@@ -254,15 +254,11 @@ public:
 		}
 	}
 
-	// When we near the end of the loop, start a crossfade to the beginning
+	//  When we near the end of the loop, start a crossfade to the beginning
 	void start_looping_crossfade() {
 		constexpr uint16_t sz = AudioStreamConf::BlockSize * 2;
-		// Debug::Pin1::high();
-		// params.reset_loop();
-		// Debug::Pin1::low();
 
 		if (params.divmult_time < params.settings.crossfade_samples) {
-			// read_head = loop_start;
 			buf.rd_pos(loop_start);
 			read_fade_phase = 0.f;
 
@@ -273,6 +269,9 @@ public:
 			// We have to add in sz because read_addr has already
 			// been incremented by sz since a block was just read
 			int32_t loop_size = loop_end - loop_start;
+			// ensure stereo frame alignment
+			if (params.settings.stereo_mode)
+				loop_size &= ~1U;
 			if (params.modes.reverse)
 				loop_size = -loop_size;
 
@@ -306,7 +305,6 @@ public:
 	void set_divmult_time() {
 		uint32_t use_ping_time = params.modes.ping_locked ? params.locked_ping_time : params.ping_time;
 		uint32_t t_divmult_time = use_ping_time * params.time;
-		// t_divmult_time = t_divmult_time & 0xFFFFFFFC; // force it to be a multiple of 4
 		std::clamp(t_divmult_time, (uint32_t)0, MemorySamplesNum);
 
 		// Crossfade to new read head position (or queue it if we're already crossfading)
@@ -468,6 +466,9 @@ public:
 
 		uint32_t loop_length = (hi > lo) ? (hi - lo) : hi + (Brain::MemorySizeBytes / MemorySampleSize - lo);
 		int32_t loop_shift = (int32_t)(amt * (float)loop_length);
+		// maintain stereo frame alignment
+		if (params.settings.stereo_mode)
+			loop_shift &= ~1U;
 		loop_start = Util::offset_samples(loop_start, loop_shift);
 		loop_end = Util::offset_samples(loop_end, loop_shift);
 	}
