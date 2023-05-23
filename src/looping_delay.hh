@@ -103,7 +103,9 @@ public:
 			if (!check_read_head_in_loop()) {
 				if (!is_crossfading()) {
 					start_crossfade(loop_start);
-					params.reset_loop();
+					// Debug::Pin0::high();
+					// params.reset_loop();
+					// Debug::Pin0::low();
 				}
 			}
 
@@ -255,7 +257,9 @@ public:
 	// When we near the end of the loop, start a crossfade to the beginning
 	void start_looping_crossfade() {
 		constexpr uint16_t sz = AudioStreamConf::BlockSize * 2;
-		params.reset_loop();
+		// Debug::Pin1::high();
+		// params.reset_loop();
+		// Debug::Pin1::low();
 
 		if (params.divmult_time < params.settings.crossfade_samples) {
 			// read_head = loop_start;
@@ -333,7 +337,6 @@ public:
 					queued_read_fade_ending_addr = loop_start;
 				} else {
 					start_crossfade(loop_start);
-					params.reset_loop();
 				}
 			}
 		}
