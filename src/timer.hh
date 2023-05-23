@@ -76,7 +76,6 @@ public:
 		if (_pingled_tmr >= _ping_time) {
 			_pingled_tmr = 0;
 			_ping_led_high = true;
-			_ping_changed = true;
 			clk_out.high();
 			bus_clk_out.high();
 		} else if (_pingled_tmr >= (_ping_time / 2)) {

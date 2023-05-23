@@ -330,7 +330,7 @@ public:
 				loop_start = Util::offset_samples(loop_end, t_divmult_time, !params.modes.reverse);
 
 			// If the read addr is not in between the loop start and end, then fade to the loop start
-			if (check_read_head_in_loop()) {
+			if (!check_read_head_in_loop()) {
 				if (is_crossfading()) {
 					queued_read_fade_ending_addr = loop_start;
 				} else {
