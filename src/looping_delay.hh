@@ -306,7 +306,7 @@ public:
 	void set_divmult_time() {
 		uint32_t use_ping_time = params.modes.ping_locked ? params.locked_ping_time : params.ping_time;
 		uint32_t t_divmult_time = use_ping_time * params.time;
-		t_divmult_time = t_divmult_time & 0xFFFFFFFC; // force it to be a multiple of 4
+		// t_divmult_time = t_divmult_time & 0xFFFFFFFC; // force it to be a multiple of 4
 		std::clamp(t_divmult_time, (uint32_t)0, MemorySamplesNum);
 
 		// Crossfade to new read head position (or queue it if we're already crossfading)
