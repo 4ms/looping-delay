@@ -44,6 +44,8 @@ public:
 		if (_ping_tmr_needs_reset) {
 			_ping_tmr_needs_reset = false;
 			_ping_tmr = 0;
+			clk_out.high();
+			bus_clk_out.high();
 		} else
 			_ping_tmr++;
 
@@ -69,27 +71,23 @@ public:
 				// 	flags.set_time_changed();
 			}
 			_ping_tmr = 0;
-			// Debug::Pin1::high();
-			// Debug::Pin1::low();
 		}
 
-		auto ping_ledbut_tmr = get_pingled_tmr();
-		if (ping_ledbut_tmr >= _ping_time) {
+		if (_pingled_tmr >= _ping_time) {
+			_pingled_tmr = 0;
 			_ping_led_high = true;
-			reset_pingled_tmr();
 			_ping_changed = true;
 			clk_out.high();
 			bus_clk_out.high();
-		} else if (ping_ledbut_tmr >= (_ping_time / 2)) {
+		} else if (_pingled_tmr >= (_ping_time / 2)) {
 			_ping_led_high = false;
 			clk_out.low();
 			bus_clk_out.low();
 		}
 
-		auto loopled_tmr = get_loopled_tmr();
-		if (loopled_tmr >= _loopled_time) { // && modes.inf == InfState::Off) {
+		if (_loopled_tmr >= _loopled_time) { // && modes.inf == InfState::Off) {
 			reset_loopled_tmr();
-		} else if (loopled_tmr >= (_loopled_time / 2)) {
+		} else if (_loopled_tmr >= (_loopled_time / 2)) {
 			loop_led.low();
 			loop_out.low();
 		}
@@ -111,25 +109,19 @@ public:
 		return _ping_time;
 	}
 
-	uint32_t get_ping_tmr() {
-		return _ping_tmr;
-	}
-	void reset_ping_tmr() {
+	uint32_t reset_ping_tmr() {
+		_ping_time = _ping_tmr;
 		_ping_tmr_needs_reset = true;
-		clk_out.high();
-		bus_clk_out.high();
+		return _ping_time;
 	}
 
-	uint32_t get_pingled_tmr() {
-		return _pingled_tmr;
-	}
-	void reset_pingled_tmr() {
-		_pingled_tmr = 0;
-	}
+	// uint32_t get_pingled_tmr() {
+	// 	return _pingled_tmr;
+	// }
+	// void reset_pingled_tmr() {
+	// 	_pingled_tmr = 0;
+	// }
 
-	uint32_t get_loopled_tmr() {
-		return _loopled_tmr;
-	}
 	void reset_loopled_tmr() {
 		loop_led.high();
 		loop_out.high();

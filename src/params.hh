@@ -90,8 +90,6 @@ struct Params {
 	}
 
 	void reset_loop() {
-		// controls.loop_led.high();
-		// controls.loop_out.high();
 		timer.reset_loopled_tmr();
 	}
 
@@ -174,9 +172,7 @@ private:
 		// Press ping (and no other buttons)
 		if (!controls.rev_button.is_pressed() && !controls.inf_button.is_pressed()) {
 			if (controls.ping_button.is_just_pressed()) {
-				ping_time = timer.get_ping_tmr();
-				timer.reset_ping_tmr();
-				timer.reset_pingled_tmr();
+				ping_time = timer.reset_ping_tmr();
 				handle_quantized_mode_changes();
 
 				if (!modes.ping_locked) {
