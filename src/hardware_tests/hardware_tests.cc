@@ -39,6 +39,13 @@ void print_error(std::string_view err) {
 }
 
 void run(Controls &controls) {
+	Board::PingJack ping_jack;
+	Board::LoopClkOut loop_out;
+	Board::LoopClkPassiveIn loop_passive;
+	Board::ClkOut clk_out;
+	Board::BusClkOut bus_clk_out;
+	Board::LoopLED loop_led;
+
 	printf_("\n\n%sLooping Delay Kit Hardware Test%s\n", Term::BoldGreen, Term::Normal);
 
 	//////////////////////////////
@@ -76,10 +83,6 @@ void run(Controls &controls) {
 		static uint32_t loopclk = 0;
 		static uint32_t clkout = 0;
 		for (auto [i, o] : zip(in, out)) {
-			// o.chan[0] = 0;
-			// o.chan[1] = 0;
-			// o.chan[0] = i.chan[0];
-			// o.chan[1] = i.chan[1];
 			o.chan[0] = oscR.update() * 0x7FFFFF;
 			o.chan[1] = oscL.update() * 0x7FFFFF;
 		}
@@ -87,18 +90,13 @@ void run(Controls &controls) {
 		loopclk++;
 		Board::ClkOut::set((clkout & 0b11) == 0b00);
 		clkout++;
-
-		// Board::LoopClkOut::set((loopclk & 0b11'1111'1111) < 0b01'0000'0000); // 0b1 = 750Hz
-		// loopclk++;
-		// Board::ClkOut::set((clkout & 0b11'1111'1111) < 0b10'0000'0000); // 0b11 = 375Hz
-		// clkout++;
 	});
 	audio.start();
 	printf_("Verify:\n");
 	printf_("  1) Audio Out: 440Hz sine, -10V to +10V [+/- 0.3V]\n");
 	printf_("  2) Send: 2.7kHz sine, -10V to +10V [+/- 0.3V]\n");
-	printf_("  3) Loop Clk Out: 750Hz square wave, 0V to +8V [+/- 0.5V]\n");
-	printf_("  4) Clk Out: 375Hz pulse wave (High 25%, low 75%), 0V to +8V [+/- 0.5V]\n");
+	printf_("  3) Clk Out: 375Hz pulse wave (High 25%, low 75%), 0V to +8V [+/- 0.5V]\n");
+	printf_("  4) Loop Clk Out: 750Hz square wave, 0V to +8V [+/- 0.5V]\n");
 
 	print_press_button();
 	Board::HoldLED{}.set(true);
