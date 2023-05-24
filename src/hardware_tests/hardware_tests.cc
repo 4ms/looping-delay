@@ -31,8 +31,12 @@ void print_test_name(std::string_view nm) {
 	printf_("%s%.64s%s\n", Term::BoldYellow, nm.data(), Term::Normal);
 }
 
-void print_press_button() { printf_("%sPress button to continue%s\n", Term::BlinkGreen, Term::Normal); }
-void print_error(std::string_view err) { printf_("%s%.255s%s\n", Term::BoldRed, err.data(), Term::Normal); }
+void print_press_button() {
+	printf_("%sPress button to continue%s\n", Term::BlinkGreen, Term::Normal);
+}
+void print_error(std::string_view err) {
+	printf_("%s%.255s%s\n", Term::BoldRed, err.data(), Term::Normal);
+}
 
 void run(Controls &controls) {
 	printf_("\n\n%sLooping Delay Kit Hardware Test%s\n", Term::BoldGreen, Term::Normal);
@@ -48,21 +52,21 @@ void run(Controls &controls) {
 	print_test_name("LED Test");
 	printf_("Press the Play button to verify each LED\n");
 	TestLEDs ledtester;
-	// ledtester.run_test();
+	ledtester.run_test();
 
 	//////////////////////////////
 	print_test_name("Button Test");
 	printf_("Press each button once when it lights up\n");
 	all_lights_off();
 	TestButtons buttontester;
-	// buttontester.run_test();
+	buttontester.run_test();
 
 	//////////////////////////////
 	print_test_name("Switch Test");
 	printf_("Flip the switch to all 3 positions\n");
 	all_lights_off();
 	TestSwitch switchtester;
-	// switchtester.run_test();
+	switchtester.run_test();
 
 	//////////////////////////////
 	print_test_name("Audio and Gate Output Test");
@@ -72,17 +76,22 @@ void run(Controls &controls) {
 		static uint32_t loopclk = 0;
 		static uint32_t clkout = 0;
 		for (auto [i, o] : zip(in, out)) {
-			o.chan[0] = 0;
-			o.chan[1] = 0;
+			// o.chan[0] = 0;
+			// o.chan[1] = 0;
 			// o.chan[0] = i.chan[0];
 			// o.chan[1] = i.chan[1];
-			// o.chan[0] = oscR.update() * 0x7FFFFF;
-			// o.chan[1] = oscL.update() * 0x7FFFFF;
+			o.chan[0] = oscR.update() * 0x7FFFFF;
+			o.chan[1] = oscL.update() * 0x7FFFFF;
 		}
-		Board::LoopClkOut::set((loopclk & 0b11'1111'1111) < 0b01'0000'0000); // 0b1 = 750Hz
+		Board::LoopClkOut::set(loopclk & 0b1);
 		loopclk++;
-		Board::ClkOut::set((clkout & 0b11'1111'1111) < 0b10'0000'0000); // 0b11 = 375Hz
+		Board::ClkOut::set((clkout & 0b11) == 0b00);
 		clkout++;
+
+		// Board::LoopClkOut::set((loopclk & 0b11'1111'1111) < 0b01'0000'0000); // 0b1 = 750Hz
+		// loopclk++;
+		// Board::ClkOut::set((clkout & 0b11'1111'1111) < 0b10'0000'0000); // 0b11 = 375Hz
+		// clkout++;
 	});
 	audio.start();
 	printf_("Verify:\n");
