@@ -1,6 +1,7 @@
 #include "calibration_storage.hh"
 #include "conf/flash_layout.hh"
 #include "flash.hh"
+#include "ping_methods.hh"
 #include <span>
 
 namespace LDKit

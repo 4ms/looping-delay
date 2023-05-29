@@ -4,6 +4,7 @@
 #include "elements.hh"
 #include "flash_block.hh"
 #include "modes.hh"
+#include "settings.hh"
 #include "util/wear_level.hh"
 #include <cstdint>
 
