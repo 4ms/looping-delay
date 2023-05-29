@@ -175,8 +175,8 @@ public:
 			int32_t mix = ((float)mainin * params.mix_dry) + ((float)rd * params.mix_wet);
 			int32_t mix_r = ((float)auxin * params.mix_dry) + ((float)rd_r * params.mix_wet);
 
-			out.chan[0] = mono ? clip(rd) : clip(mix_r);
-			out.chan[1] = clip(mix);
+			out.chan[0] = mono ? clip(Brain::AudioGain * rd_l) : clip(Brain::AudioGain * mix_r);
+			out.chan[1] = clip(Brain::AudioGain * mix_l);
 
 			// High-pass filter before writing to memory
 			if (params.settings.runaway_dc_block) {
