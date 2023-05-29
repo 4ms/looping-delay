@@ -143,8 +143,8 @@ public:
 			}
 
 			// Crossfade the two read head positions
-			int32_t rd = epp_crossfade(mem_rd, mem_rd_fade, read_fade_phase);
-			int32_t rd_r = epp_crossfade(mem_rd_r, mem_rd_fade_r, read_fade_phase);
+			int32_t rd_l = epp_crossfade<int32_t>(mem_rd_l, mem_rd_fade_l, read_fade_phase);
+			int32_t rd_r = epp_crossfade<int32_t>(mem_rd_r, mem_rd_fade_r, read_fade_phase);
 
 			// 16 bit => 24 bit
 			rd *= 256;
