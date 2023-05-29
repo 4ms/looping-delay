@@ -78,7 +78,7 @@ struct PingMethodAlgorithm {
 private:
 	template<uint32_t MaxDiff>
 	static std::optional<uint32_t> ignore_flat_deviation(uint32_t oldtime, uint32_t newtime) {
-		int32_t diff = std::abs((int32_t)oldtime - (int32_t)newtime);
+		uint32_t diff = std::abs((int32_t)oldtime - (int32_t)newtime);
 		if (diff > MaxDiff)
 			return newtime;
 		else
@@ -95,7 +95,7 @@ private:
 
 	template<uint32_t MaxDiff>
 	static uint32_t average_2_ignore_deviation(uint32_t oldtime, uint32_t newtime) {
-		auto diff = std::abs((int32_t)oldtime - (int32_t)newtime);
+		uint32_t diff = std::abs((int32_t)oldtime - (int32_t)newtime);
 		if (diff > MaxDiff)
 			return (oldtime + newtime) / 2;
 		else
