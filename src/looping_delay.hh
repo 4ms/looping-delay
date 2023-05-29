@@ -2,6 +2,7 @@
 #include "audio_memory.hh"
 #include "audio_stream_conf.hh"
 #include "auto_mute.hh"
+#include "brain_conf.hh"
 #include "compress.hh"
 #include "controls.hh"
 #include "dcblock.hh"
@@ -122,10 +123,10 @@ public:
 			bool mono = !params.settings.stereo_mode;
 
 			// Inputs
-			const int16_t mem_rd = mono ? rd_buff[i] : rd_buff[i * 2];
+			const int16_t mem_rd_l = mono ? rd_buff[i] : rd_buff[i * 2];
 			const int16_t mem_rd_r = mono ? 0 : rd_buff[i * 2 + 1];
 
-			const int16_t mem_rd_fade = mono ? rd_fade_buff[i] : rd_fade_buff[i * 2];
+			const int16_t mem_rd_fade_l = mono ? rd_fade_buff[i] : rd_fade_buff[i * 2];
 			const int16_t mem_rd_fade_r = mono ? 0 : rd_fade_buff[i * 2 + 1];
 
 			auto auxin = flags.mute_on_boot_ctr ? 0 : AudioStreamConf::AudioInFrame::sign_extend(inblock[i].chan[0]);
@@ -133,7 +134,7 @@ public:
 
 			// Outputs
 			int16_t nul;
-			auto &mem_wr = mono ? wr_buff[i] : wr_buff[i * 2];
+			auto &mem_wr_l = mono ? wr_buff[i] : wr_buff[i * 2];
 			auto &mem_wr_r = mono ? nul : wr_buff[i * 2 + 1];
 			auto &out = outblock[i];
 
@@ -147,32 +148,32 @@ public:
 			int32_t rd_r = epp_crossfade<int32_t>(mem_rd_r, mem_rd_fade_r, read_fade_phase);
 
 			// 16 bit => 24 bit
-			rd *= 256;
+			rd_l *= 256;
 			rd_r *= 256;
 
 			// Attenuate the delayed signal with REGEN
-			int32_t regen = (float)rd * params.feedback;
+			int32_t regen_l = (float)rd_l * params.feedback;
 			int32_t regen_r = (float)rd_r * params.feedback;
 
 			// Attenuate the clean signal by the LEVEL parameter
-			int32_t mainin_atten = (float)mainin * params.delay_feed;
+			int32_t mainin_atten_l = (float)mainin * params.delay_feed;
 			int32_t mainin_atten_r = (float)auxin * params.delay_feed;
 
-			int32_t wr;
+			int32_t wr_l;
 			int32_t wr_r;
 			if (params.settings.stereo_mode) {
-				wr = (int32_t)(regen + mainin_atten);
+				wr_l = (int32_t)(regen_l + mainin_atten_l);
 				wr_r = (int32_t)(regen_r + mainin_atten_r);
 				// } else if (params.settings.send_return_before_loop) {
 				// 	wr = auxin;
 				// 	auxout = (int32_t)(regen + mainin_atten);
 			} else {
-				wr = (int32_t)(regen + mainin_atten + (float)auxin);
+				wr_l = (int32_t)(regen_l + mainin_atten_l + (float)auxin);
 				wr_r = 0;
 			}
 
 			// Wet/dry mix, as determined by the MIX parameter
-			int32_t mix = ((float)mainin * params.mix_dry) + ((float)rd * params.mix_wet);
+			int32_t mix_l = ((float)mainin * params.mix_dry) + ((float)rd_l * params.mix_wet);
 			int32_t mix_r = ((float)auxin * params.mix_dry) + ((float)rd_r * params.mix_wet);
 
 			out.chan[0] = mono ? clip(Brain::AudioGain * rd_l) : clip(Brain::AudioGain * mix_r);
@@ -180,10 +181,10 @@ public:
 
 			// High-pass filter before writing to memory
 			if (params.settings.runaway_dc_block) {
-				wr = dcblock.update(wr);
+				wr_l = dcblock.update(wr_l);
 				wr_r = dcblock.update(wr_r);
 			}
-			mem_wr = clip(wr) / 256;
+			mem_wr_l = clip(wr_l) / 256;
 			if (!mono)
 				mem_wr_r = clip(wr_r) / 256;
 		}
