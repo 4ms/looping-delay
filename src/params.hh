@@ -329,9 +329,17 @@ private:
 
 	void update_scroll_loop_amount() {
 		if (pot_state[FeedbackPot].moved_while_inf_down) {
-			float scroll_amt = (float)pot_state[FeedbackPot].delta / 4096.f;
+			window_mode = true;
+		} else if (pot_state[FeedbackPot].moved) {
+			window_mode = false;
+		}
+		if (window_mode) {
+			float scroll_amt = (pot_state[FeedbackPot].delta + cv_state[FeedbackCV].delta) / 4096.f;
+			scroll_amt = std::clamp(scroll_amt, -1.f, 1.f);
 			flags.add_scroll_amt(scroll_amt);
 			pot_state[FeedbackPot].moved_while_inf_down = false;
+			pot_state[FeedbackPot].delta = 0;
+			cv_state[FeedbackCV].delta = 0;
 		}
 	}
 
@@ -441,6 +449,8 @@ private:
 
 	uint32_t flag_animate_mono = 0;
 	uint32_t flag_animate_stereo = 0;
+
+	bool window_mode = false;
 
 	enum class QcmState { Idle, RevPressed, RevPingPressed } qcm_state;
 };
