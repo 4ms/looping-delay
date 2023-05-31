@@ -77,6 +77,8 @@ public:
 			if (flags.take_rev_changed())
 				toggle_rev();
 		}
+		if (flags.take_clear_memory())
+			Memory::clear();
 
 		// Buffers for R/W this block (backing data)
 		std::array<int16_t, AudioStreamConf::BlockSize * 2> full_rd_buff;

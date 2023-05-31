@@ -13,6 +13,7 @@ private:
 	bool _rev_quantized_change = false;
 	bool _disable_mode_changes = false;
 	float _scroll_loop_amt = 0.f;
+	bool _clear_memory = false;
 
 public:
 	uint32_t mute_on_boot_ctr = 375; // 0.250s * 48000 / 32 block-size
@@ -55,6 +56,11 @@ public:
 		_scroll_loop_amt = 0.f;
 		return amt;
 	}
+	bool take_clear_memory() {
+		bool t = _clear_memory;
+		_clear_memory = false;
+		return t;
+	}
 
 	void set_time_changed() {
 		_time_changed = true;
@@ -82,6 +88,9 @@ public:
 	}
 	void add_scroll_amt(float amt) {
 		_scroll_loop_amt += amt;
+	}
+	void set_clear_memory() {
+		_clear_memory = true;
 	}
 };
 } // namespace LDKit
