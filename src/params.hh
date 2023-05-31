@@ -7,6 +7,7 @@
 #include "flags.hh"
 #include "log_taper_lut.hh"
 #include "modes.hh"
+#include "system_mode.hh"
 #include "timer.hh"
 #include "util/countzip.hh"
 #include "util/math.hh"
@@ -36,12 +37,14 @@ struct Params {
 
 	PersistentStorage persistent_storage;
 	Settings &settings = persistent_storage.data.settings;
-	Settings &settings = calibration.settings;
 	Timer timer{settings.ping_method};
+
+	SystemMode sys_mode;
 
 	Params(Controls &controls, Flags &flags)
 		: controls{controls}
-		, flags{flags} {
+		, flags{flags}
+		, sys_mode{controls, flags, persistent_storage} {
 	}
 
 	void start() {
@@ -76,14 +79,19 @@ struct Params {
 		}
 
 		if (op_mode == OperationMode::SysSettings) {
-			// TODO: System Settings mode
-			//  update_system_settings();
+			sys_mode.update();
+
+			if (sys_mode.is_done()) {
+				ignore_inf_release = false;
+				ignore_rev_release = false;
+				op_mode = OperationMode::Normal;
+			}
 		}
 
-		// check_entering_system_mode();
-
-		update_leds();
-		update_button_modes();
+		if (op_mode == OperationMode::Normal) {
+			update_leds();
+			update_button_modes();
+		}
 
 		if (flags.mute_on_boot_ctr)
 			flags.mute_on_boot_ctr--;
@@ -218,6 +226,16 @@ private:
 					flag_animate_stereo = settings.stereo_mode ? 1500 : 0;
 					flag_animate_mono = settings.stereo_mode ? 0 : 1500;
 					flags.set_time_changed();
+		// System Mode
+		if (!ignore_inf_release && controls.inf_button.how_long_held_pressed() > 3000) {
+			if (!ignore_rev_release && controls.rev_button.how_long_held_pressed() > 3000) {
+				if (controls.ping_button.how_long_held_pressed() > 3000) {
+					ignore_inf_release = true;
+					ignore_rev_release = true;
+					if (controls.read_time_switch() == Controls::SwitchPos::Center) {
+						sys_mode.reset();
+						op_mode = OperationMode::SysSettings;
+					}
 				}
 			}
 		}
