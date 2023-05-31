@@ -199,6 +199,7 @@ private:
 			}
 
 			ignore_inf_release = false;
+			already_toggled_stereo_mode = false;
 			for (auto &pot : pot_state)
 				pot.moved_while_inf_down = false;
 		}
@@ -212,6 +213,7 @@ private:
 			}
 
 			ignore_rev_release = false;
+			already_toggled_stereo_mode = false;
 			for (auto &pot : pot_state)
 				pot.moved_while_rev_down = false;
 		}
@@ -221,11 +223,28 @@ private:
 			if (!ignore_rev_release && controls.rev_button.how_long_held_pressed() > 1500) {
 				if (!controls.ping_button.is_pressed()) {
 					settings.stereo_mode = !settings.stereo_mode;
-					ignore_inf_release = true;
-					ignore_rev_release = true;
 					flag_animate_stereo = settings.stereo_mode ? 1500 : 0;
 					flag_animate_mono = settings.stereo_mode ? 0 : 1500;
 					flags.set_time_changed();
+					ignore_inf_release = true;
+					ignore_rev_release = true;
+					already_toggled_stereo_mode = true;
+				}
+			}
+		}
+
+		if (already_toggled_stereo_mode) {
+			if (controls.inf_button.how_long_held_pressed() > 5000) {
+				if (controls.rev_button.how_long_held_pressed() > 5000) {
+					if (!controls.ping_button.is_pressed()) {
+						flags.set_clear_memory();
+						flag_animate_clear = 1000;
+						already_toggled_stereo_mode = false;
+					}
+				}
+			}
+		}
+
 		// System Mode
 		if (!ignore_inf_release && controls.inf_button.how_long_held_pressed() > 3000) {
 			if (!ignore_rev_release && controls.rev_button.how_long_held_pressed() > 3000) {
@@ -301,8 +320,13 @@ private:
 				controls.inf_led.low();
 			}
 		}
+		if (flag_animate_clear) {
+			flag_animate_clear--;
+			controls.reverse_led.high();
+			controls.inf_led.high();
+		}
 
-		if (!flag_animate_mono && !flag_animate_stereo) {
+		if (!flag_animate_clear && !flag_animate_mono && !flag_animate_stereo) {
 			controls.reverse_led.set(modes.reverse);
 			if (modes.inf == InfState::TransitioningOn || modes.inf == InfState::On)
 				controls.inf_led.high();
@@ -464,9 +488,11 @@ private:
 
 	bool ignore_inf_release = false;
 	bool ignore_rev_release = false;
+	bool already_toggled_stereo_mode = false;
 
 	uint32_t flag_animate_mono = 0;
 	uint32_t flag_animate_stereo = 0;
+	uint32_t flag_animate_clear = 0;
 
 	bool window_mode = false;
 
