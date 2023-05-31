@@ -11,7 +11,7 @@
 namespace LDKit
 {
 
-struct CalibrationData {
+struct PersistentData {
 	uint32_t major_firmware_version;
 	uint32_t minor_firmware_version;
 	int32_t cv_calibration_offset[NumCVs];
@@ -42,12 +42,12 @@ struct CalibrationData {
 	}
 };
 
-struct CalibrationStorage {
-	WearLevel<FlashBlock<SettingsFlashAddr, CalibrationData, 8>> flash;
-	CalibrationData cal_data;
+struct PersistentStorage {
+	WearLevel<FlashBlock<SettingsFlashAddr, PersistentData, 8>> flash;
+	PersistentData data;
 	bool storage_is_ok = true;
 
-	CalibrationStorage();
+	PersistentStorage();
 	bool save_flash_params();
 	void factory_reset();
 

@@ -34,8 +34,8 @@ struct Params {
 	ChannelMode modes;
 	OperationMode op_mode = OperationMode::Normal;
 
-	CalibrationStorage cal_storage;
-	CalibrationData &calibration = cal_storage.cal_data;
+	PersistentStorage persistent_storage;
+	Settings &settings = persistent_storage.data.settings;
 	Settings &settings = calibration.settings;
 	Timer timer{settings.ping_method};
 
