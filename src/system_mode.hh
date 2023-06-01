@@ -19,7 +19,7 @@ private:
 	bool ignore_rev_release = false;
 	bool ignore_ping_release = false;
 	enum class Status { Normal, ExitArmed, Saving, Exit } status;
-	enum class Page { Page1, Page2, Page3 } cur_page;
+	enum class Page { EnterExit, AudioModes, PingDejitter } cur_page;
 	uint32_t blink_tmr = 0;
 	uint32_t pulse_ctr;
 	uint32_t flash_ctr;
@@ -37,7 +37,7 @@ public:
 		ignore_inf_release = true;
 		ignore_rev_release = true;
 		status = Status::Normal;
-		cur_page = Page::Page2;
+		cur_page = Page::AudioModes;
 	}
 
 	bool is_done() {
@@ -102,19 +102,23 @@ private:
 
 	void update_page() {
 		if (controls.read_time_switch() == Controls::SwitchPos::Up)
-			cur_page = Page::Page1;
+			cur_page = Page::EnterExit;
 		if (controls.read_time_switch() == Controls::SwitchPos::Center)
-			cur_page = Page::Page2;
+			cur_page = Page::AudioModes;
 		if (controls.read_time_switch() == Controls::SwitchPos::Down) {
-			if (cur_page != Page::Page3)
+			if (cur_page != Page::PingDejitter)
 				reset_ping_method_flash();
-			cur_page = Page::Page3;
+			cur_page = Page::PingDejitter;
 		}
 	}
 
 	void change_settings() {
 		switch (cur_page) {
-			case Page::Page1: {
+			case Page::EnterExit: {
+				break;
+			}
+
+			case Page::AudioModes: {
 				if (controls.inf_button.is_just_released()) {
 					if (!ignore_inf_release)
 						settings.auto_mute = !settings.auto_mute;
@@ -133,11 +137,7 @@ private:
 				break;
 			}
 
-			case Page::Page2: {
-				break;
-			}
-
-			case Page::Page3: {
+			case Page::PingDejitter: {
 				if (controls.ping_button.is_pressed()) {
 					constexpr uint32_t NumMethod = 5;
 					auto old_ping_method = settings.ping_method;
@@ -180,22 +180,24 @@ private:
 		}
 		if (status == Status::Normal) {
 			switch (cur_page) {
-				case Page::Page1: {
+				case Page::AudioModes: {
 					controls.inf_led.set(settings.auto_mute);
 					controls.ping_led.set(settings.soft_clip);
 					controls.reverse_led.set(settings.runaway_dc_block);
 					break;
 				}
 
-				case Page::Page2: {
-					controls.inf_led.set(settings.inf_jack == GateType::Gate);
+				case Page::EnterExit: {
+					// controls.inf_led.set(settings.inf_jack == GateType::Gate);
 					// controls.ping_led.set(settings.main_clock == GateType::Gate);
+					// controls.reverse_led.set(settings.rev_jack == GateType::Gate);
+					controls.inf_led.set(false);
 					controls.ping_led.set(false);
-					controls.reverse_led.set(settings.rev_jack == GateType::Gate);
+					controls.reverse_led.set(false);
 					break;
 				}
 
-				case Page::Page3: {
+				case Page::PingDejitter: {
 					flash_ping_method();
 					controls.reverse_led.set(false);
 					controls.inf_led.set(false);
@@ -211,15 +213,8 @@ private:
 		ping_led_state = true;
 		controls.ping_led.set(ping_led_state);
 	}
-	void flash_ping_method() {
-		// if (old_ping_method != settings.ping_method) {
-		// 	old_ping_method = settings.ping_method;
-		// 	// force reset
-		// 	loop_led_state[1] = 1;
-		// 	pulse_ctr[1] = 0;
-		// 	flashes_ctr[1] = 0;
-		// }
 
+	void flash_ping_method() {
 		if (pulse_ctr)
 			pulse_ctr--;
 		else {

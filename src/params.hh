@@ -199,7 +199,6 @@ private:
 			}
 
 			ignore_inf_release = false;
-			already_toggled_stereo_mode = false;
 			for (auto &pot : pot_state)
 				pot.moved_while_inf_down = false;
 		}
@@ -213,7 +212,6 @@ private:
 			}
 
 			ignore_rev_release = false;
-			already_toggled_stereo_mode = false;
 			for (auto &pot : pot_state)
 				pot.moved_while_rev_down = false;
 		}
@@ -228,19 +226,6 @@ private:
 					flags.set_time_changed();
 					ignore_inf_release = true;
 					ignore_rev_release = true;
-					already_toggled_stereo_mode = true;
-				}
-			}
-		}
-
-		if (already_toggled_stereo_mode) {
-			if (controls.inf_button.how_long_held_pressed() > 5000) {
-				if (controls.rev_button.how_long_held_pressed() > 5000) {
-					if (!controls.ping_button.is_pressed()) {
-						flags.set_clear_memory();
-						flag_animate_clear = 1000;
-						already_toggled_stereo_mode = false;
-					}
 				}
 			}
 		}
@@ -251,9 +236,13 @@ private:
 				if (controls.ping_button.how_long_held_pressed() > 3000) {
 					ignore_inf_release = true;
 					ignore_rev_release = true;
-					if (controls.read_time_switch() == Controls::SwitchPos::Center) {
+
+					if (controls.read_time_switch() == Controls::SwitchPos::Up) {
 						sys_mode.reset();
 						op_mode = OperationMode::SysSettings;
+					} else {
+						flags.set_clear_memory();
+						flag_animate_clear = 1000;
 					}
 				}
 			}
@@ -285,7 +274,9 @@ private:
 		// Reset to idle if all buttons released
 		if (!controls.rev_button.is_pressed() && !controls.inf_button.is_pressed() &&
 			!controls.ping_button.is_pressed())
+		{
 			qcm_state = QcmState::Idle;
+		}
 	}
 
 	void update_leds() {
@@ -488,7 +479,6 @@ private:
 
 	bool ignore_inf_release = false;
 	bool ignore_rev_release = false;
-	bool already_toggled_stereo_mode = false;
 
 	uint32_t flag_animate_mono = 0;
 	uint32_t flag_animate_stereo = 0;
