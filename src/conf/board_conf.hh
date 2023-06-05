@@ -37,13 +37,13 @@ using LoopLED = mdrivlib::FPin<BrainPin::D12.gpio, BrainPin::D12.pin, Output, No
 using ClkOut = mdrivlib::FPin<BrainPin::D0.gpio, BrainPin::D0.pin, Output, Normal>;
 using BusClkOut = mdrivlib::FPin<BrainPin::D18.gpio, BrainPin::D18.pin, Output, Normal>;
 
-// Kit:
-// using LoopClkOut = mdrivlib::FPin<BrainPin::D15.gpio, BrainPin::D15.pin, Output, Normal>;
-// using LoopClkPassiveIn = mdrivlib::FPin<BrainPin::D1.gpio, BrainPin::D1.pin, Input, Normal>;
+// if LoopClkBuilt and LoopClkKit are shorted, then use LoopClkKit (D15). Otherwise use LoopClkBuilt (D1)
+// the pin not in use must be set to input
+using LoopClkBuilt = mdrivlib::FPin<BrainPin::D1.gpio, BrainPin::D1.pin, Output, Normal>;
+using LoopClkBuiltRead = mdrivlib::FPin<BrainPin::D1.gpio, BrainPin::D1.pin, Input, Normal>;
 
-// Built:
-using LoopClkOut = mdrivlib::FPin<BrainPin::D1.gpio, BrainPin::D1.pin, Output, Normal>;
-using LoopClkPassiveIn = mdrivlib::FPin<BrainPin::D15.gpio, BrainPin::D15.pin, Input, Normal>;
+using LoopClkKit = mdrivlib::FPin<BrainPin::D15.gpio, BrainPin::D15.pin, Output, Normal>;
+using LoopClkKitRead = mdrivlib::FPin<BrainPin::D15.gpio, BrainPin::D15.pin, Input, Normal>;
 
 constexpr std::array<AdcChannelConf, NumPots> PotAdcChans = {{
 	{BrainPin::A3, BrainPin::A3AdcChan, TimePot, Brain::AdcSampTime},

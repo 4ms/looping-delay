@@ -10,11 +10,12 @@ namespace LDKit
 class Timer {
 	Board::PingJack ping_jack;
 	mdrivlib::PinChangeInt<Brain::LRClkPinChangeConf> pin_change;
-	Board::LoopClkOut loop_out;
-	Board::LoopClkPassiveIn loop_passive;
 	Board::ClkOut clk_out;
 	Board::BusClkOut bus_clk_out;
 	Board::LoopLED loop_led;
+
+	Board::LoopClkBuilt loop_out_built;
+	Board::LoopClkKit loop_out_kit;
 
 	uint32_t _ping_tmr = 0;
 	uint32_t _ping_time = 12000;
@@ -26,10 +27,36 @@ class Timer {
 	bool _ping_tmr_needs_reset = false;
 	PingMethod &ping_method;
 
+	bool is_kit = false;
+
 public:
 	Timer(PingMethod &ping_method)
 		: ping_method{ping_method} {
 		pin_change.init([this] { inc(); });
+
+		// PCB difference between Kit and built:
+		// on the built PCB only, the two loop out pins are shorted together.
+		// Toggle one loop out and see if the other has the same state.
+		// Then repeat, swapping the in and out
+		// If at any point the out and in have different states, it's a Kit PCB.
+		bool state = false;
+
+		// Init pins as Kit
+		Board::LoopClkKit loop_out_kit;
+		Board::LoopClkBuiltRead loop_in_built;
+		for (unsigned i = 0; i < 4; i++) {
+			loop_out_kit.set(state);
+			HAL_Delay(10);
+			if (loop_in_built.read() != state)
+				is_kit = true;
+			state = !state;
+		}
+
+		if (!is_kit) {
+			// Init pins as Built
+			Board::LoopClkBuilt loop_out_built;
+			Board::LoopClkKitRead loop_in_kit;
+		}
 	}
 
 	void start() {
@@ -84,7 +111,10 @@ public:
 			reset_loopled_tmr();
 		} else if (_loopled_tmr >= (_loopled_time / 2)) {
 			loop_led.low();
-			loop_out.low();
+			if (is_kit)
+				loop_out_kit.low();
+			else
+				loop_out_built.low();
 		}
 	}
 
@@ -112,7 +142,10 @@ public:
 
 	void reset_loopled_tmr() {
 		loop_led.high();
-		loop_out.high();
+		if (is_kit)
+			loop_out_kit.high();
+		else
+			loop_out_built.high();
 		_loopled_tmr = 0;
 	}
 

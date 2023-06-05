@@ -40,8 +40,8 @@ void print_error(std::string_view err) {
 
 void run(Controls &controls) {
 	Board::PingJack ping_jack;
-	Board::LoopClkOut loop_out;
-	Board::LoopClkPassiveIn loop_passive;
+	Board::LoopClkBuilt loop_out;
+	Board::LoopClkKit loop_passive;
 	Board::ClkOut clk_out;
 	Board::BusClkOut bus_clk_out;
 	Board::LoopLED loop_led;
@@ -86,7 +86,8 @@ void run(Controls &controls) {
 			o.chan[0] = oscR.update() * 0x7FFFFF;
 			o.chan[1] = oscL.update() * 0x7FFFFF;
 		}
-		Board::LoopClkOut::set(loopclk & 0b1);
+		Board::LoopClkBuilt::set(loopclk & 0b1);
+		Board::LoopClkKit::set(loopclk & 0b1);
 		loopclk++;
 		Board::ClkOut::set((clkout & 0b11) == 0b00);
 		clkout++;
