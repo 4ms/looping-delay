@@ -16,7 +16,6 @@ struct Settings {
 	GateType loop_clock;
 	GateType main_clock;
 	bool log_delay_feed;
-	bool runaway_dc_block;
 	bool auto_unquantize_timejack;
 	bool send_return_before_loop;
 	bool stereo_mode;

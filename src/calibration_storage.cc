@@ -27,7 +27,6 @@ void PersistentStorage::set_default_cal() {
 	data.settings.loop_clock = GateType::Trig;
 	data.settings.main_clock = GateType::Gate;
 	data.settings.log_delay_feed = true;
-	data.settings.runaway_dc_block = true;
 	data.settings.auto_unquantize_timejack = false;
 	data.settings.send_return_before_loop = false;
 	data.settings.stereo_mode = false;

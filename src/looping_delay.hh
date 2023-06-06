@@ -182,10 +182,10 @@ public:
 			out.chan[1] = clip(Brain::AudioGain * mix_l);
 
 			// High-pass filter before writing to memory
-			if (params.settings.runaway_dc_block) {
-				wr_l = dcblock.update(wr_l);
-				wr_r = dcblock.update(wr_r);
-			}
+			// if (params.settings.runaway_dc_block) {
+			wr_l = dcblock.update(wr_l);
+			wr_r = dcblock.update(wr_r);
+			// }
 			mem_wr_l = clip(wr_l) / 256;
 			if (!mono)
 				mem_wr_r = clip(wr_r) / 256;
