@@ -21,7 +21,6 @@ void PersistentStorage::set_default_cal() {
 	data.codec_dac_calibration_dcoffset[1] = 0;
 	data.settings.auto_mute = true;
 	data.settings.soft_clip = true;
-	data.settings.dc_input = false;
 	data.settings.ping_method = PingMethod::IGNORE_FLAT_DEVIATION_10;
 	data.settings.rev_jack = GateType::Trig;
 	data.settings.inf_jack = GateType::Trig;

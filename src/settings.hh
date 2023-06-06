@@ -10,7 +10,6 @@ enum class GateType : uint8_t { Gate = 0, Trig = 1 };
 struct Settings {
 	bool auto_mute;
 	bool soft_clip;
-	bool dc_input;
 	PingMethod ping_method;
 	GateType rev_jack;
 	GateType inf_jack;
