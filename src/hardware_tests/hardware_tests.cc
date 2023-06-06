@@ -1,5 +1,6 @@
 #include "audio_stream.hh"
 #include "brain_conf.hh"
+#include "calibration_storage.hh"
 #include "conf/board_conf.hh"
 #include "console.hh"
 #include "drivers/ram_test.hh"
@@ -69,7 +70,15 @@ void run(Controls &controls) {
 	}
 
 	print_press_button();
-	Util::flash_mainbut_until_pressed();
+	printf_("Press Ping to continue, or hold Ping for five seconds to factory reset\n");
+	Util::flash_mainbut_until_just_pressed();
+	if (Util::check_for_longhold_button()) {
+		printf_("Resetting...\n");
+		PersistentStorage persistent_storage;
+		persistent_storage.factory_reset();
+		printf_("Sucess!\n");
+		Util::flash_mainbut_until_pressed();
+	}
 
 	//////////////////////////////
 	print_test_name("LED Test");

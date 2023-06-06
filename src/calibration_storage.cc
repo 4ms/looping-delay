@@ -47,8 +47,7 @@ void PersistentStorage::factory_reset() {
 }
 
 PersistentStorage::PersistentStorage() {
-	constexpr bool force_defaults = false;
-	if (!flash.read(data) || !data.validate() || force_defaults) {
+	if (!flash.read(data) || !data.validate()) {
 		set_default_cal();
 		if (!flash.write(data)) {
 			storage_is_ok = false;
