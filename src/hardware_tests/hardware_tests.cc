@@ -86,8 +86,8 @@ void run(Controls &controls) {
 			o.chan[0] = oscR.update() * 0x7FFFFF;
 			o.chan[1] = oscL.update() * 0x7FFFFF;
 		}
-		Board::LoopClkBuilt::set(loopclk & 0b1);
-		Board::LoopClkKit::set(loopclk & 0b1);
+		Board::LoopClkBuilt::set((loopclk & 0b1));
+		Board::LoopClkKit::set((loopclk & 0b1));
 		loopclk++;
 		Board::ClkOut::set((clkout & 0b11) == 0b00);
 		clkout++;
@@ -96,7 +96,7 @@ void run(Controls &controls) {
 	printf_("Verify:\n");
 	printf_("  1) Audio Out: 440Hz sine, -10V to +10V [+/- 0.3V]\n");
 	printf_("  2) Send: 2.7kHz sine, -10V to +10V [+/- 0.3V]\n");
-	printf_("  3) Clk Out: 375Hz pulse wave (High 25%, low 75%), 0V to +8V [+/- 0.5V]\n");
+	printf_("  3) Clk Out: 375Hz pulse/curvy-ramp wave (High 25%, low 75%), 0V to +8V [+/- 0.5V]\n");
 	printf_("  4) Loop Clk Out: 750Hz square wave, 0V to +8V [+/- 0.5V]\n");
 
 	print_press_button();
