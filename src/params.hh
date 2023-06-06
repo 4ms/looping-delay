@@ -117,6 +117,19 @@ struct Params {
 
 private:
 	void update_trig_jacks() {
+		if (controls.reverse_jack.is_just_pressed()) {
+			if (modes.quantize_mode_changes)
+				flags.set_rev_quantized_changed();
+			else
+				flags.set_rev_changed();
+		}
+		if (controls.inf_jack.is_just_pressed()) {
+			if (modes.quantize_mode_changes)
+				flags.set_inf_quantized_changed();
+			else
+				flags.set_inf_changed();
+		}
+
 		if (timer.take_ping_changed()) {
 			controls.ping_led.high();
 			ping_time = timer.get_ping_time();
@@ -125,11 +138,8 @@ private:
 			handle_quantized_mode_changes();
 		}
 
-		if (controls.reverse_jack.is_just_pressed()) {
-			flags.set_rev_changed();
-		}
-		if (controls.inf_jack.is_just_pressed()) {
-			flags.set_inf_changed();
+		if (timer.take_ping_cycled()) {
+			handle_quantized_mode_changes();
 		}
 	}
 
@@ -328,6 +338,8 @@ private:
 
 	void handle_quantized_mode_changes() {
 		// Handle staged inf/rev changes due to quantize_mode_changes==true
+		if (flags.take_time_quantized_changed())
+			flags.set_time_changed();
 		if (flags.take_inf_quantized_changed())
 			flags.set_inf_changed();
 		if (flags.take_rev_quantized_changed())
@@ -436,7 +448,10 @@ private:
 
 		if (time != time_mult) {
 			time = time_mult;
-			flags.set_time_changed();
+			if (modes.quantize_mode_changes)
+				flags.set_time_quantized_changed();
+			else
+				flags.set_time_changed();
 		}
 	}
 

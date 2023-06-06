@@ -24,6 +24,7 @@ class Timer {
 	uint32_t _loopled_tmr = 0;
 	uint32_t _loopled_time = 0;
 	bool _ping_led_high = false;
+	bool _ping_cycled = false;
 	bool _ping_tmr_needs_reset = false;
 	PingMethod &ping_method;
 
@@ -86,12 +87,6 @@ public:
 				_ping_changed = true;
 				clk_out.high();
 				bus_clk_out.high();
-
-				// TODO: see if this reduces jitter by much:
-				// controls.clk_out.high();
-				// controls.ping_led.high();
-				// if (!modes.ping_locked)
-				// 	flags.set_time_changed();
 			}
 			_ping_tmr = 0;
 		}
@@ -99,6 +94,7 @@ public:
 		if (_pingled_tmr >= _ping_time) {
 			_pingled_tmr = 0;
 			_ping_led_high = true;
+			_ping_cycled = true;
 			clk_out.high();
 			bus_clk_out.high();
 		} else if (_pingled_tmr >= (_ping_time / 2)) {
@@ -151,6 +147,12 @@ public:
 
 	bool ping_led_high() {
 		return _ping_led_high;
+	}
+
+	bool take_ping_cycled() {
+		auto t = _ping_cycled;
+		_ping_cycled = false;
+		return t;
 	}
 };
 
