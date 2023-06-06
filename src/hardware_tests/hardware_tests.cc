@@ -52,6 +52,22 @@ void run(Controls &controls) {
 	all_lights_off();
 	Util::pause_until_button_released();
 
+	// Display firmware version
+	printf_("Firmware version %d.%d\n", FirmwareMajorVersion, FirmwareMinorVersion);
+	for (unsigned i = 0; i < FirmwareMajorVersion; i++) {
+		loop_led.high();
+		HAL_Delay(150);
+		loop_led.low();
+		HAL_Delay(150);
+	}
+	HAL_Delay(350);
+	for (unsigned i = 0; i < FirmwareMinorVersion; i++) {
+		loop_led.high();
+		HAL_Delay(150);
+		loop_led.low();
+		HAL_Delay(150);
+	}
+
 	print_press_button();
 	Util::flash_mainbut_until_pressed();
 
