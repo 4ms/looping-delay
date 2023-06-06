@@ -160,6 +160,16 @@ private:
 					if (old_ping_method != settings.ping_method)
 						reset_ping_method_flash();
 				}
+				if (controls.inf_button.is_just_released()) {
+					if (!ignore_inf_release)
+						settings.inf_jack = settings.inf_jack == GateType::Trig ? GateType::Gate : GateType::Trig;
+					ignore_inf_release = false;
+				}
+				if (controls.rev_button.is_just_released()) {
+					if (!ignore_rev_release)
+						settings.rev_jack = settings.rev_jack == GateType::Trig ? GateType::Gate : GateType::Trig;
+					ignore_rev_release = false;
+				}
 				break;
 			}
 		}
@@ -188,9 +198,7 @@ private:
 				}
 
 				case Page::EnterExit: {
-					// controls.inf_led.set(settings.inf_jack == GateType::Gate);
 					// controls.ping_led.set(settings.main_clock == GateType::Gate);
-					// controls.reverse_led.set(settings.rev_jack == GateType::Gate);
 					controls.inf_led.set(false);
 					controls.ping_led.set(false);
 					controls.reverse_led.set(false);
@@ -199,8 +207,8 @@ private:
 
 				case Page::PingDejitter: {
 					flash_ping_method();
-					controls.reverse_led.set(false);
-					controls.inf_led.set(false);
+					controls.inf_led.set(settings.inf_jack == GateType::Gate);
+					controls.reverse_led.set(settings.rev_jack == GateType::Gate);
 					break;
 				}
 			}

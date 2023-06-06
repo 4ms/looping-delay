@@ -117,13 +117,17 @@ struct Params {
 
 private:
 	void update_trig_jacks() {
-		if (controls.reverse_jack.is_just_pressed()) {
+		if (controls.reverse_jack.is_just_pressed() ||
+			(settings.rev_jack == GateType::Gate && controls.reverse_jack.is_just_released()))
+		{
 			if (modes.quantize_mode_changes)
 				flags.set_rev_quantized_changed();
 			else
 				flags.set_rev_changed();
 		}
-		if (controls.inf_jack.is_just_pressed()) {
+		if (controls.inf_jack.is_just_pressed() ||
+			(settings.inf_jack == GateType::Gate && controls.inf_jack.is_just_released()))
+		{
 			if (modes.quantize_mode_changes)
 				flags.set_inf_quantized_changed();
 			else
