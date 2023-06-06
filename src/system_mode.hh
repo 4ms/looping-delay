@@ -24,6 +24,7 @@ private:
 	uint32_t pulse_ctr;
 	uint32_t flash_ctr;
 	bool ping_led_state = false;
+	bool rev_led_state = false;
 
 public:
 	SystemMode(Controls &controls, Flags &flags, PersistentStorage &storage)
@@ -103,8 +104,13 @@ private:
 	void update_page() {
 		if (controls.read_time_switch() == Controls::SwitchPos::Up)
 			cur_page = Page::EnterExit;
-		if (controls.read_time_switch() == Controls::SwitchPos::Center)
+
+		if (controls.read_time_switch() == Controls::SwitchPos::Center) {
+			if (cur_page != Page::AudioModes)
+				reset_crossfade_samples_flash();
 			cur_page = Page::AudioModes;
+		}
+
 		if (controls.read_time_switch() == Controls::SwitchPos::Down) {
 			if (cur_page != Page::PingDejitter)
 				reset_ping_method_flash();
@@ -129,10 +135,57 @@ private:
 						settings.soft_clip = !settings.soft_clip;
 					ignore_ping_release = false;
 				}
-				if (controls.rev_button.is_just_released()) {
-					if (!ignore_rev_release)
-						settings.runaway_dc_block = !settings.runaway_dc_block;
-					ignore_rev_release = false;
+				if (controls.rev_button.is_pressed()) {
+					constexpr uint32_t NumMethod = 7;
+					auto old_fade_samples = settings.crossfade_samples;
+
+					if (controls.read_pot(TimePot) < (4095 * 1 / NumMethod)) // 1 - 2
+					{
+						settings.crossfade_samples = 0;
+						settings.write_crossfade_samples = 0;
+					}
+
+					else if (controls.read_pot(TimePot) < (4095 * 2 / NumMethod)) // 3 - 4
+					{
+						settings.crossfade_samples = 96; // 2ms
+						settings.write_crossfade_samples = 96;
+					}
+
+					else if (controls.read_pot(TimePot) < (4095 * 3 / NumMethod)) // 5 - 6
+					{
+						settings.crossfade_samples = 192; // 4ms
+						settings.write_crossfade_samples = 192;
+					}
+
+					else if (controls.read_pot(TimePot) < (4095 * 4 / NumMethod)) // 7 - 8
+					{
+						settings.crossfade_samples = 384; // 8ms
+						settings.write_crossfade_samples = 192;
+					}
+
+					else if (controls.read_pot(TimePot) < (4095 * 5 / NumMethod)) // 9 - 10
+					{
+						settings.crossfade_samples = 1200; // 25ms
+						settings.write_crossfade_samples = 192;
+					}
+
+					else if (controls.read_pot(TimePot) < (4095 * 6 / NumMethod)) // 11 - 12
+					{
+						settings.crossfade_samples = 4800; // 100ms
+						settings.write_crossfade_samples = 4800;
+					}
+
+					else // 13 - 16
+					{
+						settings.crossfade_samples = 12000; // 250ms
+						settings.write_crossfade_samples = 4800;
+					}
+
+					if (old_fade_samples != settings.crossfade_samples) {
+						settings.crossfade_rate = settings.calc_fade_increment(settings.crossfade_samples);
+						settings.write_crossfade_rate = settings.calc_fade_increment(settings.write_crossfade_samples);
+						reset_crossfade_samples_flash();
+					}
 				}
 				break;
 			}
@@ -193,7 +246,7 @@ private:
 				case Page::AudioModes: {
 					controls.inf_led.set(settings.auto_mute);
 					controls.ping_led.set(settings.soft_clip);
-					controls.rev_led.set(settings.runaway_dc_block);
+					flash_crossfade_samples();
 					break;
 				}
 
@@ -235,6 +288,46 @@ private:
 			} else {
 				pulse_ctr = 1000;
 				flash_ctr = static_cast<std::underlying_type_t<PingMethod>>(settings.ping_method) * 2 + 1;
+			}
+		}
+	}
+
+	void reset_crossfade_samples_flash() {
+		pulse_ctr = 0;
+		flash_ctr = 0;
+		rev_led_state = true;
+		controls.rev_led.set(rev_led_state);
+	}
+
+	void flash_crossfade_samples() {
+		if (pulse_ctr)
+			pulse_ctr--;
+		else {
+			rev_led_state = !rev_led_state;
+			controls.rev_led.set(rev_led_state);
+
+			if (flash_ctr) {
+				pulse_ctr = 250;
+				flash_ctr--;
+			} else {
+				pulse_ctr = 1000;
+				// 1..9
+				if (settings.crossfade_samples == 0)
+					flash_ctr = 1;
+				else if (settings.crossfade_samples <= 96)
+					flash_ctr = 3;
+				else if (settings.crossfade_samples <= 192)
+					flash_ctr = 5;
+				else if (settings.crossfade_samples <= 384)
+					flash_ctr = 7;
+				else if (settings.crossfade_samples <= 1200)
+					flash_ctr = 9;
+				else if (settings.crossfade_samples <= 4800)
+					flash_ctr = 11;
+				else if (settings.crossfade_samples <= 12000)
+					flash_ctr = 13;
+				else
+					flash_ctr = 13;
 			}
 		}
 	}
