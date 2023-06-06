@@ -32,8 +32,8 @@ void PersistentStorage::set_default_cal() {
 	data.settings.send_return_before_loop = false;
 	data.settings.stereo_mode = false;
 
-	data.settings.crossfade_samples = 4800;		  // SLOW_FADE_SAMPLES
-	data.settings.write_crossfade_samples = 4800; // FAST_FADE_SAMPLES
+	data.settings.crossfade_samples = 384;		 // SLOW_FADE_SAMPLES
+	data.settings.write_crossfade_samples = 384; // FAST_FADE_SAMPLES
 
 	data.settings.crossfade_rate =
 		data.settings.calc_fade_increment(data.settings.crossfade_samples); // SLOW_FADE_INCREMENT
