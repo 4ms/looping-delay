@@ -276,6 +276,7 @@ private:
 				{
 					qcm_state = QcmState::Idle;
 					modes.quantize_mode_changes = !modes.quantize_mode_changes;
+					flag_acknowledge_qcm = 1536;
 					ignore_rev_release = true;
 				}
 				break;
@@ -309,8 +310,7 @@ private:
 				controls.reverse_led.high();
 				controls.inf_led.low();
 			}
-		}
-		if (flag_animate_mono) {
+		} else if (flag_animate_mono) {
 			flag_animate_mono--;
 			if ((flag_animate_mono & 0x1FF) == 0x100) {
 				controls.reverse_led.high();
@@ -320,14 +320,22 @@ private:
 				controls.reverse_led.low();
 				controls.inf_led.low();
 			}
-		}
-		if (flag_animate_clear) {
+		} else if (flag_animate_clear) {
 			flag_animate_clear--;
 			controls.reverse_led.high();
 			controls.inf_led.high();
+
+		} else if (flag_acknowledge_qcm) {
+			flag_acknowledge_qcm--;
+			bool blink = (flag_acknowledge_qcm & (1 << 8)) ||
+						 (!modes.quantize_mode_changes && (flag_acknowledge_qcm & (1 << 6)));
+			controls.reverse_led.set(blink);
+			controls.ping_led.set(blink);
+			controls.inf_led.set(blink);
 		}
 
-		if (!flag_animate_clear && !flag_animate_mono && !flag_animate_stereo) {
+		else
+		{
 			controls.reverse_led.set(modes.reverse);
 			if (modes.inf == InfState::TransitioningOn || modes.inf == InfState::On)
 				controls.inf_led.high();
@@ -497,6 +505,7 @@ private:
 
 	uint32_t flag_animate_mono = 0;
 	uint32_t flag_animate_stereo = 0;
+	uint32_t flag_acknowledge_qcm = 0;
 	uint32_t flag_animate_clear = 0;
 
 	bool window_mode = false;
