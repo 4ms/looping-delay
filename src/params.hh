@@ -335,7 +335,6 @@ private:
 						 (!modes.quantize_mode_changes && (flag_acknowledge_qcm & (1 << 6)));
 			controls.reverse_led.set(blink);
 			controls.ping_led.set(blink);
-			controls.inf_led.set(blink);
 		}
 
 		else
