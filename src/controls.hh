@@ -33,14 +33,13 @@ public:
 	Board::TimeSwitch time_switch;
 
 	// Trig Jacks
-	// Board::PingJack ping_jack;
-	Board::RevJack reverse_jack;
+	Board::RevJack rev_jack;
 	Board::HoldJack inf_jack;
 
 	// LEDs:
 	Board::PingLED ping_led;
 	Board::HoldLED inf_led;
-	Board::RevLED reverse_led;
+	Board::RevLED rev_led;
 
 	using SwitchPos = mdrivlib::SwitchPos;
 
@@ -89,7 +88,7 @@ public:
 		inf_button.update();
 
 		// ping_jack.update();
-		reverse_jack.update();
+		rev_jack.update();
 		inf_jack.update();
 	}
 };

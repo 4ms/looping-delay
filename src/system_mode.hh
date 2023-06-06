@@ -180,20 +180,20 @@ private:
 			blink_tmr++;
 			controls.inf_led.set((blink_tmr & 0x1FF) < 0x0FF);
 			controls.ping_led.set((blink_tmr & 0x1FF) < 0x0FF);
-			controls.reverse_led.set((blink_tmr & 0x1FF) < 0x0FF);
+			controls.rev_led.set((blink_tmr & 0x1FF) < 0x0FF);
 		}
 		if (status == Status::Saving) {
 			blink_tmr++;
 			controls.inf_led.set((blink_tmr & 0xFF) < 0x7F);
 			controls.ping_led.set((blink_tmr & 0xFF) < 0x7F);
-			controls.reverse_led.set((blink_tmr & 0xFF) < 0x7F);
+			controls.rev_led.set((blink_tmr & 0xFF) < 0x7F);
 		}
 		if (status == Status::Normal) {
 			switch (cur_page) {
 				case Page::AudioModes: {
 					controls.inf_led.set(settings.auto_mute);
 					controls.ping_led.set(settings.soft_clip);
-					controls.reverse_led.set(settings.runaway_dc_block);
+					controls.rev_led.set(settings.runaway_dc_block);
 					break;
 				}
 
@@ -201,14 +201,14 @@ private:
 					// controls.ping_led.set(settings.main_clock == GateType::Gate);
 					controls.inf_led.set(false);
 					controls.ping_led.set(false);
-					controls.reverse_led.set(false);
+					controls.rev_led.set(false);
 					break;
 				}
 
 				case Page::PingDejitter: {
 					flash_ping_method();
 					controls.inf_led.set(settings.inf_jack == GateType::Gate);
-					controls.reverse_led.set(settings.rev_jack == GateType::Gate);
+					controls.rev_led.set(settings.rev_jack == GateType::Gate);
 					break;
 				}
 			}

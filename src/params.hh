@@ -117,8 +117,8 @@ struct Params {
 
 private:
 	void update_trig_jacks() {
-		if (controls.reverse_jack.is_just_pressed() ||
-			(settings.rev_jack == GateType::Gate && controls.reverse_jack.is_just_released()))
+		if (controls.rev_jack.is_just_pressed() ||
+			(settings.rev_jack == GateType::Gate && controls.rev_jack.is_just_released()))
 		{
 			if (modes.quantize_mode_changes)
 				flags.set_rev_quantized_changed();
@@ -307,39 +307,39 @@ private:
 		if (flag_animate_stereo) {
 			flag_animate_stereo--;
 			if ((flag_animate_stereo & 0xFF) == 0x80) {
-				controls.reverse_led.low();
+				controls.rev_led.low();
 				controls.inf_led.high();
 			}
 			if ((flag_animate_stereo & 0xFF) == 0x00) {
-				controls.reverse_led.high();
+				controls.rev_led.high();
 				controls.inf_led.low();
 			}
 		} else if (flag_animate_mono) {
 			flag_animate_mono--;
 			if ((flag_animate_mono & 0x1FF) == 0x100) {
-				controls.reverse_led.high();
+				controls.rev_led.high();
 				controls.inf_led.high();
 			}
 			if ((flag_animate_mono & 0x1FF) == 0x000) {
-				controls.reverse_led.low();
+				controls.rev_led.low();
 				controls.inf_led.low();
 			}
 		} else if (flag_animate_clear) {
 			flag_animate_clear--;
-			controls.reverse_led.high();
+			controls.rev_led.high();
 			controls.inf_led.high();
 
 		} else if (flag_acknowledge_qcm) {
 			flag_acknowledge_qcm--;
 			bool blink = (flag_acknowledge_qcm & (1 << 8)) ||
 						 (!modes.quantize_mode_changes && (flag_acknowledge_qcm & (1 << 6)));
-			controls.reverse_led.set(blink);
+			controls.rev_led.set(blink);
 			controls.ping_led.set(blink);
 		}
 
 		else
 		{
-			controls.reverse_led.set(modes.reverse);
+			controls.rev_led.set(modes.reverse);
 			if (modes.inf == InfState::TransitioningOn || modes.inf == InfState::On)
 				controls.inf_led.high();
 			else if (modes.inf == InfState::TransitioningOff || modes.inf == InfState::Off)
