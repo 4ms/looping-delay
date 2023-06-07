@@ -107,10 +107,7 @@ public:
 			reset_loopled_tmr();
 		} else if (_loopled_tmr >= (_loopled_time / 2)) {
 			loop_led.low();
-			if (is_kit)
-				loop_out_kit.low();
-			else
-				loop_out_built.low();
+			is_kit ? loop_out_kit.low() : loop_out_built.low();
 		}
 	}
 
@@ -138,10 +135,7 @@ public:
 
 	void reset_loopled_tmr() {
 		loop_led.high();
-		if (is_kit)
-			loop_out_kit.high();
-		else
-			loop_out_built.high();
+		is_kit ? loop_out_kit.high() : loop_out_built.high();
 		_loopled_tmr = 0;
 	}
 
