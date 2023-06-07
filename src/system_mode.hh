@@ -141,8 +141,8 @@ private:
 
 					if (controls.read_pot(TimePot) < (4095 * 1 / NumMethod)) // 1 - 2
 					{
-						settings.crossfade_samples = 0;
-						settings.write_crossfade_samples = 0;
+						settings.crossfade_samples = 1;
+						settings.write_crossfade_samples = 1;
 					}
 
 					else if (controls.read_pot(TimePot) < (4095 * 2 / NumMethod)) // 3 - 4
@@ -312,7 +312,7 @@ private:
 			} else {
 				pulse_ctr = 1000;
 				// 1..9
-				if (settings.crossfade_samples == 0)
+				if (settings.crossfade_samples <= 1)
 					flash_ctr = 1;
 				else if (settings.crossfade_samples <= 96)
 					flash_ctr = 3;
