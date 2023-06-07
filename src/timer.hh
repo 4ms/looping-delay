@@ -1,7 +1,7 @@
 #pragma once
 #include "conf/board_conf.hh"
-#include "debug.hh"
 #include "drivers/pin_change.hh"
+#include "pcb_detect.hh"
 #include "ping_methods.hh"
 
 namespace LDKit
@@ -34,30 +34,7 @@ public:
 	Timer(PingMethod &ping_method)
 		: _ping_method{ping_method} {
 		pin_change.init([this] { inc(); });
-
-		// PCB difference between Kit and built:
-		// on the built PCB only, the two loop out pins are shorted together.
-		// Toggle one loop out and see if the other has the same state.
-		// Then repeat, swapping the in and out
-		// If at any point the out and in have different states, it's a Kit PCB.
-		bool state = false;
-
-		// Init pins as Kit
-		Board::LoopClkKit loop_out_kit;
-		Board::LoopClkBuiltRead loop_in_built;
-		for (unsigned i = 0; i < 4; i++) {
-			loop_out_kit.set(state);
-			HAL_Delay(10);
-			if (loop_in_built.read() != state)
-				is_kit = true;
-			state = !state;
-		}
-
-		if (!is_kit) {
-			// Init pins as Built
-			Board::LoopClkBuilt loop_out_built;
-			Board::LoopClkKitRead loop_in_kit;
-		}
+		is_kit = PCBDetect::is_kit();
 	}
 
 	void start() {
