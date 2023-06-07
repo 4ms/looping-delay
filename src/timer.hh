@@ -21,7 +21,7 @@ class Timer {
 	uint32_t _ping_time = 12000;
 	bool _ping_changed = true;
 	uint32_t _pingled_tmr = 0;
-	uint32_t _loopled_tmr = 0;
+	float _loopled_tmr = 0;
 	float _loopled_time = 0;
 	bool _ping_led_high = false;
 	bool _ping_cycled = false;
@@ -103,8 +103,8 @@ public:
 			bus_clk_out.low();
 		}
 
-		if (_loopled_tmr >= _loopled_time) { // && modes.inf == InfState::Off) {
-			reset_loopled_tmr();
+		if (_loopled_tmr >= _loopled_time) {
+			reset_loopled_tmr(_loopled_tmr - _loopled_time);
 		} else if (_loopled_tmr >= (_loopled_time / 2)) {
 			loop_led.low();
 			is_kit ? loop_out_kit.low() : loop_out_built.low();
@@ -133,10 +133,10 @@ public:
 		return _ping_time;
 	}
 
-	void reset_loopled_tmr() {
+	void reset_loopled_tmr(float reset_to = 0.f) {
 		loop_led.high();
 		is_kit ? loop_out_kit.high() : loop_out_built.high();
-		_loopled_tmr = 0;
+		_loopled_tmr = reset_to;
 	}
 
 	bool ping_led_high() {
