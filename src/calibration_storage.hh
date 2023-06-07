@@ -22,20 +22,20 @@ struct PersistentData {
 	Settings settings;
 
 	bool validate() {
-		return (major_firmware_version < 100) && (minor_firmware_version < 100) &&					//
-			   (major_firmware_version + minor_firmware_version > 0) &&								//
-			   (std::abs(cv_calibration_offset[0]) < 200) &&										//
-			   (std::abs(cv_calibration_offset[1]) < 200) &&										//
-			   (std::abs(cv_calibration_offset[2]) < 200) &&										//
-			   (std::abs(cv_calibration_offset[3]) < 200) &&										//
-			   (tracking_comp > 0.5f) && (tracking_comp < 1.5f) &&									//
-			   (uint8_t)settings.ping_method < (uint8_t)PingMethod::NUM_PING_METHODS &&				//
-			   (uint8_t)settings.rev_jack <= 1 &&													//
-			   (uint8_t)settings.inf_jack <= 1 &&													//
-			   (uint8_t)settings.loop_clock <= 1 &&													//
-			   (uint8_t)settings.main_clock <= 1 &&													//
-			   settings.crossfade_samples > 48 && settings.crossfade_samples < 48000 &&				//
-			   settings.write_crossfade_samples > 48 && settings.write_crossfade_samples < 48000 && //
+		return (major_firmware_version < 100) && (minor_firmware_version < 100) &&		//
+			   (major_firmware_version + minor_firmware_version > 0) &&					//
+			   (std::abs(cv_calibration_offset[0]) < 200) &&							//
+			   (std::abs(cv_calibration_offset[1]) < 200) &&							//
+			   (std::abs(cv_calibration_offset[2]) < 200) &&							//
+			   (std::abs(cv_calibration_offset[3]) < 200) &&							//
+			   (tracking_comp > 0.5f) && (tracking_comp < 1.5f) &&						//
+			   (uint8_t)settings.ping_method < (uint8_t)PingMethod::NUM_PING_METHODS && //
+			   (uint8_t)settings.rev_jack <= 1 &&										//
+			   (uint8_t)settings.inf_jack <= 1 &&										//
+			   (uint8_t)settings.loop_clock <= 1 &&										//
+			   (uint8_t)settings.main_clock <= 1 &&										//
+			   settings.crossfade_samples < 48000 &&									//
+			   settings.write_crossfade_samples < 48000 &&								//
 			   std::abs(settings.crossfade_rate - settings.calc_fade_increment(settings.crossfade_samples)) < 0.01f &&
 			   std::abs(settings.write_crossfade_rate -
 						settings.calc_fade_increment(settings.write_crossfade_samples)) < 0.01f; // &&
