@@ -21,18 +21,18 @@ class Timer {
 	uint32_t _ping_time = 12000;
 	bool _ping_changed = true;
 	uint32_t _pingled_tmr = 0;
-	float _loopled_tmr = 0;
-	float _loopled_time = 0;
+	float _loop_tmr = 0;
+	float _loop_time = 0;
 	bool _ping_led_high = false;
 	bool _ping_cycled = false;
 	bool _ping_tmr_needs_reset = false;
-	PingMethod &ping_method;
+	PingMethod &_ping_method;
 
 	bool is_kit = false;
 
 public:
 	Timer(PingMethod &ping_method)
-		: ping_method{ping_method} {
+		: _ping_method{ping_method} {
 		pin_change.init([this] { inc(); });
 
 		// PCB difference between Kit and built:
@@ -74,12 +74,12 @@ public:
 			_ping_tmr++;
 
 		_pingled_tmr++;
-		_loopled_tmr++;
+		_loop_tmr++;
 
 		ping_jack.update();
 		if (ping_jack.just_went_high()) {
 			// TODO: if ping_method != last_ping_method PingMethodAlgorithm::reset();
-			auto newtime = PingMethodAlgorithm::filter(_ping_time, _ping_tmr, ping_method);
+			auto newtime = PingMethodAlgorithm::filter(_ping_time, _ping_tmr, _ping_method);
 			if (newtime.has_value()) {
 				_ping_time = newtime.value();
 				_pingled_tmr = 0;
@@ -103,16 +103,16 @@ public:
 			bus_clk_out.low();
 		}
 
-		if (_loopled_tmr >= _loopled_time) {
-			reset_loopled_tmr(_loopled_tmr - _loopled_time);
-		} else if (_loopled_tmr >= (_loopled_time / 2)) {
+		if (_loop_tmr >= _loop_time) {
+			reset_loop_tmr(_loop_tmr - _loop_time);
+		} else if (_loop_tmr >= (_loop_time / 2)) {
 			loop_led.low();
 			is_kit ? loop_out_kit.low() : loop_out_built.low();
 		}
 	}
 
 	void set_divmult_time(float time) {
-		_loopled_time = time;
+		_loop_time = time;
 	}
 
 	bool take_ping_changed() {
@@ -133,10 +133,10 @@ public:
 		return _ping_time;
 	}
 
-	void reset_loopled_tmr(float reset_to = 0.f) {
+	void reset_loop_tmr(float reset_to = 0.f) {
 		loop_led.high();
 		is_kit ? loop_out_kit.high() : loop_out_built.high();
-		_loopled_tmr = reset_to;
+		_loop_tmr = reset_to;
 	}
 
 	bool ping_led_high() {

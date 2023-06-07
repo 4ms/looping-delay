@@ -98,7 +98,7 @@ struct Params {
 	}
 
 	void reset_loop() {
-		timer.reset_loopled_tmr();
+		timer.reset_loop_tmr();
 	}
 
 	// TODO: to use a double-buffer params, then
