@@ -28,7 +28,7 @@ class LoopingDelay {
 	CircularBufferAccess<DelayBuffer::span> fade_buf;
 
 	float read_fade_phase = 0;
-	uint32_t queued_divmult_time = 0;
+	float queued_divmult_time = 0;
 	uint32_t queued_read_fade_ending_addr = 0;
 
 	float write_fade_phase = 0.f;
@@ -303,8 +303,8 @@ public:
 
 	void set_divmult_time() {
 		uint32_t use_ping_time = params.modes.ping_locked ? params.locked_ping_time : params.ping_time;
-		uint32_t t_divmult_time = use_ping_time * params.time;
-		std::clamp(t_divmult_time, (uint32_t)0, MemorySamplesNum);
+		float t_divmult_time = use_ping_time * params.time;
+		std::clamp(t_divmult_time, 0.f, (float)MemorySamplesNum);
 
 		// Crossfade to new read head position (or queue it if we're already crossfading)
 		if (params.modes.inf == InfState::Off) {

@@ -22,7 +22,7 @@ class Timer {
 	bool _ping_changed = true;
 	uint32_t _pingled_tmr = 0;
 	uint32_t _loopled_tmr = 0;
-	uint32_t _loopled_time = 0;
+	float _loopled_time = 0;
 	bool _ping_led_high = false;
 	bool _ping_cycled = false;
 	bool _ping_tmr_needs_reset = false;
@@ -114,7 +114,7 @@ public:
 		}
 	}
 
-	void set_divmult_time(uint32_t time) {
+	void set_divmult_time(float time) {
 		_loopled_time = time;
 	}
 
