@@ -346,8 +346,6 @@ public:
 
 	void start_crossfade(uint32_t addr) {
 		read_fade_phase = params.settings.crossfade_rate;
-		Debug::Pin0::high();
-		Debug::Pin1::high();
 		queued_divmult_time = 0; // means: no queued crossfade
 		fade_buf.rd_pos(addr);
 	}
@@ -357,7 +355,6 @@ public:
 			read_fade_phase += params.settings.crossfade_rate;
 			if (read_fade_phase > 1.f) {
 				read_fade_phase = 1.f;
-				Debug::Pin0::low();
 			}
 		}
 	}
@@ -367,8 +364,6 @@ public:
 			read_fade_phase = 0.f;
 			doing_reverse_fade = false;
 			buf.rd_pos(fade_buf.rd_pos());
-
-			Debug::Pin1::low();
 
 			if (queued_divmult_time > 0.f) {
 				params.set_divmult(queued_divmult_time);

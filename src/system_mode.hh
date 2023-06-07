@@ -82,7 +82,7 @@ private:
 		if (!ignore_inf_release && controls.inf_button.how_long_held_pressed() > 3000) {
 			if (!ignore_rev_release && controls.rev_button.how_long_held_pressed() > 3000) {
 				if (!ignore_ping_release && controls.ping_button.how_long_held_pressed() > 3000) {
-					if (controls.read_time_switch() == Controls::SwitchPos::Center) {
+					if (controls.read_time_switch() == Controls::SwitchPos::Up) {
 						status = Status::Saving;
 						storage.save_flash_params();
 						ignore_inf_release = true;
