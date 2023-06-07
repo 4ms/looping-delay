@@ -26,7 +26,7 @@ struct Settings {
 	float write_crossfade_rate;		  // FAST_FADE_INCREMENT
 
 	static constexpr float calc_fade_increment(uint32_t samples) {
-		return (1.f / (((float)samples / (float)AudioStreamConf::BlockSize) + 1.f));
+		return samples > 0.f ? 1.f / (float)samples : 1.f;
 	}
 };
 } // namespace LDKit
