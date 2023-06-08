@@ -1,22 +1,16 @@
 BUILDDIR := build
 
-rebuild: | $(BUILDDIR)
-	cmake --build $(BUILDDIR) --config RelWithDebInfo
-	./uimg_header.py build/mp153/RelWithDebInfo/mp153.bin build/mp153/RelWithDebInfo/mp153.uimg
-
-debug:
-	cmake --build $(BUILDDIR) --config Debug
-	./uimg_header.py build/mp153/Debug/mp153.bin build/mp153/Debug/mp153.uimg
-
-release:
-	cmake --build $(BUILDDIR) --config RelWithDebInfo
-	./uimg_header.py build/mp153/RelWithDebInfo/mp153.bin build/mp153/RelWithDebInfo/mp153.uimg
+all: | $(BUILDDIR)
+	cmake --build $(BUILDDIR)
 
 $(BUILDDIR):
-	cmake -B $(BUILDDIR) -G"Ninja Multi-Config" 
+	cmake -B $(BUILDDIR) -GNinja
 
 clean:
 	rm -rf $(BUILDDIR)
 
 wav:
 	cmake --build build --target 723.wav
+
+combo:
+	cmake --build build --target 723-combo
