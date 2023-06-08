@@ -56,3 +56,10 @@ set(TARGET_SOURCES
 set_hal_sources(HAL_SOURCES stm32mp1)
 create_target(${target} stm32mp1_ca7)
 add_dependencies(${target}.elf ${target}-linkerscript)
+
+add_custom_target(
+  mp153-uimg ALL
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${target}.elf
+  COMMAND ${CMAKE_SOURCE_DIR}/scripts/uimg_header.py ${CMAKE_CURRENT_BINARY_DIR}/${target}.bin
+          ${CMAKE_CURRENT_BINARY_DIR}/${target}.uimg
+)
