@@ -2,3 +2,4 @@ lib/STM32F7xx_HAL_Driver/** linguist-vendored
 lib/STM32MP1xx_HAL_Driver/** linguist-vendored
 lib/CMSIS/** linguist-vendored
 lib/printf/** linguist-vendored
+*.hh linguist-language=C++
