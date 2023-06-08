@@ -1,0 +1,18 @@
+SAI DMA ISR: [57]
+ vector table entry for 57 (DMA2_Stream1_IRQn):
+ 08000124   DC32           0x08001E51
+
+ 08001E50   LDR            R0, =0x200004A0               ; [PC, #4] [0x08001E58]
+ 08001E52   LDR            R3, [R0, #-8]
+ 08001E56   BX             R3							; goes to 0x080020CD
+
+ 080020CC   PUSH           {R3-R5, LR}
+ 080020CE   LDR            R3, [R0]
+ 080020D0   MOV            R4, R0
+
+... actual ISR starts here (checks DMA flags, BX to HT handler or TC handler)
+... then ends:
+
+  08002146   POP            {R3-R5, PC}
+
+ .. which takes us back to normal execution context

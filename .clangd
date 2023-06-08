@@ -1,0 +1,8 @@
+CompileFlags:
+	Remove: [
+		"-std=c++23",
+		"-ffold-simple-inlines"
+	]
+	Add: [
+		"-std=c++20"
+	]
