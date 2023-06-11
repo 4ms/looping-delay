@@ -20,8 +20,6 @@ struct Params {
 	Controls &controls;
 	Flags &flags;
 
-	// TODO: double-buffer Params:
-	// put just these into its own struct
 	float time = 0.f;		 // TIME: fractional value for time multiplication, integer value for time division
 	float delay_feed = 0.7f; // DELAY FEED: amount of main input mixed into delay loop
 	float feedback = 0.5f;	 // FEEDBACK: amount of regeneration
@@ -70,13 +68,7 @@ struct Params {
 		if (modes.inf == InfState::On)
 			update_scroll_loop_amount();
 
-		// TODO
 		tracking_comp = 1.f;
-
-		if (op_mode == OperationMode::Calibrate) {
-			// TODO: Calibrate mode
-			//  update_calibration();
-		}
 
 		if (op_mode == OperationMode::SysSettings) {
 			sys_mode.update();
@@ -101,9 +93,6 @@ struct Params {
 		timer.reset_loop_tmr();
 	}
 
-	// TODO: to use a double-buffer params, then
-	// looping delay should set a flag that tells params to set a
-	// new state for these
 	void set_inf_state(InfState newstate) {
 		modes.inf = newstate;
 	}
