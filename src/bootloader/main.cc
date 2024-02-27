@@ -25,9 +25,3 @@ void main() {
 		__NOP();
 	}
 }
-
-void recover_from_task_fault() {
-	while (true) {
-		__NOP();
-	}
-}
