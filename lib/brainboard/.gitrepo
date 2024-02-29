@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:4ms/brainboard.git
 	branch = f746
-	commit = 26a424d58d9ad5193601c79b9069b7066efa18fa
-	parent = 407acd6d30b1c4b1ea36cae01cc1afb2bd515ad1
+	commit = d6d30d15ad593e32f6af6c45bca4cb53ee02997f
+	parent = 03d1181b10f131c2caab6f1a91a05103d696fc05
 	method = merge
 	cmdver = 0.4.6
