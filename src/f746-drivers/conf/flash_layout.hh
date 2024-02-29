@@ -1,7 +1,7 @@
 #pragma once
 
-#define APP_FLASH_ADDR 0x0800C000
-#define APP_START_ADDR 0x0800C000
+#define APP_FLASH_ADDR 0x08018000
+#define APP_START_ADDR 0x08018000
 
 #ifdef __cplusplus
 // TODO: put APP_FLASH_ADDR etc in a .h file, which is used to preprocess linker script
