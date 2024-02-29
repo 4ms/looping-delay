@@ -11,13 +11,13 @@ namespace Brain
 constexpr bool DebugDisableAdcIRQ = false;
 
 // ADC Peripheral Conf:
-constexpr inline int16_t MinPotChange = DebugDisableAdcIRQ ? 30 : 3;
-constexpr inline int16_t MinCVChange = 3;
+constexpr inline int16_t MinPotChange = DebugDisableAdcIRQ ? 30 : 10;
+constexpr inline int16_t MinCVChange = 10;
 constexpr inline auto AdcSampTime = mdrivlib::AdcSamplingTime::_28Cycles;
 
 struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 	static constexpr auto resolution = mdrivlib::AdcResolution::Bits12;
-	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_1;
+	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_3;
 	static constexpr auto oversample = DebugDisableAdcIRQ ? true : false;
 	static constexpr auto clock_div = mdrivlib::AdcClockSourceDiv::APBClk_Div4;
 
@@ -27,19 +27,19 @@ struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 	struct DmaConf : mdrivlib::DefaultAdcPeriphConf::DmaConf {
 		static constexpr auto DMAx = 2;
 		static constexpr auto StreamNum = 0;
-		static constexpr auto RequestNum = DMA_CHANNEL_0;
+		static constexpr auto RequestNum = DMA_CHANNEL_2;
 		static constexpr auto dma_priority = Low;
 		static constexpr IRQn_Type IRQn = DMA2_Stream0_IRQn;
 		static constexpr uint32_t pri = 0;
 		static constexpr uint32_t subpri = 0;
 	};
 
-	static constexpr uint16_t min_value = 25;
+	static constexpr uint16_t min_value = 15;
 };
 
 struct CVAdcConf : mdrivlib::DefaultAdcPeriphConf {
 	static constexpr auto resolution = mdrivlib::AdcResolution::Bits12;
-	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_2;
+	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_1;
 	static constexpr auto oversample = false;
 	static constexpr auto clock_div = mdrivlib::AdcClockSourceDiv::APBClk_Div4;
 
@@ -48,15 +48,15 @@ struct CVAdcConf : mdrivlib::DefaultAdcPeriphConf {
 
 	struct DmaConf : mdrivlib::DefaultAdcPeriphConf::DmaConf {
 		static constexpr auto DMAx = 2;
-		static constexpr auto StreamNum = 2;
-		static constexpr auto RequestNum = DMA_CHANNEL_1;
+		static constexpr auto StreamNum = 4;
+		static constexpr auto RequestNum = DMA_CHANNEL_0;
 		static constexpr auto dma_priority = Low;
-		static constexpr IRQn_Type IRQn = DMA2_Stream2_IRQn;
+		static constexpr IRQn_Type IRQn = DMA2_Stream4_IRQn;
 		static constexpr uint32_t pri = 0;
 		static constexpr uint32_t subpri = 0;
 	};
 
-	static constexpr uint16_t uni_min_value = 65;
+	static constexpr uint16_t uni_min_value = 40;
 	static constexpr uint16_t bi_min_value = 20;
 };
 
@@ -89,7 +89,8 @@ const mdrivlib::TimekeeperConfig param_update_task_conf = {
 };
 
 // Audio
-constexpr inline float AudioGain = 1.216f; // gain to apply to acheive 0dB out:in
+// TODO: actually measure this!
+constexpr inline float AudioGain = 1.f; // gain to apply to acheive 0db out:in
 
 // SDCard
 constexpr inline bool SdmmcWide = false;
