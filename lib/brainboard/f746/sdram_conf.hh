@@ -48,7 +48,7 @@ constexpr inline mdrivlib::SDRAMPinNames SDRAM_pin_names = {
 	.SDNCAS{GPIO::G, PinNum::_15, PinAF::AltFunc12},
 	.SDNE0{GPIO::H, PinNum::_6, PinAF::AltFunc12},
 	.SDNRAS{GPIO::F, PinNum::_11, PinAF::AltFunc12},
-	.SDNWE{GPIO::D, PinNum::_5, PinAF::AltFunc12},
+	.SDNWE{GPIO::H, PinNum::_5, PinAF::AltFunc12},
 };
 
 constexpr inline uint32_t FMC_Clock = 216; // Todo: read/calc this from RCC... query System?

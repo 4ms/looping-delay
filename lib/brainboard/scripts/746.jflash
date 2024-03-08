@@ -32,18 +32,18 @@
   UseScriptFile = 0
   ScriptFile = ""
   RAMAddr = 0x20020000
-  RAMSize = 0x0001C000
+  RAMSize = 0x00020000
   CheckCoreID = 1
   CoreID = 0x5BA00477
   CoreIDMask = 0x0F000FFF
   UseAutoSpeed = 0x00000001
   ClockSpeed = 0x00000000
   EndianMode = 0
-  ChipName = "ST STM32F723IE"
+  ChipName = "ST STM32F746IE"
 [FLASH]
   NumBanks = 3
 [FLASH0]
-  aRangeSel[1] = 0-7
+  aRangeSel[1] = 0-5
   BankName = "Program flash"
   BankSelMode = 1
   BaseAddr = 0x08000000
@@ -55,7 +55,7 @@
 [FLASH2]
   BankName = "External QSPI flash"
   BaseAddr = 0x90000000
-  LoaderName = "CLK@PB2_nCS@PB6_D0@PC9_D1@PC10_D2@PE2_D3@PD13"
+  LoaderName = "CLK@PB2_nCS@PB6_D0@PD11_D1@PD12_D2@PE2_D3@PD13"
 [PRODUCTION]
   AutoPerformsDisconnect = 0
   AutoPerformsErase = 1
