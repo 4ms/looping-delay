@@ -29,21 +29,21 @@ using PingJack = mdrivlib::DebouncedPin<BrainPin::D6, Normal>;
 using HoldJack = mdrivlib::DebouncedPin<BrainPin::D2, Normal>;
 using RevJack = mdrivlib::DebouncedPin<BrainPin::D3, Normal>;
 
-using PingLED = mdrivlib::FPin<BrainPin::D14.gpio, BrainPin::D14.pin, Output, Normal>;
-using HoldLED = mdrivlib::FPin<BrainPin::D5.gpio, BrainPin::D5.pin, Output, Normal>;
-using RevLED = mdrivlib::FPin<BrainPin::D4.gpio, BrainPin::D4.pin, Output, Normal>;
-using LoopLED = mdrivlib::FPin<BrainPin::D12.gpio, BrainPin::D12.pin, Output, Normal>;
+using PingLED = mdrivlib::PinF<BrainPin::D14, Output, Normal>;
+using HoldLED = mdrivlib::PinF<BrainPin::D5, Output, Normal>;
+using RevLED = mdrivlib::PinF<BrainPin::D4, Output, Normal>;
+using LoopLED = mdrivlib::PinF<BrainPin::D12, Output, Normal>;
 
-using ClkOut = mdrivlib::FPin<BrainPin::D0.gpio, BrainPin::D0.pin, Output, Normal>;
-using BusClkOut = mdrivlib::FPin<BrainPin::D18.gpio, BrainPin::D18.pin, Output, Normal>;
+using ClkOut = mdrivlib::PinF<BrainPin::D0, Output, Normal>;
+using BusClkOut = mdrivlib::PinF<BrainPin::D18, Output, Normal>;
 
 // if LoopClkBuilt and LoopClkKit are shorted, then use LoopClkKit (D15). Otherwise use LoopClkBuilt (D1)
 // the pin not in use must be set to input
-using LoopClkBuilt = mdrivlib::FPin<BrainPin::D1.gpio, BrainPin::D1.pin, Output, Normal>;
-using LoopClkBuiltRead = mdrivlib::FPin<BrainPin::D1.gpio, BrainPin::D1.pin, Input, Normal>;
+using LoopClkBuilt = mdrivlib::PinF<BrainPin::D1, Output, Normal>;
+using LoopClkBuiltRead = mdrivlib::PinF<BrainPin::D1, Input, Normal>;
 
-using LoopClkKit = mdrivlib::FPin<BrainPin::D15.gpio, BrainPin::D15.pin, Output, Normal>;
-using LoopClkKitRead = mdrivlib::FPin<BrainPin::D15.gpio, BrainPin::D15.pin, Input, Normal>;
+using LoopClkKit = mdrivlib::PinF<BrainPin::D15, Output, Normal>;
+using LoopClkKitRead = mdrivlib::PinF<BrainPin::D15, Input, Normal>;
 
 constexpr std::array<AdcChannelConf, NumPots> PotAdcChans = {{
 	{BrainPin::A3, BrainPin::A3AdcChan, TimePot, Brain::AdcSampTime},
