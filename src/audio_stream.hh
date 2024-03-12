@@ -1,7 +1,7 @@
 #pragma once
 
 #include "audio_stream_conf.hh"
-#include "conf/codec_conf.hh"
+#include "codec_conf.hh"
 #include "conf/rcc_conf.hh"
 #include "debug.hh"
 #include "drivers/callable.hh"
@@ -24,8 +24,8 @@ public:
 		std::function<void(const AudioStreamConf::AudioInBlock &, AudioStreamConf::AudioOutBlock &)>;
 
 	AudioStream(AudioProcessFunction &&process_func)
-		: codec_i2c{Board::codec_i2c_conf}
-		, codec{codec_i2c, Board::sai_conf}
+		: codec_i2c{Brain::codec_i2c_conf}
+		, codec{codec_i2c, Brain::sai_conf<48000, 24>}
 		, _process_func{std::move(process_func)} {
 
 		codec.init(mdrivlib::CodecPCM3060Register::default_setup_i2s_24bit_hpf);
@@ -34,8 +34,12 @@ public:
 		codec.set_callbacks([this] { _process<1>(); }, [this] { _process<0>(); });
 	}
 
-	void start() { codec.start(); }
-	void stop() { codec.stop(); }
+	void start() {
+		codec.start();
+	}
+	void stop() {
+		codec.stop();
+	}
 
 	void set_callback(AudioProcessFunction &&process_func) {
 		stop();
