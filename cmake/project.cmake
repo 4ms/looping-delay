@@ -156,6 +156,24 @@ function(create_target target driver_arch)
   # Helper for letting lsp servers know what target we're using
   add_custom_target(${target}-compdb COMMAND ln -snf ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_SOURCE_DIR}/.)
 
+  set(TARGET_BASE $<TARGET_FILE_DIR:${target}.elf>/${target})
+  
+  add_custom_command(
+      TARGET ${target}.elf
+      POST_BUILD
+      COMMAND arm-none-eabi-size ${TARGET_BASE}.elf
+      VERBATIM
+      )
+
+  add_custom_target(
+    ${target}-jflash-app
+    DEPENDS ${target}.elf
+    COMMAND JFlashExe -openprj${CMAKE_SOURCE_DIR}/lib/brainboard/scripts/${target}.jflash -open${TARGET_BASE}.hex -auto -min -hide -exit
+    COMMENT "Flashing app. Requires JFlashExe on your PATH"
+    USES_TERMINAL
+    VERBATIM
+  )
+
 endfunction()
 
 function(create_bootloader_target target driver_arch)
@@ -217,13 +235,13 @@ function(create_bootloader_target target driver_arch)
   )
   set_target_properties(${target}-combo PROPERTIES ADDITIONAL_CLEAN_FILES "${TARGET_BASE}-combo.hex")
 
-  # Target: XXX-flash: Flashes bootloader and app to chip. Requires JFlashExe to be executable and in your $PATH
   add_custom_target(
-    ${target}-flash
+    ${target}-jflash-combo
     DEPENDS ${target}-combo
-    COMMAND echo "JFlashExe -openprj${CMAKE_SOURCE_DIR}/${target}.jflash -open${TARGET_BASE}-combo.hex -auto -exit"
-    COMMAND JFlashExe -openprj${CMAKE_SOURCE_DIR}/${target}.jflash -open${TARGET_BASE}-combo.hex -auto -exit
+    COMMAND JFlashExe -openprj${CMAKE_SOURCE_DIR}/lib/brainboard/scripts/${target}.jflash -open${TARGET_BASE}-combo.hex -auto -min -hide -exit
+    COMMENT "Flashing app. Requires JFlashExe on your PATH"
     USES_TERMINAL
+    VERBATIM
   )
 
 endfunction()
