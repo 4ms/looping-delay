@@ -98,6 +98,6 @@ constexpr inline uint32_t SdmmcPeriphNum = 1;
 constexpr inline uint32_t SdmmcMaxSpeed = 48'000'000;
 
 // Debug
-constexpr inline uint32_t ConsoleUartBaseAddr = UART4_BASE;
+constexpr inline uint32_t ConsoleUartBaseAddr = UART7_BASE;
 
 } // namespace Brain
