@@ -112,15 +112,20 @@ constexpr inline mdrivlib::TimChanConf D14PwmConf{
 	.channum = TimChannelNum::_1,
 };
 
+constexpr inline mdrivlib::TimChanConf D17PwmConf{
+	.pin = {D17.gpio, D17.pin, PinAF::AltFunc2},
+	.TIM = TIM3_BASE,
+	.channum = TimChannelNum::_4,
+};
+
 constexpr inline PinDef Debug0{GPIO::F, PinNum::_7};
 constexpr inline PinDef Debug1{GPIO::F, PinNum::_6};
-
 constexpr inline PinDef Debug2{GPIO::I, PinNum::_5};
 constexpr inline PinDef Debug3{GPIO::B, PinNum::_4};
 
 // UART7
-constexpr inline PinDef ConsoleUartTX{GPIO::F, PinNum::_6, PinAF::AltFunc8};
-constexpr inline PinDef ConsoleUartRX{GPIO::F, PinNum::_7, PinAF::AltFunc8};
+constexpr inline PinDef ConsoleUartTX{GPIO::F, PinNum::_7, PinAF::AltFunc8};
+constexpr inline PinDef ConsoleUartRX{GPIO::F, PinNum::_6, PinAF::AltFunc8};
 
 } // namespace Pin
 } // namespace Brain
