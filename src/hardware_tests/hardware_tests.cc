@@ -63,9 +63,9 @@ void run(Controls &controls) {
 	}
 	HAL_Delay(350);
 	for (unsigned i = 0; i < FirmwareMinorVersion; i++) {
-		loop_led.high();
+		UtilIF::set_main_button_led(true);
 		HAL_Delay(150);
-		loop_led.low();
+		UtilIF::set_main_button_led(false);
 		HAL_Delay(150);
 	}
 
