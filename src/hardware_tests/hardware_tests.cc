@@ -63,9 +63,9 @@ void run(Controls &controls) {
 	}
 	HAL_Delay(350);
 	for (unsigned i = 0; i < FirmwareMinorVersion; i++) {
-		UtilIF::set_main_button_led(true);
+		Board::HoldLED::set(true);
 		HAL_Delay(150);
-		UtilIF::set_main_button_led(false);
+		Board::HoldLED::set(false);
 		HAL_Delay(150);
 	}
 
