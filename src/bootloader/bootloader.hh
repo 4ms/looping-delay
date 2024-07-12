@@ -221,7 +221,7 @@ struct AudioBootloader {
 	void init_reception() {
 #ifdef USING_QPSK
 		// QPSK
-		decoder.Init((uint16_t)20000);
+		decoder.Init(BootloaderConf::OutroSyncSeconds * kModulationRate - 4000, BootloaderConf::DoScramble);
 		demodulator.Init(
 			kModulationRate / kSampleRate * 4294967296.0f, kSampleRate / kModulationRate, 2.f * kSampleRate / kBitRate);
 		demodulator.SyncCarrier(true);
