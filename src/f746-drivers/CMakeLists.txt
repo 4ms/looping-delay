@@ -32,7 +32,7 @@ set(TARGET_SOURCES
 
 set(WAV_ENCODE_PYTHON_CMD
     # cmake-format: off
-    python3 ${CMAKE_SOURCE_DIR}/src/bootloader/stm_audio_bootloader/qpsk/encoder.py -s 48000 -b 12000 -c 6000 -p 256 -t stm32f4 -a 3 -g 131072 $<TARGET_FILE_DIR:${target}.elf>/${target}.bin
+    python3 ${CMAKE_SOURCE_DIR}/lib/stm_audio_bootloader/qpsk/encoder.py -v --scramble --sample_rate 48000 --baud_rate 12000 --carrier_frequency 6000 --packet_size 256 --target stm32f74 --start_sector 2 --block_size 32768 $<TARGET_FILE_DIR:${target}.elf>/${target}.bin
     # cmake-format: on
 )
 
@@ -44,6 +44,10 @@ set(TARGET_BOOTLOADER_SOURCES
     ${root}/lib/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_flash_ex.c
     ${root}/src/bootloader/f746/flash.cc
     ${root}/lib/mdrivlib/drivers/hal_handlers.cc
+    # ${root}/lib/mdrivlib/target/stm32f7xx/boot/startup.s
+    # ${root}/lib/mdrivlib/target/stm32f7xx/boot/system_init.c
+    # ${root}/lib/mdrivlib/target/stm32f7xx/drivers/sai_tdm.cc
+    # ${root}/lib/mdrivlib/target/stm32f7xx/drivers/interrupt_handler.cc
 )
 set(TARGET_BOOTLOADER_INCLUDES
     ${root}/src/bootloader/f746
@@ -56,5 +60,5 @@ set(TARGET_BOOTLOADER_INCLUDES
 
 set(TARGET_BOOTLOADER_LINK_SCRIPT ${CMAKE_SOURCE_DIR}/linker/STM32F746IEKx_FLASH_BOOTLOADER.ld)
 
-# set_bootloader_hal_sources(BOOTLOADER_HAL_SOURCES stm32f7)
-# create_bootloader_target(${target} stm32f7xx)
+set_bootloader_hal_sources(BOOTLOADER_HAL_SOURCES stm32f7)
+create_bootloader_target(${target} stm32f7xx)

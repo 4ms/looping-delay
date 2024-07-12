@@ -166,8 +166,8 @@ function(create_bootloader_target target driver_arch)
     ${target}-bootloader.elf
     ${root}/src/bootloader/main.cc
     ${root}/src/bootloader/animation.cc
-    ${root}/src/bootloader/stm_audio_bootloader/qpsk/packet_decoder.cc
-    ${root}/src/bootloader/stm_audio_bootloader/qpsk/demodulator.cc
+    ${root}/lib/stm_audio_bootloader/qpsk/packet_decoder.cc
+    ${root}/lib/stm_audio_bootloader/qpsk/demodulator.cc
     ${root}/src/libc_stub.c
     ${root}/src/libcpp_stub.cc
     ${root}/lib/mdrivlib/drivers/pin.cc
@@ -189,6 +189,7 @@ function(create_bootloader_target target driver_arch)
             ${root}/src/bootloader
             ${root}/src/bootloader/stmlib
             ${root}/src
+            ${root}/lib
             ${root}/lib/brainboard
             ${root}/lib/mdrivlib
             ${root}/lib/cpputil
@@ -203,7 +204,7 @@ function(create_bootloader_target target driver_arch)
   add_custom_target(
     ${target}.wav
     DEPENDS ${target}.elf
-    COMMAND export PYTHONPATH="${CMAKE_SOURCE_DIR}/src/bootloader" && ${WAV_ENCODE_PYTHON_CMD}
+    COMMAND export PYTHONPATH="${CMAKE_SOURCE_DIR}/lib" && ${WAV_ENCODE_PYTHON_CMD}
   )
 
   set(TARGET_BASE $<TARGET_FILE_DIR:${target}.elf>/${target})

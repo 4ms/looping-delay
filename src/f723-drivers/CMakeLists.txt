@@ -32,7 +32,7 @@ set(TARGET_SOURCES
 
 set(WAV_ENCODE_PYTHON_CMD
     # cmake-format: off
-    python3 ${CMAKE_SOURCE_DIR}/src/bootloader/stm_audio_bootloader/qpsk/encoder.py -s 48000 -b 12000 -c 6000 -p 256 -t stm32f4 -a 3 -g 131072 $<TARGET_FILE_DIR:${target}.elf>/${target}.bin
+    python3 ${CMAKE_SOURCE_DIR}/lib/stm_audio_bootloader/qpsk/encoder.py -s 48000 -b 12000 -c 6000 -p 256 -t stm32f4 -a 3 -g 131072 $<TARGET_FILE_DIR:${target}.elf>/${target}.bin
     # cmake-format: on
 )
 
