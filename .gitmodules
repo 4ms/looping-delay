@@ -10,3 +10,6 @@
 [submodule "lib/printf"]
 	path = lib/printf
 	url = https://github.com/mpaland/printf.git
+[submodule "lib/stm-audio-bootloader"]
+	path = lib/stm-audio-bootloader
+	url = https://github.com/4ms/stm-audio-bootloader
