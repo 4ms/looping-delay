@@ -13,6 +13,16 @@ cd looping-delay
 git submodule update --init
 ```
 
+### Requirements
+
+  - cmake v3.15.3 or later
+  - ninja (not required if you configure cmake to use a different generator) 
+  - arm-none-eabi-gcc toolchain versions 12.2 or 12.3 are known to work
+      - Download here: https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
+          - Make sure you get the package for your host computer that ends in `arm-none-eabi`
+      - Make sure `arm-none-eabi-gcc`, `arm-none-eabi-g++` etc. are on your PATH.
+          - Typically you would do something like this: `export PATH="/path/where/you/installed/arm-gnu-toolchain-12.3/bin:$PATH"`
+
 ### Building
 
 To build:
