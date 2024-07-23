@@ -1,7 +1,11 @@
-## Looping Delay Kit Firmware ##
+## Looping Delay Firmware ##
 
 This is the firmware for the Looping Delay eurorack module from 4ms Company.
+
 The same firmware runs on the pre-built module as well as the DIY Kit.
+
+Note that there are two variations of the kit: v1.0 and v1.1. Make sure you
+know what version you have.
 
 ### Cloning the repo
 
