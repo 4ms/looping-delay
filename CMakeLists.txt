@@ -11,9 +11,21 @@ project(
   LANGUAGES C CXX ASM
 )
 
+option(BRAINBOARD1_0 "Build for Kit Brainboard v1.0" ON)
+option(BRAINBOARD1_1 "Build for Kit Brainboard v1.1-rc4" ON)
+option(BRAINBOARD_MP15x "Build for Brainboard MP15x" OFF)
+
+if(BRAINBOARD1_0)
 add_subdirectory(src/f723-drivers f723)
+endif()
+
+if(BRAINBOARD1_1)
 add_subdirectory(src/f746-drivers f746)
+endif()
+
+if(BRAINBOARD_MP15x)
 add_subdirectory(src/mp153-drivers mp153)
+endif()
 
 add_custom_target(
   tests ALL
