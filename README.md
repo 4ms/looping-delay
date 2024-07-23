@@ -34,23 +34,42 @@ The .elf file is found in the `build/f723/723.elf` and it can be flashed using n
 
 ### Flashing with USB-DFU
 
-You can build a hex file containing the bootloader and the application, and flash it using the built-in USB DFU bootloader. To do this:
+You can build a .bin file containing the bootloader and the application, and
+flash it using the built-in USB DFU bootloader. To do this:
+
+For Brainboard v1.0:
 
 ```
 cmake --build build --target 723-combo
 ```
 
-or
+For Brainboard v1.1:
+
+```
+cmake --build build --target 746-combo
+```
+
+
+or for all targets:
 
 ```
 make combo
 ```
 
-This generates a hex file at `build/f723/723-combo.hex`. You can then use a DFU tool to flash this to the device. 
+This generates .bin files here:
+ - Brainboard v1.0: `build/f723/723-combo.bin` 
+ - Brainboard v1.1: `build/f746/746-combo.bin`
 
-First, reset the device into DFU mode by holding down the RESET button, then pressing and releasing the USB BOOT button. Finally, release the RESET button. (Note: the names of these buttons were written incorrectly on the PCB, so if you have used DFU bootloaders and think the previous sentence is a typo, don't second guess it!).
+You can then use a DFU tool to flash this to the device. 
+First, reset the device into DFU mode by holding down the RESET button, then
+pressing and releasing the USB BOOT button. Finally, release the RESET button.
+(Note: the names of these buttons were written incorrectly on the PCB, so if
+you have used DFU bootloaders and think the previous sentence is a typo, don't
+second guess it!).
 
-Now you can load the combo hex file to the device at address 0x08000000. An easy way is using a web dfu bootloader such as https://devanlai.github.io/webdfu/dfu-util/
+Now you can load the combo .bin file to the device at address 0x08000000. An
+easy way is using a web dfu bootloader such as
+https://devanlai.github.io/webdfu/dfu-util/
 
 
 ### Building a wav file for audio bootloader
