@@ -215,6 +215,7 @@ function(create_bootloader_target target driver_arch)
     DEPENDS ${TARGET_BASE}.hex ${TARGET_BASE}-bootloader.elf
     COMMAND cat ${TARGET_BASE}-bootloader.hex ${TARGET_BASE}.hex | awk -f ${CMAKE_SOURCE_DIR}/scripts/merge_hex.awk >
             ${TARGET_BASE}-combo.hex
+    COMMAND arm-none-eabi-objcopy -O binary -I ihex ${TARGET_BASE}-combo.hex ${TARGET_BASE}-combo.bin
   )
   set_target_properties(${target}-combo PROPERTIES ADDITIONAL_CLEAN_FILES "${TARGET_BASE}-combo.hex")
 
