@@ -28,9 +28,42 @@ There is also a Makefile if you prefer that syntax (it just wraps the cmake call
 make
 ```
 
-Building will create firmware for both the F723 target (normal Brainboard for the kit and pre-built versions available commercially), and for the MP153 target (specially-available upgraded Brainboard, running a Cortex-A7 chip).
+### Selecting the Brainboard version
 
-The .elf file is found in the `build/f723/723.elf` and it can be flashed using normal means to your Brainboard via the SWD header.
+There are three possible brainboards to build for:
+ - Brainboard v1.0 (F723 chip)
+ - Brainboard v1.1-rc4 (F746 chip)
+ - Brainboard MP15x (MP153 chip)
+
+Building using the above commands will create firmware for the Brainboard v1.0
+and v1.1-rc4. By default the MP15x board is not enabled because this is
+aspecially-available upgraded Brainboard, running a Cortex-A7 chip.
+
+If you want to just build for your board (which will speed up the build), you
+can select it like this:
+
+Just build Brainboard v1.0:
+```
+cmake --fresh -B build -DBRAINBOARD1_0=ON -DBRAINBOARD1_1=OFF
+```
+
+Just build Brainboard v1.1:
+```
+cmake --fresh -B build -DBRAINBOARD1_0=OFF -DBRAINBOARD1_1=ON
+```
+
+Just build Brainboard MP15x:
+```
+cmake --fresh -B build -DBRAINBOARD1_0=OFF -DBRAINBOARD1_1=OFF -DBRAINBOARD_MP15x=ON
+```
+
+
+The .elf files are found here:
+ - Brainboard v1.0: `build/f723/723.elf` 
+ - Brainboard v1.1: `build/f746/746.elf`
+ - Brainboard MP15x: `build/mp153/mp153.elf`
+
+The elf file can be flashed using normal means to your Brainboard via the SWD header.
 
 ### Flashing with USB-DFU
 
@@ -74,11 +107,19 @@ https://devanlai.github.io/webdfu/dfu-util/
 
 ### Building a wav file for audio bootloader
 
+For Brainboard v1.0:
+
 ```
 cmake --build build --target 723.wav
 ```
 
-or 
+For Brainboard v1.1:
+
+```
+cmake --build build --target 746.wav
+```
+
+or for all targets:
 
 ```
 make wav
