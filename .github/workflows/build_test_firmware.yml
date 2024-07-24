@@ -98,7 +98,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-          token: ${{ secrets.CHECKOUT_TOKEN }}
 
       - name: Build and test
         run: cmake -B build -G Ninja -DBRAINBOARD_MP15x=ON && cmake --build build && make combo
